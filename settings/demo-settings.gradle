@@ -1,0 +1,10 @@
+ext {
+    // Readonly access to Maven repo via our `distribution site`
+    dist_username = '***'
+    dist_password = '***'
+    // WS URL and API Key
+    ws_base_url = '"***"'
+    client_token = '"***"'
+    // MapBox
+    mapbox_token = '"***"'
+}

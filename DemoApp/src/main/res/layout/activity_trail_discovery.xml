@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TrailDiscoveryActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/activity_trail_discovery_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/activity_trail_discovery_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <EditText
+                android:id="@+id/activity_trail_discovery_toolbar_search_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/search_trails"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:autofillHints="@null"
+                android:maxLines="1" />
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_trail_discovery_main_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/activity_trail_discovery_tabs"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/community" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/activities" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/discover" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/profile" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/activity_trail_discovery_tabs"
+            app:layout_constraintBottom_toTopOf="@id/activity_trail_discovery_list_top_guideline">
+
+            <com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
+                android:id="@+id/accuterra_map_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_trail_discovery_layer_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_layers_24px"
+                android:tint="@android:color/black"
+                android:backgroundTint="@android:color/white"
+                android:foregroundTint="@android:color/white"
+                android:visibility="gone"
+                app:borderWidth="0dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_trail_discovery_my_location_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_location_disabled_24px"
+                android:tint="@android:color/black"
+                android:backgroundTint="@android:color/white"
+                android:foregroundTint="@android:color/white"
+                android:visibility="gone"
+                app:borderWidth="0dp" />
+
+        </FrameLayout>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/activity_trail_discovery_list_top_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5"/>
+
+        <FrameLayout
+            android:id="@+id/activity_trail_discovery_list_button_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="2dp"
+            android:outlineProvider="background"
+            android:background="@android:color/white"
+            app:layout_constraintTop_toBottomOf="@id/activity_trail_discovery_list_top_guideline">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/activity_trail_discovery_show_list_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/holo_blue_light"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textAllCaps="true"
+                android:text="@string/list"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/activity_trail_discovery_sliding_bottom_pane"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:elevation="4dp"
+            android:outlineProvider="bounds"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activity_trail_discovery_list_button_wrapper"
+            android:background="@android:color/white">
+
+            <ProgressBar
+                android:id="@+id/activity_trail_discovery_list_loading_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <RelativeLayout
+                android:id="@+id/activity_trail_discovery_list_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/activity_trail_discovery_empty_list_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_trails_in_this_area"
+                    android:layout_centerInParent="true" />
+
+                <ListView
+                    android:id="@+id/activity_trail_discovery_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    tools:listitem="@layout/trail_list_item" />
+
+            </RelativeLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

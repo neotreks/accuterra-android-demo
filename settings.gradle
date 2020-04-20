@@ -1,0 +1,2 @@
+rootProject.name='AccuTerra Demo App'
+include ':DemoApp'

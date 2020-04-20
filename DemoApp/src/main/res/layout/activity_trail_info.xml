@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".TrailInfoActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/activity_trail_info_image_carousel"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/image_carousel_item"/>
+
+    <!--
+    Ideally we want to use this toolbar styled to show just the back arrow.
+    But it is casting a shadow which does not look good.
+    So we are displaying and image button instead.
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/activity_trail_info_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:background="@null">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/activity_trail_info_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            android:background="@null"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+    -->
+
+    <TextView
+        android:id="@+id/activity_trail_info_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/activity_trail_info_image_carousel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/activity_trail_info_length"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:lines="1"
+        android:ellipsize="end"
+        tools:text="Ophir Pass"
+        style="@style/TextAppearance.AppCompat.Headline" />
+
+    <TextView
+        android:id="@+id/activity_trail_info_length"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/activity_trail_info_title"
+        app:layout_constraintBottom_toBottomOf="@id/activity_trail_info_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp"
+        tools:text="16.3 mi" />
+
+    <LinearLayout
+        android:id="@+id/activity_trail_info_rating_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/activity_trail_info_title"
+        app:layout_constraintTop_toBottomOf="@id/activity_trail_info_title"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/activity_trail_info_rating_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textColor="@android:color/holo_blue_light"
+            tools:text="4.6" />
+
+        <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/activity_trail_info_rating_stars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:max="5"
+            android:stepSize="0.5"
+            tools:rating="4.6"
+            android:isIndicator="true"
+            style="@style/Widget.AppCompat.RatingBar.Small" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/activity_trail_info_ratings_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            tools:text="(289)" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/activity_trail_info_no_ratings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/no_ratings" />
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/activity_trail_info_difficulty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/activity_trail_info_rating_wrapper"
+        app:layout_constraintBottom_toBottomOf="@id/activity_trail_info_rating_wrapper"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp"
+        android:textAllCaps="true"
+        android:textColor="@android:color/holo_blue_light"
+        tools:text="MODERATE" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_trail_info_icons_bar_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/activity_trail_info_rating_wrapper"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <LinearLayout
+            android:id="@+id/activity_trail_info_get_there_icon"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/RibbonAction">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:src="@drawable/ic_directions_24px"
+                style="@style/RibbonActionIcon" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                style="@style/RibbonActionLabel"
+                android:text="@string/get_there" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/activity_trail_info_get_saved_icon"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/activity_trail_info_get_there_icon"
+            app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_download_icon"
+            style="@style/RibbonAction">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:src="@drawable/ic_bookmark_border_24px"
+                style="@style/RibbonActionIcon" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                style="@style/RibbonActionLabel"
+                android:text="@string/saved" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/activity_trail_info_get_download_icon"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/activity_trail_info_get_saved_icon"
+            app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_start_icon"
+            style="@style/RibbonAction">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:src="@drawable/ic_cloud_download_24px"
+                style="@style/RibbonActionIcon" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                style="@style/RibbonActionLabel"
+                android:text="@string/download" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/activity_trail_info_get_start_icon"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/RibbonAction">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:src="@drawable/ic_navigation_24px"
+                style="@style/RibbonActionIcon" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                style="@style/RibbonActionLabel"
+                android:text="@string/start" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/activity_trail_discovery_tabs_content_view_pager"
+        app:layout_constraintTop_toBottomOf="@id/activity_trail_info_icons_bar_wrapper"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/activity_trail_discovery_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/description" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/details" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/forecast" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                android:text="@string/reviews" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+    </androidx.viewpager.widget.ViewPager>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/activity_trail_info_back_button"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_arrow_back_24px"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:tint="@android:color/white"
+        android:background="@drawable/background_circle_semi_transparent_ripple"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

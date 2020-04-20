@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.neotreks.accuterra.mobile.demo.view.TrailFilterControl
+        android:id="@+id/trail_filter_dialog_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/trail_filter_dialog_done_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@android:string/ok"
+        android:layout_gravity="end"
+        style="@style/Widget.AppCompat.Button.Borderless" />
+
+</LinearLayout>

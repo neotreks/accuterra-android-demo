@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="8dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/trail_list_item_difficulty_level"
+        android:layout_width="16dp"
+        android:layout_height="0dp"
+        tools:src="@color/colorPrimaryDark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/trail_list_item_title_wrapper"
+        app:layout_constraintBottom_toBottomOf="@id/trail_list_item_short_description" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/trail_list_item_icons_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="8dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/trail_list_item_zoom_to_trail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_zoom_in_24px"
+            android:tint="@android:color/holo_blue_light"
+            android:background="@drawable/background_circle_ripple"
+            android:backgroundTint="@android:color/holo_blue_light"
+            android:padding="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/trail_list_item_show_trail_info_screen"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/trail_list_item_show_trail_info_screen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_chevron_right_24px"
+            android:tint="@android:color/holo_blue_light"
+            android:background="@drawable/background_circle_ripple"
+            android:backgroundTint="@android:color/holo_blue_light"
+            android:padding="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/trail_list_item_zoom_to_trail"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/trail_list_item_title_wrapper"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/trail_list_item_difficulty_level"
+        app:layout_constraintEnd_toStartOf="@id/trail_list_item_icons_wrapper"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <FrameLayout
+            android:id="@+id/trail_list_item_bookmarks_wrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/trail_list_item_zoom_to_trail"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/trail_list_item_bookmark_unchecked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_bookmark_border_24px"
+                android:background="@drawable/background_circle"
+                android:padding="4dp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/trail_list_item_bookmark_checked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_bookmark_border_24px"
+                android:tint="@color/colorPrimaryDark"
+                android:background="@drawable/background_circle"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:padding="4dp" />
+
+        </FrameLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/trail_list_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/trail_list_item_difficulty_level"
+            app:layout_constraintEnd_toStartOf="@id/trail_list_item_bookmarks_wrapper"
+            android:layout_marginStart="8dp"
+            android:lines="1"
+            android:ellipsize="end"
+            tools:text="Noel Park Rd"
+            style="@style/TextAppearance.AppCompat.Title"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/trail_list_item_rating_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/trail_list_item_title_wrapper"
+        app:layout_constraintStart_toStartOf="@id/trail_list_item_title_wrapper"
+        android:gravity="center_vertical">
+
+        <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/trail_list_item_rating_stars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:max="5"
+            android:stepSize="0.5"
+            tools:rating="3.5"
+            android:isIndicator="true"
+            style="@style/Widget.AppCompat.RatingBar.Small" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/trail_list_item_rating_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            tools:text="(37)"
+            tools:ignore="KeyboardInaccessibleWidget" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/trail_list_item_no_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:text="@string/no_ratings"
+            tools:ignore="KeyboardInaccessibleWidget" />
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/trail_list_item_length"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/trail_list_item_rating_wrapper"
+        app:layout_constraintStart_toStartOf="@id/trail_list_item_title_wrapper"
+        tools:text="12.8 mil" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/trail_list_item_short_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/trail_list_item_length"
+        app:layout_constraintStart_toStartOf="@id/trail_list_item_title_wrapper"
+        app:layout_constraintEnd_toStartOf="@id/trail_list_item_icons_wrapper"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:lines="2"
+        android:ellipsize="end"
+        tools:text="Noel Park Road is an easy introduction to some of the more difficult options available in this area." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

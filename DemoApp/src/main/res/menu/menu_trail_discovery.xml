@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.neotreks.accuterra.mobile.demo.TrailDiscoveryActivity">
+
+    <item
+        android:id="@+id/trail_discovery_menu_item_cancel_search"
+        android:icon="@drawable/ic_cancel_24px"
+        android:title="@string/show_all"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/trail_discovery_menu_item_search"
+        android:icon="@drawable/ic_search_24px"
+        android:title="@string/search_trails"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/trail_discovery_menu_item_filter"
+        android:icon="@drawable/ic_filter_list_24px"
+        android:title="@string/search_trails"
+        app:showAsAction="ifRoom" />
+
+</menu>
