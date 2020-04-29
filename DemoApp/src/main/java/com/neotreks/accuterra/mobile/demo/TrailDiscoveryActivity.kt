@@ -3,17 +3,20 @@ package com.neotreks.accuterra.mobile.demo
 import android.Manifest
 import android.animation.LayoutTransition
 import android.app.Dialog
-import android.content.Context
+import android.content.*
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.text.format.Formatter
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -23,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
+import com.mapbox.android.core.location.*
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
@@ -31,16 +35,11 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.trail.AccuTerraSatelliteStyleProvider
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItemAdapter
-import com.neotreks.accuterra.mobile.demo.util.DialogUtil
-import com.neotreks.accuterra.mobile.demo.util.ListViewSize
-import com.neotreks.accuterra.mobile.demo.util.drawDownArrowOnLeftSide
-import com.neotreks.accuterra.mobile.demo.util.drawUpArrowOnLeftSide
+import com.neotreks.accuterra.mobile.demo.util.*
 import com.neotreks.accuterra.mobile.demo.view.TrailFilterControl
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
-import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
-import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
-import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
-import com.neotreks.accuterra.mobile.sdk.map.TrailLayersManager
+import com.neotreks.accuterra.mobile.sdk.map.*
+import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailsQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.map.style.AccuterraStyleProvider
@@ -56,7 +55,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     companion object {
         private const val TAB_INDEX = 2
-
+        private const val TAG = "TrailDiscoveryActivity"
         private const val SHOW_MY_LOCATION_PERMISSIONS_REQUEST = 1
     }
 
@@ -69,17 +68,26 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     private lateinit var trailLayersManager: TrailLayersManager
     private var isTrailsLayerManagersLoaded = false
 
+    // Location engine
+    private var locationEngine: LocationEngine? = null
+
     // Current tracking option
     private var trackingOption = TrackingOption.NONE
 
     // Available tracking options
-    private var trackingOptions = arrayOf(TrackingOption.NONE, TrackingOption.LOCATION, TrackingOption.BEARING, TrackingOption.DRIVING)
+    private var trackingOptions = arrayOf(TrackingOption.NONE, TrackingOption.LOCATION)
 
     private var zoomingToSearchedTrails = false
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
 
+    private val currentLocationEngineListener = CurrentLocationEngineListener(this)
+
     private val mapViewLoadingFailListener = MapLoadingFailListener(this)
+
+    private val networkStateReceiverListener = CurrentNetworkStateListener(this)
+
+    private val cacheProgressListener = CacheProgressListener(this)
 
     private lateinit var viewModel: TrailDiscoveryViewModel
 
@@ -88,7 +96,32 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     // Current style id
     private var styleId: Int = 0
 
-    // Available styles
+    private var offlineMapService: OfflineMapService? = null
+
+    private val connectionListener = object: OfflineMapServiceConnectionListener {
+        override fun onConnected(service: OfflineMapService) {
+            offlineMapService = service
+
+            activity_trail_offlinemap_progress_layout.visibility = View.GONE
+
+            if (networkStateReceiver?.isConnected() == true) {
+                checkOverlayMapCache()
+            }
+        }
+
+        override fun onDisconnected() {
+            offlineMapService = null
+            Log.e(TAG, "offlineMapService disconnected")
+        }
+    }
+
+    private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
+        connectionListener, cacheProgressListener
+    )
+
+    private var networkStateReceiver: NetworkStateReceiver? = null
+
+    // Available online styles
     private val styles: List<String> = listOf(
         Style.OUTDOORS,
         Style.SATELLITE_STREETS,
@@ -96,8 +129,16 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         AccuTerraStyle.VECTOR
         )
 
+    // Available offline styles
+    private val offlineStyles: List<String> = listOf(
+        Style.SATELLITE_STREETS,
+        AccuTerraStyle.VECTOR
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        startService(Intent(this, OfflineMapService::class.java))
+        networkStateReceiver = NetworkStateReceiver(this)
 
         viewModel = ViewModelProvider(this).get(TrailDiscoveryViewModel::class.java)
 
@@ -119,21 +160,39 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         accuTerraMapView.onResume()
+
+        if (networkStateReceiver == null)
+            networkStateReceiver = NetworkStateReceiver(this)
+
+        networkStateReceiver?.addListener(networkStateReceiverListener)
+        this.registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     override fun onPause() {
         super.onPause()
         accuTerraMapView.onPause()
+
+        try {
+            networkStateReceiver?.removeListener(networkStateReceiverListener)
+            this.unregisterReceiver(networkStateReceiver)
+        } catch (ex: IllegalArgumentException) {
+            Log.e(TAG, ex.message)
+        }
     }
 
     override fun onStart() {
         super.onStart()
         accuTerraMapView.onStart()
+        Intent(this, OfflineMapService::class.java).also { intent ->
+            bindService(intent, offlineMapServiceConnection, Context.BIND_AUTO_CREATE)
+        }
     }
 
     override fun onStop() {
         super.onStop()
         accuTerraMapView.onStop()
+        // this doesn't stop the service, because we called "startService" explicitly
+        unbindService(offlineMapServiceConnection)
     }
 
     override fun onLowMemory() {
@@ -159,7 +218,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             SHOW_MY_LOCATION_PERMISSIONS_REQUEST -> {
                 if (grantResults.isNotEmpty() &&
                     grantResults.all { result -> result ==  PackageManager.PERMISSION_GRANTED}) {
-                    accuTerraMapView.setTracking(trackingOption)
+                    accuTerraMapView.setTracking(trackingOption, null)
+                    initializeLocationEngine()
                 }
             }
         }
@@ -221,6 +281,10 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         accuTerraMapView.addListener(accuTerraMapViewListener)
         accuTerraMapView.addOnDidFailLoadingMapListener(mapViewLoadingFailListener)
 
+        val networkAvailable = networkStateReceiver?.isConnected() ?: true
+        if (!networkAvailable) {
+            styleId = styles.indexOfFirst { it == offlineStyles.first() }
+        }
         accuTerraMapView.initialize(styles[styleId])
     }
 
@@ -271,6 +335,71 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         refreshTrailsListAsync(false, applyMapBoundsFilter = true)
     }
 
+    private class CacheProgressListener(activity: TrailDiscoveryActivity):
+        com.neotreks.accuterra.mobile.sdk.map.cache.CacheProgressListener {
+
+        val weakActivity = WeakReference<TrailDiscoveryActivity>(activity)
+
+        override fun onComplete(mapType: OfflineMapType, trailId: Long) {
+            weakActivity.get()?.let {
+                it.activity_trail_offlinemap_progress_layout.visibility = View.GONE
+            }
+        }
+
+        override fun onError(error: HashMap<OfflineMapStyle, String>, mapType: OfflineMapType, trailId: Long) {
+            weakActivity.get()?.let {
+                val errorMessage = error.map { e ->
+                    "${e.key.name}: ${e.value}"
+                }.joinToString("\n")
+                DialogUtil.buildOkDialog(it,it.getString(R.string.download_failed),errorMessage).show()
+            }
+        }
+
+        override fun onProgressChanged(progress: Double, mapType: OfflineMapType, trailId: Long) {
+            weakActivity.get()?.let {
+                // Show what is downloading and progress
+                val progressPercents = (100.0 * progress).toInt()
+                it.activity_trail_offlinemap_progress_layout.visibility = View.VISIBLE
+                it.activity_trail_offlinemap_progress_bar.progress = progressPercents
+
+                var cacheName = "$mapType"
+                if (mapType == OfflineMapType.TRAIL) {
+                    cacheName += "($trailId)"
+                }
+                it.activity_trail_offlinemap_progress_label.text = it.getString(R.string.downloading_cache, cacheName, progressPercents)
+            }
+        }
+    }
+
+    private fun checkOverlayMapCache() {
+        val offlineCacheManager = offlineMapService?.offlineMapManager ?: return
+        lifecycleScope.launchWhenCreated {
+            when(offlineCacheManager.getOfflineMapStatus(OfflineMapType.OVERLAY)) {
+                OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED ->
+                {
+                    val estimateBytes = offlineCacheManager.estimateOverlayCacheSize()
+                    val estimateText = Formatter.formatShortFileSize(
+                        this@TrailDiscoveryActivity, estimateBytes)
+
+                    // Display DIALOG
+                    DialogUtil.buildYesNoDialog(
+                        context = this@TrailDiscoveryActivity,
+                        title = getString(R.string.download),
+                        message = getString(R.string.download_overlay_prompt, estimateText),
+                        code = {
+                            lifecycleScope.launchWhenCreated {
+                                offlineCacheManager.downloadOfflineMap(OfflineMapType.OVERLAY)
+                            }
+                        }
+                    ).show()
+                }
+                else -> {
+                    // Already in progress or complete
+                }
+            }
+        }
+    }
+
     private fun registerTrailsObserverForMap() {
         viewModel.trailsListItems.observe(this,
             Observer { trailsListItems ->
@@ -278,10 +407,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                     ?.map { trailListItem -> trailListItem.id }
                     ?.toSet()
                     ?: emptySet()
-
-                lifecycleScope.launchWhenCreated {
-                    trailLayersManager.setVisibleTrails(trailIds)
-                }
             })
     }
 
@@ -501,6 +626,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         trailLayersManager.highlightTrail(trailId)
 
+        locationEngine?.getLastLocation(currentLocationEngineListener)
+
         showTrailPOIsAsync(trailId)
     }
 
@@ -526,8 +653,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToTrailInfoScreen(traiId: Long) {
-        val intent = TrailInfoActivity.createNavigateToIntent(this, traiId)
+    private fun navigateToTrailInfoScreen(trailId: Long) {
+        val intent = TrailInfoActivity.createNavigateToIntent(this, trailId)
         startActivity(intent)
     }
 
@@ -623,6 +750,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun cycleStyle() {
+        val isConnected = networkStateReceiver?.isConnected() ?: true
         if (accuTerraMapView.isStyleLoaded()) {
             activity_trail_discovery_layer_button.isEnabled = false
             activity_trail_discovery_my_location_button.isEnabled = false
@@ -631,6 +759,11 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 styleId = 0
             }
             val style = styles[styleId]
+            if (!isConnected && !offlineStyles.contains(style)) {
+                // this style is not available offline, cycle to next
+                cycleStyle()
+                return
+            }
             val styleProvider = getStyleProvider(style)
             accuTerraMapView.setStyle(style, styleProvider)
         }
@@ -651,9 +784,9 @@ class TrailDiscoveryActivity : AppCompatActivity() {
      */
     private fun getStyleProvider(style: String): IAccuTerraStyleProvider? {
         if (isSatellite(style)) {
-            return AccuTerraSatelliteStyleProvider(style, this)
+            return AccuTerraSatelliteStyleProvider(this)
         }
-        return AccuterraStyleProvider(style, this)
+        return AccuterraStyleProvider(this)
     }
 
     private fun isSatellite(style: String) = style.contains("satellite-streets")
@@ -665,6 +798,10 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     @UiThread
     private fun setLocationTracking(trackingOption: TrackingOption) {
 
+        if (this.trackingOption == trackingOption) {
+            return
+        }
+
         this.trackingOption = trackingOption
         val iconResource = when(trackingOption) {
             TrackingOption.NONE -> {
@@ -673,17 +810,15 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             TrackingOption.LOCATION -> {
                 R.drawable.ic_my_location_24px
             }
-            TrackingOption.BEARING -> {
-                R.drawable.ic_location_bearing_24px
-            }
-            TrackingOption.DRIVING -> {
-                R.drawable.ic_location_driving_24px
+            else -> {
+                throw NotImplementedError("The $trackingOption tracking option is not supported.")
             }
         }
         activity_trail_discovery_my_location_button.setImageDrawable(getDrawable(iconResource))
 
         if (hasLocationPermissions()) {
-            accuTerraMapView.setTracking(trackingOption)
+            accuTerraMapView.setTracking(trackingOption, null)
+            initializeLocationEngine()
         } else {
             ActivityCompat.requestPermissions(
                 this,
@@ -705,9 +840,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     private fun moveListViewGuideLine() {
         when(bottomListSize) {
             ListViewSize.MINIMUM -> {
-                if (trackingOption == TrackingOption.DRIVING) {
-                    accuTerraMapView.setTracking(TrackingOption.DRIVING)
-                }
                 activity_trail_discovery_list_top_guideline.setGuidelinePercent(
                     //make only the activity_trail_discovery_main_view visible
                     1.0f - activity_trail_discovery_show_list_button.height.toFloat() / activity_trail_discovery_main_view.height.toFloat()
@@ -715,16 +847,10 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 activity_trail_discovery_show_list_button.drawUpArrowOnLeftSide()
             }
             ListViewSize.MEDIUM -> {
-                if (trackingOption == TrackingOption.DRIVING) {
-                    accuTerraMapView.setTracking(TrackingOption.DRIVING)
-                }
                 activity_trail_discovery_list_top_guideline.setGuidelinePercent(0.5f)
                 activity_trail_discovery_show_list_button.drawUpArrowOnLeftSide()
             }
             ListViewSize.MAXIMUM -> {
-                if (trackingOption == TrackingOption.DRIVING) {
-                    accuTerraMapView.setTracking(TrackingOption.NONE)
-                }
                 activity_trail_discovery_list_top_guideline.setGuidelinePercent(0.0f)
                 activity_trail_discovery_show_list_button.drawDownArrowOnLeftSide()
             }
@@ -888,6 +1014,71 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         TrailFilterDialog(this).show()
     }
 
+    private fun initializeLocationEngine() {
+        val locationEngineRequest = LocationEngineRequest.Builder(750)
+            .setFastestInterval(750)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
+
+        this.locationEngine?.removeLocationUpdates(currentLocationEngineListener)
+        val locationEngine = LocationEngineProvider.getBestLocationEngine(this)
+        locationEngine.requestLocationUpdates(locationEngineRequest,
+            currentLocationEngineListener, Looper.getMainLooper())
+
+        // Set last known location
+        locationEngine.getLastLocation(currentLocationEngineListener)
+
+        this.locationEngine = locationEngine
+    }
+
+    private class CurrentLocationEngineListener(activity: TrailDiscoveryActivity) :
+        LocationEngineCallback<LocationEngineResult> {
+
+        private val weakActivity = WeakReference(activity)
+
+        override fun onSuccess(result: LocationEngineResult) {
+            val activity = weakActivity.get() ?: return
+            activity.accuTerraMapView.updateLocation(result.lastLocation)
+        }
+
+        override fun onFailure(exception: Exception) {
+            val activity = weakActivity.get() ?: return
+
+            DialogUtil.buildOkDialog(activity,"Failed to obtain location update",
+                exception.message?:"Unknown Error While obtaining location update")
+        }
+    }
+
+    private class CurrentNetworkStateListener(activity: TrailDiscoveryActivity)
+        : NetworkStateReceiver.NetworkStateReceiverListener {
+
+        private val weakActivity= WeakReference(activity)
+
+        override fun onNetworkAvailable() {
+            weakActivity.get()?.let {
+                it.activity_trail_discovery_layer_button.isEnabled = true
+            }
+        }
+
+        override fun onNetworkUnavailable() {
+            weakActivity.get()?.let {
+                val offlineCacheManager = it.offlineMapService?.offlineMapManager ?: return
+                it.lifecycleScope.launchWhenCreated {
+                    if (offlineCacheManager.getOfflineMapStatus(OfflineMapType.OVERLAY) == OfflineMapStatus.COMPLETE) {
+                        if (it.accuTerraMapView.isStyleLoaded()) {
+                            val currentStyle = it.styles[it.styleId]
+                            if (!it.offlineStyles.contains(currentStyle)) {
+                                it.cycleStyle()
+                            }
+                        }
+                    } else {
+                        it.activity_trail_discovery_layer_button.isEnabled = false
+                    }
+                }
+            }
+        }
+    }
+
     private class AccuTerraMapViewListener(activity: TrailDiscoveryActivity)
         : AccuTerraMapView.IAccuTerraMapViewListener {
 
@@ -960,7 +1151,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         override fun onStop() {
             super.onStop()
-
             trail_filter_dialog_filter.setOnTrailFilterChangeListener(null)
         }
 

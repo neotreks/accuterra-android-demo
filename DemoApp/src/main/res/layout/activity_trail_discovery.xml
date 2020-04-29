@@ -173,10 +173,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_centerInParent="true"
+                    android:layout_above="@id/activity_trail_offlinemap_progress_layout"
                     tools:listitem="@layout/trail_list_item" />
 
-            </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/activity_trail_offlinemap_progress_layout"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+                    <ProgressBar
+                        android:id="@+id/activity_trail_offlinemap_progress_bar"
+                        style="@android:style/Widget.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:progress="0"
+                        />
 
+                    <TextView
+                        android:id="@+id/activity_trail_offlinemap_progress_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center" />
+                </RelativeLayout>
+
+            </RelativeLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

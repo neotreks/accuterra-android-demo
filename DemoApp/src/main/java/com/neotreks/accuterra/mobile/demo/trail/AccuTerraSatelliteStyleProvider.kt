@@ -9,7 +9,7 @@ import com.neotreks.accuterra.mobile.sdk.map.style.TrailLayerStyleType
 /**
  * A custom style provider used for imaginary base map
  */
-class AccuTerraSatelliteStyleProvider(mapStyle: String, context: Context): AccuterraStyleProvider(mapStyle, context) {
+class AccuTerraSatelliteStyleProvider(context: Context): AccuterraStyleProvider(context) {
 
     override fun getTrailProperties(type: TrailLayerStyleType): Array<PropertyValue<out Any>> {
         return when(type) {
@@ -21,5 +21,9 @@ class AccuTerraSatelliteStyleProvider(mapStyle: String, context: Context): Accut
             // Other keep as default
             else -> super.getTrailProperties(type)
         }
+    }
+
+    override fun getFontStack(): Array<String> {
+        return arrayOf("DIN Offc Pro Italic","Arial Unicode MS Regular")
     }
 }

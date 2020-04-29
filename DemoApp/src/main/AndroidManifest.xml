@@ -41,6 +41,10 @@
         <activity
             android:name=".TrailInfoActivity"
             android:theme="@style/AppTheme.NoActionAndStatusBar"/>
+        <service
+            android:name="com.neotreks.accuterra.mobile.sdk.map.cache.OfflineMapService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

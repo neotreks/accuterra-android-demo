@@ -40,7 +40,6 @@
     <string name="multiple_pois_in_this_area">Multiple trail POIs in this area.</string>
     <string name="get_there">Get There</string>
     <string name="saved">Saved</string>
-    <string name="download">Download</string>
     <string name="start">Start</string>
     <string name="description">Description</string>
     <string name="details">Details</string>
@@ -55,6 +54,30 @@
     <string name="minimum_user_rating">Minimum User Rating</string>
     <string name="maximum_trip_distance">Maximum Trip Distance</string>
     <string name="any">Any</string>
+    <string name="loading_navigation">Loading Navigation…</string>
+    <string name="upwards_arrow_character">↑</string>
+    <string name="downwards_arrow_character">↓</string>
+    <string name="driving_mode">Driving Mode</string>
+    <string name="download">Download</string>
+    <string name="download_percents">%1$d %%</string>
+    <string name="queued">Queued</string>
+
+    <string name="download_overlay_prompt">Would you like to download Overlay map cache (~%1$s).</string>
+    <string name="download_trail_prompt">Would you like to download trail map cache (~%1$s).</string>
+    <string name="download_trail_low_space_title">Low Space</string>
+    <string name="download_trail_low_space_message">There is not enough disk space to download the trail.</string>
+    <string name="downloading_cache">Downloading Cache %1$s: %2$d %%</string>
+    <string name="download_failed">Download Error</string>
+    <string name="downloading_trail_cache">Downloading Trail Cache</string>
+    <string name="downloading_already">Cannot download now, another download is already in progress</string>
+    <string name="downloaded_already">Already downloaded</string>
+    <string name="trail_already_cached">Trail is already cached\nCache Size: %1$s</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+    <string name="cached">Cached</string>
+    <string name="offline_cache">Offline Cache</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
 
     <plurals name="star">
         <item quantity="one">%d Star</item>

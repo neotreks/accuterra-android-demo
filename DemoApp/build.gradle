@@ -5,14 +5,14 @@ apply from: file('../settings/demo-settings.gradle')
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 500
+        versionName "0.5.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -40,6 +40,7 @@ android {
             buildConfigField 'String', 'WS_BASE_URL', ws_base_url
             buildConfigField 'String', 'CLIENT_TOKEN', client_token
             buildConfigField 'String', 'MAPBOX_TOKEN', mapbox_token
+            buildConfigField 'Boolean', 'USE_TRAIL_PATH_EMULATOR', 'false'
         }
     }
 
@@ -48,7 +49,7 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.3.1"
+    implementation "com.accuterra:accuterra-android-sdk:0.5.0"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -57,7 +58,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-    implementation "androidx.fragment:fragment-ktx:1.2.2"
+    implementation "androidx.fragment:fragment-ktx:1.2.4"
     implementation "com.google.android.material:material:1.1.0"
 
     // Glide
@@ -71,5 +72,8 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.1"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
     androidTestImplementation "androidx.annotation:annotation:1.1.0"
+
+    // Turf - Mapbox library for geometry operations
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.0.0'
 
 }

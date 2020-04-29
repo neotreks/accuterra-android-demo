@@ -5,17 +5,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.neotreks.accuterra.mobile.demo.DrivingActivity"
+    android:keepScreenOn="true"
     android:id="@+id/activity_driving_main_view">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/activity_driving_notification_panel"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/colorPrimary"
-        />
+        app:layout_constraintBottom_toTopOf="@id/activity_driving_map_bottom_guideline">
+
+        <com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
+            android:id="@+id/activity_driving_accuterra_map_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_driving_to_driving_mode_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_location_driving_24px"
+            android:tint="@android:color/black"
+            android:backgroundTint="@android:color/white"
+            android:foregroundTint="@android:color/white"
+            android:visibility="gone"
+            android:contentDescription="@string/driving_mode"
+            app:borderWidth="0dp" />
+
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/activity_driving_map_bottom_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5"/>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/activity_driving_list_top_guideline"

@@ -151,7 +151,7 @@
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/activity_trail_info_get_there_icon"
-            app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_download_icon"
+            app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_download_button"
             style="@style/RibbonAction">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -165,22 +165,26 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/activity_trail_info_get_download_icon"
+            android:id="@+id/activity_trail_info_get_download_button"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/activity_trail_info_get_saved_icon"
             app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_start_icon"
+            android:visibility="visible"
             style="@style/RibbonAction">
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/activity_trail_info_get_download_icon"
                 android:src="@drawable/ic_cloud_download_24px"
                 style="@style/RibbonActionIcon" />
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/activity_trail_info_get_download_text"
                 style="@style/RibbonActionLabel"
                 android:text="@string/download" />
 
         </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/activity_trail_info_get_start_icon"
@@ -250,5 +254,23 @@
         style="@style/Widget.AppCompat.Button.Borderless"
         android:tint="@android:color/white"
         android:background="@drawable/background_circle_semi_transparent_ripple"/>
+
+    <!-- This view avoids any touch event on the rest of the UI. -->
+    <FrameLayout
+        android:id="@+id/activity_trail_discovery_progress_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/activity_trail_discovery_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

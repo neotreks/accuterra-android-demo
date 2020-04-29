@@ -12,20 +12,14 @@ abstract class ListItemAdapter<T>(context: Context,
                                   items: List<T>,
                                   private val viewBinder: ListItemAdapterViewBinder<T>
 )
-    : ArrayAdapter<T>(context, R.layout.list_item, items.toMutableList()) {
+    : ArrayAdapter<T>(context, R.layout.list_item, items) {
 
     private var listener: OnListItemClickedListener<T>? = null
     private val inflater = LayoutInflater.from(context)
 
-    private var selectedItemId: Long? = null
+    var selectedItemId: Long? = null
 
     abstract fun getItemId(item: T): Long
-
-    @UiThread
-    fun selectItem(itemId: Long?) {
-        selectedItemId = itemId
-        notifyDataSetChanged()
-    }
 
     @UiThread
     @Synchronized
