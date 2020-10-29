@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.TripSaveActivity">
+
+    <!-- TOOLBAR -->
+    <include
+        android:id="@+id/activity_trip_save_toolbar"
+        layout="@layout/general_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- LIST OF ATTRIBUTES -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_trip_save_toolbar">
+
+
+        <!-- NAME -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/activity_trip_save_trip_name"
+            android:text="@string/activity_save_trip_name" />
+
+        <EditText
+            android:id="@+id/activity_trip_save_trip_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            tools:text="Trip #3" />
+
+        <!-- DESCRIPTION -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/activity_trip_save_trip_description"
+            android:text="@string/activity_save_trip_description" />
+
+        <EditText
+            android:id="@+id/activity_trip_save_trip_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:maxLines="4"
+            tools:text="Very long description that is possible not that long as it could be..." />
+
+        <!-- PHOTOS -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/activity_trip_save_photos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:layout_margin="@dimen/default_margin_internal"
+            android:layout_marginStart="@dimen/default_margin"/>
+
+        <!-- PHOTOS: Add Photo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            tools:ignore="UseCompoundDrawables">
+
+            <!-- Add Photo From Gallery Icon -->
+            <ImageView
+                android:id="@+id/activity_trip_save_select_photo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="@dimen/default_margin_internal"
+                android:src="@drawable/ic_add_photo_from_gallery_24px"
+                android:contentDescription="@string/activity_trip_add_poi_add_photos"/>
+
+            <!-- Take Photo Icon -->
+            <ImageView
+                android:id="@+id/activity_trip_save_take_photo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="@dimen/default_margin_internal"
+                android:src="@drawable/ic_add_photo_24px"
+                android:contentDescription="@string/activity_trip_add_poi_add_photos"/>
+            
+            <!-- Add Photo Text -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin_internal"
+                android:gravity="center"
+                android:text="@string/activity_save_trip_add_photos" />
+
+            <!-- Container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="end"
+                android:gravity="end">
+
+                <!-- Shuffle Photos -->
+                <ImageView
+                    android:id="@+id/activity_trip_save_shuffle_photo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="@dimen/default_margin_internal"
+                    android:contentDescription="@string/activity_save_trip_shuffle_photos"
+                    android:src="@drawable/ic_shuffle_24px"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- SHARE -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center">
+
+            <!-- SHARE WITH LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:text="@string/activity_save_trip_add_share"
+                android:labelFor="@id/activity_trip_save_share"/>
+
+            <!-- SHARE WITH DROPDOWN -->
+            <Spinner
+                android:id="@+id/activity_trip_save_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:listitem="@android:layout/simple_spinner_item"/>
+
+        </LinearLayout>
+
+        <!-- PROMOTE TO TRAIL -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center|start">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/activity_trip_save_trip_promote"
+                android:text="@string/activity_save_trip_promote_to_trail" />
+
+            <CheckBox
+                android:id="@+id/activity_trip_save_trip_promote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center|start">
+
+            <!-- MY RATING LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:text="@string/activity_save_trip_my_rating" />
+
+            <!-- MY RATING -->
+            <androidx.appcompat.widget.AppCompatRatingBar
+                android:id="@+id/activity_trip_save_my_rating"
+                style="@style/UserRatingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:isIndicator="false"
+                android:max="5"
+                android:stepSize="0.5"
+                tools:rating="2" />
+
+        </LinearLayout>
+
+        <!-- PERSONAL NOTE -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/activity_trip_save_trip_personal_note"
+            android:text="@string/activity_save_trip_personal_note" />
+
+        <EditText
+            android:id="@+id/activity_trip_save_trip_personal_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:maxLines="4"
+            tools:text="I should take more gasoline next time." />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

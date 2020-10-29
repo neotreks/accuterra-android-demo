@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- GENERAL -->
+    <string name="trails_updating_trail">Updating Trail</string>
+    <string name="trails_trail_updated">Trail updated</string>
+    <string name="trails_trail_update_failed">Trail update failed because of: %1$s</string>
+
+    <!-- Trail Download -->
+    <string name="trail_updates_check_updates">Check trail DB updates</string>
+    <string name="trail_updates_checking_updates">Checking trail updates</string>
+    <string name="trail_updates_checking_updates_failed">Checking of trail updates has failed because of: %1$s</string>
+    <string name="trail_updates_no_updates">No trail updates available</string>
+    <string name="trail_updates_updating_trails">Updating Trail DB</string>
+    <string name="trail_updates_trail_db_updated">Trail DB updated (%1$s).</string>
+    <string name="trail_updates_trail_no_updates">There were no updates of the Trail DB.</string>
+    <string name="trail_updates_trail_db_update_failed">Trail DB update failed because of: %1$s</string>
+
+</resources>

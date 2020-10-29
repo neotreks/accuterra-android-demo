@@ -13,4 +13,12 @@ enum class ListViewSize(val showListViewIcons: Boolean) {
         return values()[(this.ordinal + 1) % values().size]
     }
 
+    fun toggleMinMaxListView(): ListViewSize {
+        return if (this == MINIMUM) {
+            MAXIMUM
+        } else {
+            MINIMUM
+        }
+    }
+
 }

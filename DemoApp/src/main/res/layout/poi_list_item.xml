@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingStart="0dp"
+    android:paddingEnd="5dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
@@ -22,12 +24,22 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/poi_list_item_millage"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/poi_list_item_action"
         style="@style/TextAppearance.AppCompat.Widget.ActionBar.Menu"
         android:paddingTop="10dp"
         android:paddingBottom="5dp"
-        android:paddingEnd="5dp"
         tools:text="Obstacle #5"/>
+
+    <TextView
+        android:id="@+id/poi_list_item_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/general_detail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="@dimen/default_margin"
+        style="@style/DemoAppLink"/>
 
     <TextView
         android:id="@+id/poi_list_item_description"
@@ -38,7 +50,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingEnd="5dp"
         tools:text="Obstacle #5 si the most difficult maneuver on this route. Begin your approach on the right then go to the left side of the path......"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

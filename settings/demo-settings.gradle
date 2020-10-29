@@ -2,9 +2,16 @@ ext {
     // Readonly access to Maven repo via our `distribution site`
     dist_username = '***'
     dist_password = '***'
-    // WS URL and API Key
-    ws_base_url = '"***"'
-    client_token = '"***"'
+    // URL to AccuTerra BE
+    ws_base_url = '"https://dev.accuterra.com:443/api/"'
+    // URL and credentials for the authentication service
+    ws_auth_url = '"***"'
+    ws_auth_client_id = '"***"'
+    ws_auth_client_secret = '"***"'
     // MapBox
     mapbox_token = '"***"'
+    // AccuTerra Map Service
+    accuterra_map_api_key = '"***"'
+    accuterra_map_style_url = '"***"'
+
 }

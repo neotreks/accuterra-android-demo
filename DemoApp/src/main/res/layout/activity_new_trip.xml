@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.NewTripActivity">
+
+    <include
+        layout="@layout/general_toolbar"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:id="@+id/new_trip_activity_chose_route_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/new_trip_activity_free_roam_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            style="@style/TextGrayedHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="50dp"
+            android:text="@string/activity_new_trip_chose_route_title"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/new_trip_activity_chose_route"
+            style="@style/TextLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:text="@string/activity_new_trip_chose_route"
+            android:textAlignment="center"
+            android:padding="@dimen/default_margin" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/new_trip_activity_free_roam_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_trip_activity_chose_route_list">
+
+        <TextView
+            style="@style/TextGrayedHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="50dp"
+            android:text="@string/activity_new_trip_free_roam_title"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/new_trip_activity_free_roam"
+            style="@style/TextLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:text="@string/activity_new_trip_free_roam"
+            android:textAlignment="center"
+            android:padding="@dimen/default_margin"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

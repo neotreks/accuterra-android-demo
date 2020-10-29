@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.RecordedTripActivity">
+
+    <TextView
+        android:id="@+id/activity_recorded_trip_name"
+        style="@style/DemoAppTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Red Cone Pass first trip of the year" />
+
+    <TextView
+        android:id="@+id/activity_recorded_trip_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_recorded_trip_name"
+        tools:text="2020-10-11" />
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/activity_recorded_trip_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_recorded_trip_date"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/activity_recorded_trip_tab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_recorded_trip_tab_map"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="@string/general_map" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_recorded_trip_tab_photos"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="@string/general_photos" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_recorded_trip_tab_pois"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="@string/general_pois" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_recorded_trip_tab_info"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="@string/general_info" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_recorded_trip_tab_stats"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="@string/general_statistics" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+    </androidx.viewpager.widget.ViewPager>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,3 +1,8 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="toolbar_margin">16dp</dimen>
+
+    <!-- DEFAULT VALUES -->
+    <dimen name="default_margin">16dp</dimen>
+    <dimen name="default_margin_internal">8dp</dimen>
 </resources>

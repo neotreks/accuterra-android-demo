@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- SHARE -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start|center"
+        android:orientation="horizontal">
+
+        <!-- SHARE WITH LABEL -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/fragment_trip_info_share"
+            android:text="@string/activity_save_trip_add_share" />
+
+        <!-- SHARE WITH DROPDOWN -->
+        <TextView
+            android:id="@+id/fragment_trip_info_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|start">
+
+        <!-- MY RATING LABEL -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:text="@string/activity_save_trip_my_rating" />
+
+        <!-- MY RATING -->
+        <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/fragment_trip_info_my_rating"
+            style="@style/UserRatingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:isIndicator="true"
+            android:max="5"
+            android:stepSize="0.5"
+            tools:rating="2"/>
+
+    </LinearLayout>
+    
+    <!-- PROMOTE TO TRAIL -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center|start">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/fragment_trip_info_promote"
+            android:text="@string/activity_save_trip_promote_to_trail" />
+
+        <CheckBox
+            android:id="@+id/fragment_trip_info_promote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            android:enabled="false" />
+
+    </LinearLayout>
+
+    <!-- PERSONAL NOTE -->
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:labelFor="@id/fragment_trip_info_trip_personal_note"
+        android:text="@string/activity_save_trip_personal_note" />
+
+    <TextView
+        android:id="@+id/fragment_trip_info_trip_personal_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_margin"
+        android:importantForAutofill="no"
+        tools:text="I should take more gasoline next time." />
+
+</LinearLayout>

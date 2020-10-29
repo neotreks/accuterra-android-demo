@@ -2,20 +2,20 @@ package com.neotreks.accuterra.mobile.demo.util
 
 import android.location.Location
 import android.os.Handler
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
+import com.neotreks.accuterra.mobile.demo.trip.location.ILocationUpdateListener
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDrive
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailPath
 
-class TrailPathLocationSimulator(trailPath: TrailPath,
-                                 callback: LocationEngineCallback<LocationEngineResult>) {
+class TrailPathLocationSimulator(trailDrive: TrailDrive,
+                                 callback: ILocationUpdateListener) {
 
-    private var callback: LocationEngineCallback<LocationEngineResult>? = callback
+    private var locationListener: ILocationUpdateListener? = callback
 
-    private val trailPoints: List<Point>
+    private val trailPoints: List<Point> = trailDrive.trailDrivePath.coordinates()
     private var nextPointIndex = 0
     private val handler = Handler()
 
@@ -23,13 +23,8 @@ class TrailPathLocationSimulator(trailPath: TrailPath,
     private val delayMillis = 500L
 
     init {
-        val trailGeometry = Feature.fromJson(trailPath.geojson).geometry() as? LineString
-            ?: throw IllegalArgumentException("Unexpected trail path format.")
-
-        trailPoints = trailGeometry.coordinates()
-
         if (trailPoints.isEmpty()) {
-            throw IllegalArgumentException("The trailPath does not contain any points.")
+            throw IllegalArgumentException("The trail drive does not contain any points.")
         }
     }
 
@@ -42,7 +37,7 @@ class TrailPathLocationSimulator(trailPath: TrailPath,
 
     fun destroy() {
         handler.removeCallbacksAndMessages(null)
-        callback = null
+        locationListener = null
     }
 
     private fun scheduleNextFakeLocation() {
@@ -74,7 +69,7 @@ class TrailPathLocationSimulator(trailPath: TrailPath,
             location.bearing = bearing.toFloat()
         }
 
-        callback?.onSuccess(LocationEngineResult.create(location))
+        locationListener?.onLocationUpdated(location)
     }
 
     private fun calculateBearing(currentPoint: Point, nextPoint: Point): Double {

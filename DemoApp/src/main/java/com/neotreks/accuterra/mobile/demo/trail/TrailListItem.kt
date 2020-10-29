@@ -22,7 +22,7 @@ class TrailListItem(
                 trailBasicInfo.id,
                 trailBasicInfo.name,
                 trailBasicInfo.highlights,
-                trailBasicInfo.length * 1000, // convert kilometers to meters
+                trailBasicInfo.length,
                 trailBasicInfo.userRating,
                 false,
                 difficulty

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- HEADER with ICONS -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginEnd="@dimen/default_margin"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- COMMENTS ICON -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/fragment_trail_ugc_comments_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_comment_black_24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- COMMENTS TEXT -->
+        <TextView
+            android:id="@+id/fragment_trail_ugc_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_margin_internal"
+            app:layout_constraintStart_toEndOf="@id/fragment_trail_ugc_comments_icon"
+            app:layout_constraintTop_toTopOf="@id/fragment_trail_ugc_comments_icon"
+            tools:text="6 Comments" />
+
+        <!-- Add Comment -->
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/fragment_trail_ugc_add_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add_comment_black_24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- RATING -->
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/fragment_trail_ugc_rating_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:textColor="@android:color/holo_blue_light"
+                tools:text="4.5" />
+
+            <androidx.appcompat.widget.AppCompatRatingBar
+                android:id="@+id/fragment_trail_ugc_rating_stars"
+                style="@style/UserRatingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/general_my_rating"
+                android:isIndicator="false"
+                android:max="5"
+                android:stepSize="0.5"
+                tools:rating="4.5" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- DISCUSSION/COMMENTS List -->
+
+    <ListView
+        android:id="@+id/fragment_trail_comments_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        tools:listitem="@layout/comment_item" />
+
+</LinearLayout>

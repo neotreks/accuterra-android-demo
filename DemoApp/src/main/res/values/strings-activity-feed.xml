@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="activity_feed_trip_type_free_roam">Free Roam</string>
+    <string name="activity_feed_trip_type_trail_drive">Trail Drive</string>
+
+</resources>

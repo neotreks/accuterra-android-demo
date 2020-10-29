@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- DIALOGS / NAMES -->
+
+    <string name="general_ok">OK</string>
+    <string name="general_yes">Yes</string>
+    <string name="general_cancel">Cancel</string>
+    <string name="general_unexpected_error">Unexpected error</string>
+    <string name="general_na">n/a</string>
+    <string name="general_favorite">Favorite</string>
+    <string name="general_image">Image</string>
+    <string name="general_media">Media</string>
+    <string name="general_settings">Settings</string>
+    <string name="general_info">Info</string>
+    <string name="general_statistics">Statistics</string>
+    <string name="general_map">Map</string>
+    <string name="general_photos">Photos</string>
+    <string name="general_poi">POI</string>
+    <string name="general_pois">POIs</string>
+    <string name="general_uuid">UUID</string>
+
+    <!-- ACTIONS -->
+    <string name="general_delete">Delete</string>
+    <string name="general_deleting">Deleting…</string>
+    <string name="general_save">Save</string>
+    <string name="general_save_and_upload">Save and upload</string>
+    <string name="general_saving">Saving…</string>
+    <string name="general_edit">Edit</string>
+    <string name="general_detail">Detail</string>
+    <string name="general_exit">Exit</string>
+    <string name="general_refresh">Refresh</string>
+    <string name="general_promote">Promote</string>
+    <string name="general_copy_to_clipboard">Copy to clipboard</string>
+    <string name="general_copied_to_clipboard">"Copied to clipboard"</string>
+    <string name="general_reset">Reset</string>
+    <string name="general_close_no_save">Close without saving</string>
+    <string name="general_no_records">No records</string>
+
+    <!-- Sharing Types -->
+    <string name="general_sharing_private">No-one (keep private)</string>
+    <string name="general_sharing_friends_only">Friends Only</string>
+    <string name="general_sharing_public">Everyone (make public)</string>
+
+    <!-- Value labels -->
+    <string name="general_distance">Distance</string>
+    <string name="general_duration">Duration</string>
+    <string name="general_length">Length</string>
+    <string name="general_driving_time">Driving Time</string>
+    <string name="general_cumulative_ascent">Cumulative Ascent</string>
+    <string name="general_cumulative_descent">Cumulative Descent</string>
+    <string name="general_min_elevation">Min Elevation</string>
+    <string name="general_max_elevation">Max Elevation</string>
+    <string name="general_max_speed">Max Speed</string>
+    <string name="general_avg_speed">Average Speed</string>
+
+    <string name="general_type">Type</string>
+
+    <!-- Basic Objects -->
+    <string name="general_trip">Trip</string>
+
+    <!-- Content descriptors -->
+    <string name="general_cd_user_avatar">User Avatar</string>
+
+    <!-- UGC -->
+    <string name="general_ugc">UGC</string>
+    <string name="general_likes_number">%1$d Likes</string>
+    <string name="general_comments_number">%1$d Comments</string>
+    <string name="general_photos_number">%1$d Photos</string>
+    <string name="general_my_rating">My Rating</string>
+
+    <!-- COMMENTS -->
+    <string name="general_comment_hint_comment_text">Write your comment</string>
+    <string name="general_comment_send">Send</string>
+    <string name="general_comment_update">Update</string>
+    <string name="general_comment_add">Add Comment</string>
+    <string name="general_comment_edit">Edit Comment</string>
+    <string name="general_comment_delete">Delete Comment</string>
+    <string name="general_comment_delete_dialog_message">Do you really want to delete this comment?</string>
+
+    <!-- ERRORS -->
+
+    <string name="general_error_something_went_wrong">Something went wrong</string>
+    <string name="general_error_no_internet_connection">No Internet Connection</string>
+
+    <!-- Constraints -->
+
+    <string name="general_constraint_min_x_chars">Min %1$d characters.</string>
+
+</resources>

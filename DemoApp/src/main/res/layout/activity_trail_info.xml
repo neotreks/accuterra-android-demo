@@ -90,7 +90,7 @@
             android:stepSize="0.5"
             tools:rating="4.6"
             android:isIndicator="true"
-            style="@style/Widget.AppCompat.RatingBar.Small" />
+            style="@style/UserRatingBar" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/activity_trail_info_ratings_count"
@@ -147,7 +147,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/activity_trail_info_get_saved_icon"
+            android:id="@+id/activity_trail_info_favorite_wrapper"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/activity_trail_info_get_there_icon"
@@ -155,12 +155,13 @@
             style="@style/RibbonAction">
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/activity_trail_info_favorite_icon"
                 android:src="@drawable/ic_bookmark_border_24px"
                 style="@style/RibbonActionIcon" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 style="@style/RibbonActionLabel"
-                android:text="@string/saved" />
+                android:text="@string/general_favorite" />
 
         </LinearLayout>
 
@@ -168,7 +169,7 @@
             android:id="@+id/activity_trail_info_get_download_button"
             app:layout_constraintHorizontal_weight="1"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/activity_trail_info_get_saved_icon"
+            app:layout_constraintStart_toEndOf="@id/activity_trail_info_favorite_wrapper"
             app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_start_icon"
             android:visibility="visible"
             style="@style/RibbonAction">
@@ -205,6 +206,18 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- loading progress -->
+
+    <ProgressBar
+        android:id="@+id/activity_trail_info_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/activity_trail_discovery_tabs_content_view_pager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- TABS -->
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/activity_trail_discovery_tabs_content_view_pager"
         app:layout_constraintTop_toBottomOf="@id/activity_trail_info_icons_bar_wrapper"
@@ -265,7 +278,6 @@
         android:visibility="gone">
 
         <ProgressBar
-            android:id="@+id/activity_trail_discovery_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />

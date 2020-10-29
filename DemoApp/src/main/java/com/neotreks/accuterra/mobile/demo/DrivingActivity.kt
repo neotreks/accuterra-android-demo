@@ -1,51 +1,74 @@
 package com.neotreks.accuterra.mobile.demo
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.android.core.location.*
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
-import com.neotreks.accuterra.mobile.demo.trail.OnListItemClickedListener
-import com.neotreks.accuterra.mobile.demo.trail.PoiListAdapter
+import com.neotreks.accuterra.mobile.demo.trail.WaypointListAdapter
+import com.neotreks.accuterra.mobile.demo.trail.TrailPoiDetailActivity
+import com.neotreks.accuterra.mobile.demo.trip.recorded.BaseTripRecordingActivity
+import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingButtonsPanel
+import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingStatsPanel
+import com.neotreks.accuterra.mobile.demo.ui.OnListItemActionClickedListener
+import com.neotreks.accuterra.mobile.demo.ui.OnListItemClickedListener
 import com.neotreks.accuterra.mobile.demo.util.*
-import com.neotreks.accuterra.mobile.sdk.map.*
-import com.neotreks.accuterra.mobile.sdk.trail.model.MapPoint
+import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
+import com.neotreks.accuterra.mobile.sdk.map.NextWayPoint
+import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
+import com.neotreks.accuterra.mobile.sdk.map.TrailLayersManager
+import com.neotreks.accuterra.mobile.sdk.map.navigation.ITrailNavigator
+import com.neotreks.accuterra.mobile.sdk.map.navigation.ITrailNavigatorListener
+import com.neotreks.accuterra.mobile.sdk.map.navigation.TrailNavigator
+import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
-import com.neotreks.accuterra.mobile.sdk.trail.model.TrailPath
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDrive
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDriveWaypoint
+import com.neotreks.accuterra.mobile.sdk.trail.service.TrailLoadFilter
+import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
 import kotlinx.android.synthetic.main.activity_driving.*
+import kotlinx.android.synthetic.main.component_trip_recording_buttons.*
+import kotlinx.android.synthetic.main.component_trip_recording_stats.*
 import kotlinx.android.synthetic.main.driving_activity_toolbar.*
+import kotlinx.android.synthetic.main.poi_item.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import java.lang.ref.WeakReference
+import java.nio.charset.Charset
+import java.text.NumberFormat
+import java.util.*
 
-class DrivingActivity : AppCompatActivity() {
+class DrivingActivity : BaseTripRecordingActivity() {
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
         private const val TAG = "DrivingActivity"
 
         private const val KEY_TRAIL_ID = "KEY_TRAIL_ID"
-
-        private const val SHOW_MY_LOCATION_PERMISSIONS_REQUEST = 1
 
         fun createNavigateToIntent(context: Context, trailId: Long): Intent {
             return Intent(context, DrivingActivity::class.java)
@@ -55,26 +78,31 @@ class DrivingActivity : AppCompatActivity() {
         }
     }
 
-    private var requiredLocationPermissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private val id = Date().time
 
     private lateinit var viewModel: DrivingViewModel
 
-    private lateinit var accuTerraMapView: AccuTerraMapView
     private lateinit var trailLayersManager: TrailLayersManager
     private var isTrailsLayerManagersLoaded = false
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
     private val mapViewLoadingFailListener = MapLoadingFailListener(this)
-    private val currentLocationEngineListener = CurrentLocationEngineListener(this)
     private val trailNavigatorListener = TrailNavigatorListener(this)
 
-    private var locationEngine: LocationEngine? = null
-    private var trailNavigator: TrailNavigator? = null
+    private var trailNavigator: ITrailNavigator? = null
     private var trailPathLocationSimulator: TrailPathLocationSimulator? = null
 
-    private var bottomListSize = ListViewSize.MEDIUM
+    private var listSize = ListViewSize.MINIMUM
     private val distanceFormatter = Formatter.getDistanceFormatter()
-    private lateinit var poiListAdapter: PoiListAdapter
+    private lateinit var poiListAdapter: WaypointListAdapter
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate()")
@@ -82,82 +110,199 @@ class DrivingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_driving)
 
         viewModel = ViewModelProvider(this).get(DrivingViewModel::class.java)
-        parseIntent()
 
-        setupToolbar()
-
+        initRecordingPanel()
         setupButtons()
         setupListView()
         setupNextWayPointLabels()
-        setupMap(savedInstanceState)
+        setupToolbar()
 
-        if (BuildConfig.USE_TRAIL_PATH_EMULATOR) {
-            initializeTrailPathSimulatorLocationEngine()
-        } else {
-            initializeGpsLocationEngine()
-        }
-
+        parseIntent()
         registerTrailObserver()
-    }
 
-    override fun onResume() {
-        Log.i(TAG, "onResume()")
-        super.onResume()
-        accuTerraMapView.onResume()
-    }
-
-    override fun onPause() {
-        Log.i(TAG, "onPause()")
-        super.onPause()
-        accuTerraMapView.onPause()
-    }
-
-    override fun onStart() {
-        Log.i(TAG, "onStart()")
-        super.onStart()
-        accuTerraMapView.onStart()
-    }
-
-    override fun onStop() {
-        Log.i(TAG, "onStop()")
-        super.onStop()
-        accuTerraMapView.onStop()
-    }
-
-    override fun onLowMemory() {
-        Log.w(TAG, "onLowMemory()")
-        super.onLowMemory()
-        accuTerraMapView.onLowMemory()
+        // Let's setup the map as the last component
+        setupMap(savedInstanceState)
     }
 
     override fun onDestroy() {
         Log.i(TAG, "onLowMemory()")
         super.onDestroy()
 
-        accuTerraMapView.removeListener(accuTerraMapViewListener)
-        accuTerraMapView.removeOnDidFailLoadingMapListener(mapViewLoadingFailListener)
-        accuTerraMapView.onDestroy()
-
         trailPathLocationSimulator?.destroy()
 
-        locationEngine?.removeLocationUpdates(currentLocationEngineListener)
-        locationEngine = null
+        trailNavigator?.removeListener(trailNavigatorListener)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        Log.i(TAG, "onRequestPermissionsResult(requestCode=$requestCode, permissions=${permissions.joinToString()}, grantResults=${grantResults.asList().joinToString()})")
+    override fun onBackPressed() {
+        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTrip()
+        if (hasActiveTrip) {
+            toast(getString(R.string.general_recording_cannot_exit_while_recording))
+            return
+        } else {
+            super.onBackPressed()
+        }
+    }
 
-        when (requestCode) {
-            SHOW_MY_LOCATION_PERMISSIONS_REQUEST -> {
-                if (grantResults.isNotEmpty() &&
-                    grantResults.all { result -> result ==  PackageManager.PERMISSION_GRANTED}) {
-                    tryRegisteringLocationObservers()
-                } else {
-                    Toast.makeText(this, "Cannot navigate.", Toast.LENGTH_LONG).show()
-                    finish()
+    override fun onLocationUpdated(location: Location) {
+        Log.i(TAG, "ILocationUpdateListener.onLocationUpdated()")
+        Log.d(TAG, location.toString())
+
+        viewModel.setLastLocation(location)
+    }
+
+    /*  IMPLEMENTATION OF THE ABSTRACT METHODS   */
+
+    override fun getAccuTerraMapView(): AccuTerraMapView {
+        return activity_driving_accuterra_map_view
+    }
+
+    override fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
+        return accuTerraMapViewListener
+    }
+
+    override fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
+        return mapViewLoadingFailListener
+    }
+
+    override fun getDrivingModeButton(): FloatingActionButton {
+        return activity_driving_to_driving_mode_button
+    }
+
+    override fun getMapLayerButton(): FloatingActionButton? {
+        return activity_driving_layer_button
+    }
+
+    // Location Activity Abstract Methods Implementation
+
+    override fun onLocationPermissionsGranted() {
+        tryRegisteringLocationObservers()
+    }
+
+    override fun onLocationServiceBind() {
+        if (BuildConfig.USE_TRAIL_PATH_EMULATOR) {
+            initializeTrailPathSimulatorLocationEngine()
+        } else {
+            initializeGpsLocationUpdates()
+        }
+    }
+
+    override fun getLastLocationLiveData(): MutableLiveData<Location?> {
+        return viewModel.lastLocation
+    }
+
+    // BaseTripRecordingActivity Abstract Methods Implementation
+
+    override fun getTripStatisticsLiveData(): MutableLiveData<TripStatistics?> {
+        return viewModel.tripStatistics
+    }
+
+    override suspend fun getTripRecorder(): ITripRecorder {
+        return viewModel.getTripRecorder(this)
+    }
+
+    override fun getTrailId(): Long? {
+        val trailId = viewModel.trail.value?.info?.id
+        checkNotNull(trailId) { "The trail ID must be available!" }
+        return trailId
+    }
+
+    override fun getTripUuid(): String? {
+        return viewModel.tripUUID
+    }
+
+    override fun onNewTripUuid(tripUuid: String?) {
+        viewModel.tripUUID = tripUuid
+    }
+
+
+    override fun getSnackbarView(): View {
+        return activity_driving_recording_panel
+    }
+
+    override fun getAddPoiButton(): View {
+        return activity_driving_add_poi_button
+    }
+
+    override fun updateBackButton() {
+        // TODO:boronmic IMPLEMENT!
+    }
+
+    override fun handleMapViewClick(latLng: LatLng): Boolean {
+        val handled = searchTrailPois(latLng)
+        if (handled) {
+            return handled
+        }
+        return super.handleMapViewClick(latLng)
+    }
+
+    /* * * PRIVATE * * */
+
+    private fun searchTrailPois(latLng: LatLng) : Boolean {
+        val searchResult = TrailPoisQueryBuilder(trailLayersManager)
+            .setCenter(latLng)
+            .setTolerance(5.0f)
+            .includeAllTrailLayers()
+            .create()
+            .execute()
+
+        when(searchResult.trailPois.size) {
+            0 -> {
+                showNewSnackBar(null)
+                trailLayersManager.highlightPOI(null)
+                subSelectPoiById(null)
+                return false
+            }
+            1 -> {
+                val trailPois = searchResult.trailPois[0]
+                when(trailPois.poiIds.size) {
+                    0 -> throw IllegalStateException("Search returned a layer with an empty POIs set.")
+                    1 -> {
+                        handleTrailPoiMapClick(trailPois.poiIds.first())
+                        return true
+                    }
+                    else -> {
+                        handleMultiTrailPoiMapClick()
+                        return true
+                    }
                 }
             }
+            else -> {
+                handleMultiTrailPoiMapClick()
+                return true
+            }
+        }
+    }
+
+    private fun handleTrailPoiMapClick(poiId: Long) {
+        loadAndShowPoiInfoAsync(poiId)
+        trailLayersManager.highlightPOI(poiId)
+    }
+
+    private fun loadAndShowPoiInfoAsync(poiId: Long) {
+        lifecycleScope.launchWhenCreated {
+            // Unfold the list view and make sure the item is displayed
+            setMediumListView() // Search related waypoint and display it in the list
+            val waypoint = viewModel.trailDrive.waypoints.find { it.point.id == poiId }
+                ?: return@launchWhenCreated
+            subSelectPoiById(waypoint.id)
+            val position = poiListAdapter.getPosition(waypoint)
+            activity_driving_list.smoothScrollToPosition(position)
+        }
+    }
+    private fun handleMultiTrailPoiMapClick() {
+        val snackBar = Snackbar
+            .make(getSnackbarView(), R.string.multiple_pois_in_this_area, Snackbar.LENGTH_SHORT)
+
+        showNewSnackBar(snackBar)
+
+        trailLayersManager.highlightPOI(null)
+        subSelectPoiById(null)
+    }
+
+    private fun subSelectPoiById(id: Long?) {
+        if (poiListAdapter.subSelectedItemId != id) {
+            poiListAdapter.setSubSelectedId(id)
+            poiListAdapter.notifyDataSetChanged()
         }
     }
 
@@ -166,22 +311,14 @@ class DrivingActivity : AppCompatActivity() {
 
         viewModel.trail.observe(this, Observer { trail ->
             if (trail != null) {
-                onTrailDataLoaded(trail)
+                onTrailDataLoaded(trail, viewModel.trailDrive)
             }
         })
     }
 
-    private fun onTrailDataLoaded(trail: Trail) {
+    private fun onTrailDataLoaded(trail: Trail, trailDrive: TrailDrive) {
         Log.d(TAG, "onTrailDataLoaded()")
-
-        viewModel.sortedWayPoints.clear()
-        viewModel.sortWayPoints(null)
-        viewModel.sortedWayPoints.addAll(
-
-            trail.navigationInfo.waypoints
-                .filter { point -> point.isWaypoint == true }
-        )
-        viewModel.sortWayPoints(TrailNavigator.Direction.FORWARD)
+        poiListAdapter.addAll(trailDrive.waypoints)
         poiListAdapter.notifyDataSetChanged()
 
         activity_driving_toolbar_trail_name.text = trail.info.name
@@ -189,26 +326,27 @@ class DrivingActivity : AppCompatActivity() {
         activity_driving_toolbar_trail_name_panel.visibility = View.VISIBLE
         activity_driving_toolbar_way_point_panel.visibility = View.GONE
 
-        viewModel.trailNavigatorSituation.observe(this, Observer { situation ->
-            updateNextWayPointInList(situation)
+        viewModel.navigatorStatus.observe(this, Observer { navigatorStatus ->
+            // do not update the list if the trail is lost or when going in the wrong direction
+            if (navigatorStatus.status == NavigatorStatusType.NOT_READY
+                || navigatorStatus.status == NavigatorStatusType.NAVIGATING) {
+                updateNextWayPointInList(navigatorStatus.nextWayPoint)
+            }
         })
 
         hideProgressBar()
     }
 
-    private fun updateNextWayPointInList(situation: TrailNavigatorSituation?) {
+    private fun updateNextWayPointInList(situation: NextWayPoint?) {
         Log.d(TAG, "updateNextWayPointInList()")
-
-        var hasDataSetChanged = viewModel.sortWayPoints(situation?.direction)
 
         val poiId = situation?.trailPOI?.id
         if (poiListAdapter.selectedItemId != poiId) {
             poiListAdapter.selectedItemId = poiId
-            hasDataSetChanged = true
-        }
-
-        if (hasDataSetChanged) {
+            // Refresh the list
             poiListAdapter.notifyDataSetChanged()
+            // Update also the poi_item layout
+            displayNextNextPoiInfo()
         }
     }
 
@@ -220,14 +358,60 @@ class DrivingActivity : AppCompatActivity() {
         check(trailId != Long.MIN_VALUE) { "Invalid $KEY_TRAIL_ID value." }
 
         Log.i(TAG, "trailId=$trailId")
-        viewModel.loadTrail(trailId, this)
+        try {
+            viewModel.loadTrail(trailId, this)
+        } catch (e: Exception) {
+            longToast("Error while loading the trail: ${e.localizedMessage}")
+            finish()
+        }
     }
 
     private fun toggleListView() {
         Log.d(TAG, "toggleListView()")
-        bottomListSize = bottomListSize.toggleListView()
+        listSize = listSize.toggleMinMaxListView()
 
         moveListViewGuideLine()
+        refreshList()
+    }
+
+    private fun setMediumListView() {
+        if (listSize == ListViewSize.MEDIUM) {
+            return
+        }
+        listSize = ListViewSize.MEDIUM
+        moveListViewGuideLine()
+        refreshList()
+    }
+
+    private fun refreshList() {
+        val displayDescriptions = listSize != ListViewSize.MINIMUM
+        poiListAdapter.setDisplayDescription(displayDescriptions)
+        poiListAdapter.notifyDataSetChanged()
+        displayNextNextPoiInfo()
+    }
+
+    private fun displayNextNextPoiInfo() {
+        // Scroll to nex position if possible
+        val selectedIndex = poiListAdapter.getSelectedItemIndex()
+        val count = poiListAdapter.count
+        if (selectedIndex == -1) {
+            // Nothing is selected -> nothing to display
+            poi_item_name.text = ""
+            poi_item_millage.text = ""
+            return
+        }
+        // Get the nextNext item but avoid out of index
+        val nextNextItem = if (count > selectedIndex + 1) {
+            poiListAdapter.getItem(selectedIndex + 1)
+        } else {
+            // Select the last one
+            poiListAdapter.getItem(poiListAdapter.count - 1)
+        }
+        // Update the poi_item labels
+        poi_item_name.text = nextNextItem?.point?.name
+        nextNextItem?.distanceMarker?.let { distance ->
+            poi_item_millage.text = Formatter.getDistanceFormatter().formatDistance(this, distance)
+        }
     }
 
     private fun setupToolbar() {
@@ -243,106 +427,220 @@ class DrivingActivity : AppCompatActivity() {
         activity_driving_toolbar_way_point_panel.visibility = View.GONE
     }
 
-    private fun setupButtons() {
+    override fun setupButtons() {
+        // Setup recording buttons
+        super.setupButtons()
+
         Log.v(TAG, "setupButtons()")
 
-        activity_driving_show_list_button.drawUpArrowOnLeftSide()
-        activity_driving_show_list_button.setOnClickListener {
+        activity_driving_poi_list_expander.drawDownArrowOnLeftSide()
+        activity_driving_poi_list_expander.setOnClickListener {
             toggleListView()
         }
 
-        activity_driving_to_driving_mode_button.setOnClickListener {
-            // this button is hidden by default. it only becomes visible when the user
-            // clicks a way point in the list.
-            // in such case we expect that meanwhile the Location permission has been checked
-            // and that the activity has finished if they were not granted
-            switchToDrivingMode()
+        activity_driving_layer_button.setOnClickListener {
+            onToggleMapStyle()
         }
+
     }
 
-    private fun setupListView() {
-        activity_driving_list.emptyView = activity_driving_empty_list_label
+    private fun initRecordingPanel() {
+        buttonsPanel = TripRecordingButtonsPanel(component_trip_recording_stat_duration,
+            component_trip_recording_stat_distance, component_trip_recording_start_button,
+            component_trip_recording_stop_button, component_trip_recording_resume_button,
+            component_trip_recording_finish_button, activity_driving_add_poi_button, this)
 
-        poiListAdapter = PoiListAdapter(this, viewModel.sortedWayPoints)
+        statsPanel = TripRecordingStatsPanel(
+            component_trip_recording_stats_speed, component_trip_recording_stats_heading,
+            component_trip_recording_stats_elevation, component_trip_recording_stats_lat,
+            component_trip_recording_stats_lon, this
+        )
+    }
+
+
+    private fun setupListView() {
+
+        poiListAdapter = WaypointListAdapter(this, mutableListOf(), displayDescription = false, displayAction = true)
         activity_driving_list.adapter = poiListAdapter
 
-        poiListAdapter.setOnListItemClickedListener(object : OnListItemClickedListener<MapPoint> {
-            override fun onListItemClicked(item: MapPoint) {
+        makeListVisible(false)
+
+        // Zoom to POI
+        poiListAdapter.setOnListItemClickedListener(object : OnListItemClickedListener<TrailDriveWaypoint> {
+            override fun onListItemClicked(item: TrailDriveWaypoint, view: View) {
                 exitDrivingMode(object: OnLocationCameraTransitionListener {
                     override fun onLocationCameraTransitionFinished(cameraMode: Int) {
-                        zoomToWayPoint(item)
+                        onTrailPoiClicked(item)
                     }
 
                     override fun onLocationCameraTransitionCanceled(cameraMode: Int) {
-                        zoomToWayPoint(item)
+                        onTrailPoiClicked(item)
                     }
                 })
             }
         })
+        // Display POI detail
+        poiListAdapter.setOnListItemDetailClickedListener(
+            object : OnListItemActionClickedListener<TrailDriveWaypoint> {
+                override fun onListItemActionClicked(item: TrailDriveWaypoint) {
+                    val intent = TrailPoiDetailActivity.createNavigateToIntent(this@DrivingActivity, item.id)
+                    startActivity(intent)
+                }
+            })
     }
 
-    private fun zoomToWayPoint(wayPoint: MapPoint) {
-        Log.d(TAG, "zoomToWayPoint(wayPoint: ${wayPoint.id}")
-
-        accuTerraMapView.zoomToPoint(wayPoint.location)
+    private fun onTrailPoiClicked(item: TrailDriveWaypoint) {
+        zoomToWayPoint(item.point)
+        trailLayersManager.highlightPOI(item.point.id)
+        subSelectPoiById(item.id)
+        if (!isListMediumSize()) {
+            setMediumListView()
+            scrollListToItem(item)
+        }
     }
+
+    private fun scrollListToItem(point: TrailDriveWaypoint) {
+        val position = poiListAdapter.getPosition(point)
+        activity_driving_list.smoothScrollToPosition(position)
+    }
+
+    private fun isListMediumSize() = listSize == ListViewSize.MEDIUM
 
     private fun setupNextWayPointLabels() {
         Log.v(TAG, "setupNextWayPointLabels()")
 
-        viewModel.trailNavigatorSituation.observe(this, Observer { situation ->
-            updateNextWayPointLabels(situation)
+        viewModel.navigatorStatus.observe(this, Observer { navigatorStatus ->
+            @Suppress("REDUNDANT_ELSE_IN_WHEN")
+            when(navigatorStatus.status) {
+                NavigatorStatusType.NOT_READY -> {
+                    // nothing to do
+                }
+                NavigatorStatusType.NAVIGATING -> showNextWayPointLabels(navigatorStatus.nextWayPoint!!)
+                NavigatorStatusType.FINISHED -> showNavigationFinishedLabels(navigatorStatus.nextWayPoint!!)
+                NavigatorStatusType.TRAIL_LOST -> showTrailLost()
+                NavigatorStatusType.WRONG_DIRECTION -> showWrongDirection()
+                else -> throw NotImplementedError("Unhandled NavigatorStatusType ${navigatorStatus.status}.")
+            }
         })
     }
 
-    private fun updateNextWayPointLabels(situation: TrailNavigatorSituation?) {
+    private fun showNextWayPointLabels(situation: NextWayPoint) {
         Log.v(TAG, "updateNextWayPointLabels(situation=$situation)")
 
-        if (situation == null) {
-            activity_driving_toolbar_loading_panel.visibility = View.GONE
-            activity_driving_toolbar_trail_name_panel.visibility = View.VISIBLE
-            activity_driving_toolbar_way_point_panel.visibility = View.GONE
-        } else {
-            activity_driving_toolbar_way_point_panel_arrow_forward.visibility =
-                if (situation.direction == TrailNavigator.Direction.FORWARD) View.VISIBLE else View.GONE
-            activity_driving_toolbar_way_point_panel_arrow_backward.visibility =
-                if (situation.direction == TrailNavigator.Direction.BACKWARD) View.VISIBLE else View.GONE
-            activity_driving_toolbar_way_point_name.text = situation.trailPOI.name
-            activity_driving_toolbar_way_point_distance.text =
-                distanceFormatter.formatDistance(this, situation.distance)
-
-            activity_driving_toolbar_loading_panel.visibility = View.GONE
-            activity_driving_toolbar_trail_name_panel.visibility = View.GONE
-            activity_driving_toolbar_way_point_panel.visibility = View.VISIBLE
+        val icon = when(situation.direction) {
+            TrailNavigator.Direction.AT_POINT -> null
+            else -> situation.direction
         }
+
+        val distance = when(situation.direction) {
+            TrailNavigator.Direction.AT_POINT -> null
+            else -> situation.distance
+        }
+
+        showNextWayPointToolbar(icon, distance, situation.trailPOI.point.name ?: "End")
+    }
+
+    private fun showNavigationFinishedLabels(situation: NextWayPoint) {
+        Log.v(TAG, "showNavigationFinishedLabels(situation=$situation)")
+
+        require(situation.direction == TrailNavigator.Direction.AT_POINT)
+
+        showNextWayPointToolbar(TrailNavigator.Direction.AT_POINT, null, situation.trailPOI.point.name ?: "End")
+    }
+
+    private fun showNextWayPointToolbar(icon: TrailNavigator.Direction?,
+                                        distance: Double?,
+                                        title: String) {
+
+        if (icon == null) {
+            activity_driving_toolbar_way_point_panel_direction_icon.visibility = View.GONE
+        } else {
+            activity_driving_toolbar_way_point_panel_direction_icon.visibility = View.VISIBLE
+            val iconId = when(icon) {
+                TrailNavigator.Direction.AT_POINT -> R.string.chequered_flag_character
+                TrailNavigator.Direction.FORWARD -> R.string.upwards_arrow_character
+                TrailNavigator.Direction.BACKWARD -> R.string.downwards_arrow_character
+            }
+            activity_driving_toolbar_way_point_panel_direction_icon.text = getString(iconId)
+        }
+
+        if (distance == null) {
+            activity_driving_toolbar_way_point_distance.visibility = View.GONE
+        } else {
+            activity_driving_toolbar_way_point_distance.visibility = View.VISIBLE
+            activity_driving_toolbar_way_point_distance.text =
+                distanceFormatter.formatDistance(this, distance)
+        }
+
+        activity_driving_toolbar_way_point_name.text = title
+
+        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
+        activity_driving_toolbar_way_point_panel.visibility = View.VISIBLE
+        activity_driving_toolbar_wrong_direction.visibility = View.GONE
+        activity_driving_toolbar_trail_lost.visibility = View.GONE
+    }
+
+    private fun showTrailLost() {
+        Log.v(TAG, "showTrailLost()")
+
+        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
+        activity_driving_toolbar_way_point_panel.visibility = View.GONE
+        activity_driving_toolbar_wrong_direction.visibility = View.GONE
+        activity_driving_toolbar_trail_lost.visibility = View.VISIBLE
+    }
+
+    private fun showWrongDirection() {
+        Log.v(TAG, "showWrongDirection()")
+
+        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
+        activity_driving_toolbar_way_point_panel.visibility = View.GONE
+        activity_driving_toolbar_wrong_direction.visibility = View.VISIBLE
+        activity_driving_toolbar_trail_lost.visibility = View.GONE
     }
 
     private fun moveListViewGuideLine() {
-        Log.d(TAG, "moveListViewGuideLine(), bottomListSize=$bottomListSize")
+        Log.d(TAG, "moveListViewGuideLine(), bottomListSize=$listSize")
 
-        when(bottomListSize) {
+        when(listSize) {
             ListViewSize.MINIMUM -> {
+                makeListVisible(false)
                 //make only the activity_driving_main_view visible
-                val guidelinePercent = 1.0f -
-                        activity_driving_show_list_button.height.toFloat() / activity_driving_main_view.height.toFloat()
+                val guidelinePercent =
+                        (activity_driving_poi_item.height.toFloat() / activity_driving_main_view.height)
 
-                activity_driving_list_top_guideline.setGuidelinePercent(guidelinePercent)
-                activity_driving_map_bottom_guideline.setGuidelinePercent(guidelinePercent)
-                activity_driving_show_list_button.drawUpArrowOnLeftSide()
+                activity_driving_list_bottom_guideline.setGuidelinePercent(guidelinePercent)
+                activity_driving_map_top_guideline.setGuidelinePercent(guidelinePercent)
+                activity_driving_poi_list_expander.drawDownArrowOnLeftSide()
             }
             ListViewSize.MEDIUM -> {
-                activity_driving_list_top_guideline.setGuidelinePercent(0.5f)
-                activity_driving_map_bottom_guideline.setGuidelinePercent(0.5f)
-                activity_driving_show_list_button.drawUpArrowOnLeftSide()
+                makeListVisible(true)
+                activity_driving_list_bottom_guideline.setGuidelinePercent(0.4f)
+                activity_driving_map_top_guideline.setGuidelinePercent(0.4f)
+                activity_driving_poi_list_expander.drawUpArrowOnLeftSide()
             }
             ListViewSize.MAXIMUM -> {
-                activity_driving_list_top_guideline.setGuidelinePercent(0.0f)
+                makeListVisible(true)
+                val guidelinePercent = 1.0f -
+                        (activity_driving_recording_panel.height.toFloat() / activity_driving_main_view.height)
+
+                activity_driving_list_bottom_guideline.setGuidelinePercent(guidelinePercent)
                 // keep map visible to avoid mapbox crashes caused by its height being 0
                 // the list will overflow the map so it will look like it's hidden
-                activity_driving_map_bottom_guideline.setGuidelinePercent(0.5f)
-                activity_driving_show_list_button.drawDownArrowOnLeftSide()
+                activity_driving_poi_list_expander.drawUpArrowOnLeftSide()
             }
         }
+    }
+
+    private fun makeListVisible(visible: Boolean) {
+        if (visible) {
+            activity_driving_list.emptyView = activity_driving_empty_list_label
+        } else {
+            // Need to remove the emptyView to make the `visibility = View.GONE` working
+            activity_driving_list.emptyView = null
+        }
+        activity_driving_list.visibility = visible.visibility
+        activity_driving_empty_list_label.visibility = visible.visibility
+        activity_driving_poi_item.visibility = (!visible).visibility
     }
 
     @UiThread
@@ -351,23 +649,24 @@ class DrivingActivity : AppCompatActivity() {
         activity_driving_list_loading_progress.visibility = View.GONE
     }
 
-    private fun setupMap(savedInstanceState: Bundle?) {
-        Log.d(TAG, "setupMap()")
-
-        accuTerraMapView = activity_driving_accuterra_map_view
-        accuTerraMapView.onCreate(savedInstanceState)
-        accuTerraMapView.addListener(accuTerraMapViewListener)
-        accuTerraMapView.addOnDidFailLoadingMapListener(mapViewLoadingFailListener)
-
-        accuTerraMapView.initialize(AccuTerraStyle.VECTOR)
-    }
-
     private fun onAccuTerraMapViewReady() {
         Log.i(TAG, "onAccuTerraMapViewReady()")
+        // Try to register location observers to obtain device location
         tryRegisteringLocationObservers()
 
         lifecycleScope.launchWhenCreated {
             addTrailLayers()
+            setupRecordingAfterOnAccuTerraMapViewReady()
+            getDrivingModeButton().show()
+            // Add map move listener to update the icon
+            getAccuTerraMapView().getMapboxMap().addOnMoveListener(object : MapboxMap.OnMoveListener {
+                override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {}
+                override fun onMoveEnd(moveGestureDetector: MoveGestureDetector) {}
+                // Remove the [TrackOption.LOCATION] tracking
+                override fun onMove(moveGestureDetector: MoveGestureDetector) {
+                    resetLocationCentering()
+                }
+            })
         }
     }
 
@@ -375,16 +674,19 @@ class DrivingActivity : AppCompatActivity() {
         Log.d(TAG, "addTrailLayers()")
 
         withContext(Dispatchers.Main) {
-            trailLayersManager = accuTerraMapView.trailLayersManager
+            trailLayersManager = getAccuTerraMapView().trailLayersManager
             isTrailsLayerManagersLoaded = true
-
-            trailLayersManager.addStandardLayers()
 
             viewModel.trail.observe(this@DrivingActivity, Observer { trail ->
                 if (trail == null) {
                     Log.d(TAG, "addTrailLayers() - the trail has not been loaded yet")
                 } else {
-                    filterTrail(trail)
+                    // Load the one particular trail
+                    lifecycleScope.launchWhenCreated {
+                        val filter = TrailLoadFilter(listOf(trail.info.id))
+                        trailLayersManager.addStandardLayers(filter)
+                        filterTrail(trail)
+                    }
                 }
             })
         }
@@ -400,38 +702,21 @@ class DrivingActivity : AppCompatActivity() {
 
                 trailLayersManager.showTrailPOIs(trail)
 
-                viewModel.trailNavigatorSituation.observe(this@DrivingActivity, Observer { situation ->
-                    trailLayersManager.highlightPOI(situation?.trailPOI?.id)
+                viewModel.navigatorStatus.observe(this@DrivingActivity, Observer { navigatorStatus ->
+                    if (navigatorStatus.status == NavigatorStatusType.NAVIGATING) {
+                        trailLayersManager.highlightPOI(navigatorStatus.nextWayPoint!!.trailPOI.id)
+                    }
                 })
             }
         }
     }
 
     private fun tryRegisteringLocationObservers() {
-        Log.d(TAG, "trySwitchingToDrivingMode()")
-
         if (hasLocationPermissions()) {
             registerLocationObservers()
+            registerStatisticsObserver()
             switchToDrivingMode()
-        } else {
-            Log.i(TAG, "trySwitchingToDrivingMode() - request permissions")
-            ActivityCompat.requestPermissions(this, requiredLocationPermissions, SHOW_MY_LOCATION_PERMISSIONS_REQUEST)
         }
-    }
-
-    private fun switchToDrivingMode() {
-        Log.i(TAG, "switchToDrivingMode()")
-
-        // the driving mode requires Location permissions
-        accuTerraMapView.setTracking(TrackingOption.DRIVING, null)
-        activity_driving_to_driving_mode_button.visibility = View.GONE
-    }
-
-    private fun exitDrivingMode(transitionListener: OnLocationCameraTransitionListener?) {
-        Log.i(TAG, "exitDrivingMode()")
-
-        accuTerraMapView.setTracking(TrackingOption.NONE_WITH_GPS_LOCATION, transitionListener)
-        activity_driving_to_driving_mode_button.visibility = View.VISIBLE
     }
 
     private fun registerLocationObservers() {
@@ -441,66 +726,62 @@ class DrivingActivity : AppCompatActivity() {
 
         viewModel.trail.observe(this, Observer { trail ->
             if (trail != null) {
-                initializeTrailNavigator(trail, viewModel.trailPath)
+                initializeTrailNavigator(trail, viewModel.trailDrive)
             }
         })
     }
 
-    private fun updateLocationOnMap(location: Location?) {
-        Log.v(TAG, "updateLocationOnMap(location=$location)")
-
-        accuTerraMapView.updateLocation(location)
-    }
-
-    private fun initializeTrailNavigator(trail: Trail, trailPath: TrailPath) {
+    private fun initializeTrailNavigator(trail: Trail, trailDrive: TrailDrive) {
         Log.i(TAG, "initializeTrailNavigator(trail=${trail.info.id}")
 
-        trailNavigator = TrailNavigator(trail, trailPath)
+        // In a production app the TrailNavigator reference should be held in a ViewModel.
+        // We create it here any time the activity is restarted to show how to use the
+        // nextExpectedWayPoint property.
+        trailNavigator = ServiceFactory
+            .getTrailNavigatorService(this)
+            .getTrailNavigator(trailDrive)
             .apply {
+                viewModel.nextExpectedWayPoint?.let { nextExpectedWayPoint ->
+                    // restore the navigator
+                    this.nextExpectedWayPoint = nextExpectedWayPoint
+                }
+
                 addListener(trailNavigatorListener)
             }
 
         viewModel.lastLocation.observe(this, Observer { lastLocation ->
             Log.v(TAG, "update trailNavigator location $lastLocation")
 
-            trailNavigator!!.updateLocation(lastLocation)
-        })
-    }
-
-    private fun initializeGpsLocationEngine() {
-        Log.d(TAG, "initializeLocationEngine()")
-
-        val locationEngineRequest = LocationEngineRequest.Builder(750)
-            .setFastestInterval(750)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
-
-        locationEngine = LocationEngineProvider
-            .getBestLocationEngine(this)
-            .apply {
-                requestLocationUpdates(locationEngineRequest, currentLocationEngineListener, Looper.getMainLooper())
-
-                // Set last known location
-                getLastLocation(currentLocationEngineListener)
+            if (lastLocation != null) {
+                trailNavigator!!.evaluateLocation(lastLocation)
             }
+        })
     }
 
     @UiThread
     private fun initializeTrailPathSimulatorLocationEngine() {
         viewModel.trail.observe(this, Observer { trail ->
             if (trail != null) {
-                trailPathLocationSimulator = TrailPathLocationSimulator(viewModel.trailPath, currentLocationEngineListener)
+                trailPathLocationSimulator = TrailPathLocationSimulator(viewModel.trailDrive, this)
                 trailPathLocationSimulator?.start()
             }
         })
     }
 
-    private fun hasLocationPermissions(): Boolean {
-        Log.v(TAG, "hasLocationPermissions()")
+    private fun updateNavigatorStatus(status: NavigatorStatus) {
 
-        return requiredLocationPermissions.all { permission ->
-            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        viewModel.navigatorStatus.value = status
+
+        if (status.nextWayPoint != null) {
+            val isNewWayPoint = viewModel.nextExpectedWayPoint != status.nextWayPoint.trailPOI
+            viewModel.nextExpectedWayPoint = status.nextWayPoint.trailPOI
+
+            if (isNewWayPoint && listSize != ListViewSize.MINIMUM) {
+                val position = poiListAdapter.getPosition(status.nextWayPoint.trailPOI)
+                activity_driving_list.smoothScrollToPosition(position)
+            }
         }
+
     }
 
     private class AccuTerraMapViewListener(activity: DrivingActivity)
@@ -519,7 +800,10 @@ class DrivingActivity : AppCompatActivity() {
 
         override fun onStyleChanged(mapboxMap: MapboxMap) {
             Log.v(TAG, "AccuTerraMapViewListener.onStyleChanged()")
-            // nothing to do?
+            weakActivity.get()?.let { activity ->
+                activity.getMapLayerButton()?.isEnabled = true
+                activity.getDrivingModeButton().isEnabled = true
+            }
         }
 
         override fun onSignificantMapBoundsChange() {
@@ -548,40 +832,86 @@ class DrivingActivity : AppCompatActivity() {
         }
     }
 
-    private class CurrentLocationEngineListener(activity: DrivingActivity) :
-        LocationEngineCallback<LocationEngineResult> {
-
-        private val weakActivity = WeakReference(activity)
-
-        override fun onSuccess(result: LocationEngineResult) {
-            Log.i(TAG, "CurrentLocationEngineListener.onSuccess()")
-            Log.d(TAG, result.lastLocation?.toString() ?: "no location")
-
-            val activity = weakActivity.get() ?: return
-            activity.viewModel.lastLocation.value = result.lastLocation
-        }
-
-        override fun onFailure(exception: Exception) {
-            Log.e(TAG, "CurrentLocationEngineListener.onFailure(exception=)", exception)
-
-            val activity = weakActivity.get() ?: return
-
-            DialogUtil.buildOkDialog(activity,"Failed to obtain location update",
-                exception.message ?: "Unknown Error While obtaining location update")
-        }
-    }
-
     private class TrailNavigatorListener(activity: DrivingActivity)
-        : TrailNavigator.ITrailNavigatorListener {
+        : ITrailNavigatorListener {
 
         private val weakActivity= WeakReference(activity)
 
-        override fun onChange(situation: TrailNavigatorSituation) {
+        override fun onChange(location: Location, situation: NextWayPoint) {
             Log.i(TAG, "TrailNavigatorListener.onChange(situation=$situation)")
 
+            if (BuildConfig.USE_TRAIL_NAVIGATOR_DEBUG_MODE) {
+                saveDebugLine(location, "onChange", situation.trailPOI.pointIndexOnDrivePath)
+            }
+
+            weakActivity.get()
+                ?.updateNavigatorStatus(NavigatorStatus.createNavigating(location, situation))
+        }
+
+        override fun onTrailEndReached(location: Location, situation: NextWayPoint) {
+            Log.i(TAG, "TrailNavigatorListener.onTrailEndReached(situation=$situation)")
+
+            if (BuildConfig.USE_TRAIL_NAVIGATOR_DEBUG_MODE) {
+                saveDebugLine(location, "onTrailEndReached", situation.trailPOI.pointIndexOnDrivePath)
+            }
+
+            weakActivity.get()
+                ?.updateNavigatorStatus(NavigatorStatus.createFinished(location, situation))
+        }
+
+        override fun onLocationIgnored(location: Location) {
+            Log.w(TAG, "TrailNavigatorListener.onLocationIgnored()")
+
+            if (BuildConfig.USE_TRAIL_NAVIGATOR_DEBUG_MODE) {
+                saveDebugLine(location, "onLocationIgnored", null)
+            }
+
+            // nothing to do
+        }
+
+        override fun onTrailLost(location: Location) {
+            Log.w(TAG, "TrailNavigatorListener.onTrailLost()")
+
+            if (BuildConfig.USE_TRAIL_NAVIGATOR_DEBUG_MODE) {
+                saveDebugLine(location, "onTrailLost", null)
+            }
+
+            weakActivity.get()
+                ?.updateNavigatorStatus(NavigatorStatus.createTrailLost(location))
+        }
+
+        override fun onWrongDirection(location: Location) {
+            Log.w(TAG, "TrailNavigatorListener.onWrongDirection()")
+
+            if (BuildConfig.USE_TRAIL_NAVIGATOR_DEBUG_MODE) {
+                saveDebugLine(location, "onWrongDirection", null)
+            }
+
+            weakActivity.get()
+                ?.updateNavigatorStatus(NavigatorStatus.createWrongDirection(location))
+        }
+
+        private fun saveDebugLine(location: Location, resultType: String, navigationOrder: Int?) {
             val activity = weakActivity.get() ?: return
 
-            activity.viewModel.trailNavigatorSituation.value = situation
+            val formatter = NumberFormat.getInstance(Locale.ROOT)
+
+            OutputStreamWriter(
+                FileOutputStream(File(activity.filesDir, "${activity.id}.csv"), true),
+                Charset.forName("UTF-8")).use { writer ->
+                writer
+                    .append(formatter.format(location.latitude))
+                    .append(",")
+                    .append(formatter.format(location.longitude))
+                    .append(",")
+                    .append(formatter.format(location.time))
+                    .append(",")
+                    .append(resultType)
+                    .append(",")
+                    .append(navigationOrder?.toString() ?: "")
+                    .appendLine()
+            }
+
         }
     }
 }

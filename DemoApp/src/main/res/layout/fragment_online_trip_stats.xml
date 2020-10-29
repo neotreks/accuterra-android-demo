@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- LENGTH -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- LENGTH LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_length"
+                android:text="@string/general_length" />
+
+            <!-- LENGTH VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_length"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="1.5 km" />
+
+        </LinearLayout>
+
+        <!-- DRIVING TIME -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- DRIVING TIME LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_driving_time"
+                android:text="@string/general_driving_time" />
+
+            <!-- DRIVING TIME VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_driving_time"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="00:59:45" />
+
+        </LinearLayout>
+
+        <!-- CUMULATIVE ASCENT TIME -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- CUMULATIVE ASCENT LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_cumulative_ascent"
+                android:text="@string/general_cumulative_ascent" />
+
+            <!-- CUMULATIVE ASCENT VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_cumulative_ascent"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="50 m" />
+
+        </LinearLayout>
+
+        <!-- CUMULATIVE DESCENT TIME -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- CUMULATIVE DESCENT LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_cumulative_descent"
+                android:text="@string/general_cumulative_descent" />
+
+            <!-- CUMULATIVE DESCENT VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_cumulative_descent"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="50 m" />
+
+        </LinearLayout>
+
+        <!-- MIN ELEVATION TIME -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- MIN ELEVATION LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_min_elevation"
+                android:text="@string/general_min_elevation" />
+
+            <!-- MIN ELEVATION VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_min_elevation"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="50 m" />
+
+        </LinearLayout>
+
+        <!-- MAX ELEVATION TIME -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- MAX ELEVATION LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_max_elevation"
+                android:text="@string/general_min_elevation" />
+
+            <!-- MAX ELEVATION VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_max_elevation"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="50 m" />
+
+        </LinearLayout>
+
+        <!-- AVG SPEED -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- AVG SPEED LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_avg_speed"
+                android:text="@string/general_avg_speed" />
+
+            <!-- AVG SPEED VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_avg_speed"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="50 mph" />
+
+        </LinearLayout>
+
+        <!-- MAX SPEED -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center"
+            android:orientation="horizontal">
+
+            <!-- MAX SPEED LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trip_stats_max_speed"
+                android:text="@string/general_max_speed" />
+
+            <!-- MAX SPEED VALUE -->
+            <TextView
+                android:id="@+id/fragment_trip_stats_max_speed"
+                style="@style/DemoAppText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="50 mph" />
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+</ScrollView>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- PHOTO DETAIL -->
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/fragment_online_trip_photo_detail"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/fragment_online_trip_photos"
+        android:src="@drawable/ic_image_gray_24px"/>
+
+    <!-- PROGRESS INDICATOR -->
+
+    <ProgressBar
+        android:id="@+id/fragment_online_trip_photo_detail_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/fragment_online_trip_photo_detail"
+        app:layout_constraintEnd_toEndOf="@id/fragment_online_trip_photo_detail"
+        app:layout_constraintTop_toTopOf="@id/fragment_online_trip_photo_detail"
+        app:layout_constraintBottom_toBottomOf="@id/fragment_online_trip_photo_detail" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/fragment_online_trip_photos_anchor"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        app:layout_constraintGuide_percent="0.7"
+        android:orientation="horizontal" />
+
+    <!-- PHOTO LIST -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_online_trip_photos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/default_margin_internal"
+        android:layout_marginStart="@dimen/default_margin"
+        android:minHeight="80dp"
+        app:layout_constraintTop_toBottomOf="@id/fragment_online_trip_photos_anchor"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

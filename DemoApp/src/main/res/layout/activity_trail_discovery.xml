@@ -7,7 +7,6 @@
     tools:context=".TrailDiscoveryActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/activity_trail_discovery_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -40,35 +39,11 @@
         android:animateLayoutChanges="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.google.android.material.tabs.TabLayout
+        <include
             android:id="@+id/activity_trail_discovery_tabs"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            layout="@layout/component_basic_tabs" />
 
-            <com.google.android.material.tabs.TabItem
-                android:layout_height="0dp"
-                android:layout_width="0dp"
-                android:text="@string/community" />
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_height="0dp"
-                android:layout_width="0dp"
-                android:text="@string/activities" />
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_height="0dp"
-                android:layout_width="0dp"
-                android:text="@string/discover" />
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_height="0dp"
-                android:layout_width="0dp"
-                android:text="@string/profile" />
-
-        </com.google.android.material.tabs.TabLayout>
-
-        <FrameLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/activity_trail_discovery_tabs"
@@ -83,7 +58,8 @@
                 android:id="@+id/activity_trail_discovery_layer_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|start"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 android:layout_margin="8dp"
                 android:src="@drawable/ic_layers_24px"
                 android:tint="@android:color/black"
@@ -96,7 +72,8 @@
                 android:id="@+id/activity_trail_discovery_my_location_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_margin="8dp"
                 android:src="@drawable/ic_location_disabled_24px"
                 android:tint="@android:color/black"
@@ -105,7 +82,7 @@
                 android:visibility="gone"
                 app:borderWidth="0dp" />
 
-        </FrameLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/activity_trail_discovery_list_top_guideline"
@@ -133,10 +110,18 @@
                 android:text="@string/list"
                 android:layout_gravity="center"/>
 
+            <ImageButton
+                android:id="@+id/activity_trail_discovery_download_updates_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:src="@drawable/ic_cloud_download_24px"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:contentDescription="@string/trail_updates_check_updates"/>
+
         </FrameLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/activity_trail_discovery_sliding_bottom_pane"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:elevation="4dp"
@@ -174,7 +159,8 @@
                     android:layout_height="match_parent"
                     android:layout_centerInParent="true"
                     android:layout_above="@id/activity_trail_offlinemap_progress_layout"
-                    tools:listitem="@layout/trail_list_item" />
+                    tools:listitem="@layout/trail_list_item">
+                </ListView>
 
                 <RelativeLayout
                     android:id="@+id/activity_trail_offlinemap_progress_layout"

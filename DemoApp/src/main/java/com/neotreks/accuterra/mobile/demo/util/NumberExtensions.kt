@@ -7,13 +7,6 @@ import java.math.RoundingMode
  */
 
 /**
- * Converts given double value from `meters` to `miles`
- */
-fun Double.fromMetersToMiles(): Double {
-    return this * 0.000621371192
-}
-
-/**
  *
  */
 fun Double.roundTo(decimals: Int): Double {

@@ -25,6 +25,7 @@ class TrailDiscoveryViewModel: ViewModel() {
     var maxDifficultyLevel: TechnicalRating? = null
     var minUserRating: Int? = null
     var maxTripDistance: Int? = null
+    var favoriteOnly: Boolean = false
 
     lateinit var defaultTitle: CharSequence
 

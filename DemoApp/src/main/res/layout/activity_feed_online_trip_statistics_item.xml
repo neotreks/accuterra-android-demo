@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginTop="@dimen/default_margin"
+    android:layout_marginBottom="@dimen/default_margin">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/activity_feed_online_trip_statistics_start_anchor"
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        app:layout_constraintGuide_begin="@dimen/default_margin"
+        android:orientation="vertical"/>
+
+   <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/activity_feed_online_trip_statistics_middle_anchor"
+       android:layout_width="1px"
+       android:layout_height="match_parent"
+       app:layout_constraintGuide_percent="0.5"
+       android:orientation="vertical"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/activity_feed_online_trip_statistics_end_anchor"
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        app:layout_constraintGuide_end="@dimen/default_margin"
+        android:orientation="vertical"/>
+
+
+    <!-- DISTANCE -->
+
+    <TextView
+        android:id="@+id/activity_feed_online_trip_statistics_distance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/activity_feed_online_trip_statistics_start_anchor"
+        android:text="@string/general_distance"
+        style="@style/ActivityFeed_Trip_Statistics_Label" />
+
+    <TextView
+        android:id="@+id/activity_feed_online_trip_statistics_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="15.7 mi"
+        app:layout_constraintTop_toBottomOf="@id/activity_feed_online_trip_statistics_distance_label"
+        app:layout_constraintStart_toEndOf="@id/activity_feed_online_trip_statistics_start_anchor"
+        style="@style/ActivityFeed_Trip_Statistics_Value" />
+
+    <!-- DURATION -->
+
+    <TextView
+        android:id="@+id/activity_feed_online_trip_statistics_duration_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="@id/activity_feed_online_trip_statistics_middle_anchor"
+        app:layout_constraintEnd_toEndOf="@id/activity_feed_online_trip_statistics_middle_anchor"
+        android:text="@string/general_duration"
+        style="@style/ActivityFeed_Trip_Statistics_Label" />
+
+    <TextView
+        android:id="@+id/activity_feed_online_trip_statistics_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="3:04:12"
+        app:layout_constraintTop_toBottomOf="@id/activity_feed_online_trip_statistics_duration_label"
+        app:layout_constraintStart_toStartOf="@id/activity_feed_online_trip_statistics_duration_label"
+        style="@style/ActivityFeed_Trip_Statistics_Value" />
+
+    <!-- TYPE -->
+
+    <TextView
+        android:id="@+id/activity_feed_online_trip_statistics_type_label"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/activity_feed_online_trip_statistics_end_anchor"
+        android:text="@string/general_type"
+        style="@style/ActivityFeed_Trip_Statistics_Label" />
+
+    <TextView
+        android:id="@+id/activity_feed_online_trip_statistics_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Free Roam"
+        app:layout_constraintTop_toBottomOf="@id/activity_feed_online_trip_statistics_type_label"
+        app:layout_constraintStart_toStartOf="@id/activity_feed_online_trip_statistics_type_label"
+        style="@style/ActivityFeed_Trip_Statistics_Value" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

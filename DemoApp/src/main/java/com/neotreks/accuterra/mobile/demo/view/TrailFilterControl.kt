@@ -3,6 +3,7 @@ package com.neotreks.accuterra.mobile.demo.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.neotreks.accuterra.mobile.demo.R
@@ -13,7 +14,8 @@ import kotlinx.coroutines.runBlocking
 
 class TrailFilterControl(context: Context, attrs: AttributeSet):
     ConstraintLayout(context, attrs),
-    SeekBar.OnSeekBarChangeListener {
+    SeekBar.OnSeekBarChangeListener,
+    CompoundButton.OnCheckedChangeListener {
 
     companion object {
         private const val MAX_STARS = 5
@@ -59,6 +61,14 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
             refreshTripDistanceLabel(value)
         }
 
+    var favoriteOnly: Boolean
+        get() {
+            return trail_filter_trip_favorite.isChecked
+        }
+        set(value) {
+            trail_filter_trip_favorite.isChecked = value
+        }
+
     init {
         View.inflate(context, R.layout.trail_filter, this)
 
@@ -73,12 +83,16 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
         trail_filter_difficulty.setOnSeekBarChangeListener(this)
         trail_filter_user_rating.setOnSeekBarChangeListener(this)
         trail_filter_trip_distance.setOnSeekBarChangeListener(this)
+        trail_filter_trip_favorite.setOnCheckedChangeListener(this)
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
+        trail_filter_difficulty.setOnSeekBarChangeListener(null)
         trail_filter_user_rating.setOnSeekBarChangeListener(null)
+        trail_filter_trip_distance.setOnSeekBarChangeListener(null)
+        trail_filter_trip_favorite.setOnCheckedChangeListener(null)
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -106,6 +120,14 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
                 if (fromUser) {
                     listener?.onMaxTripDistanceChanged(this, newTripDistance)
                 }
+            }
+        }
+    }
+
+    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+        when(buttonView) {
+            trail_filter_trip_favorite -> {
+                listener?.onFavoriteChanged(this, isChecked)
             }
         }
     }
@@ -237,5 +259,6 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
         fun onMaxDifficultyLevelChanged(trailFilterControl: TrailFilterControl, maxDifficultyLevel: TechnicalRating?)
         fun onMinUserRatingChanged(trailFilterControl: TrailFilterControl, minUserRating: Int?)
         fun onMaxTripDistanceChanged(trailFilterControl: TrailFilterControl, maxTripDistance: Int?)
+        fun onFavoriteChanged(trailFilterControl: TrailFilterControl, favoriteOnly: Boolean)
     }
 }

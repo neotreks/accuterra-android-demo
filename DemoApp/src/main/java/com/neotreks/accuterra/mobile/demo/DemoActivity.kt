@@ -8,10 +8,14 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.snackbar.Snackbar
+import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
+import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
+import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailConfiguration
+import com.neotreks.accuterra.mobile.sdk.trail.model.TripConfiguration
 import kotlinx.android.synthetic.main.activity_demo.*
 import kotlinx.coroutines.*
 
@@ -34,11 +38,6 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_demo)
         setSupportActionBar(toolbar)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
 
         // Test the reference to the SDK
         Log.i(TAG, "AccuTerra SDK Version: ${SdkInfo().versionName}")
@@ -81,6 +80,12 @@ class DemoActivity : AppCompatActivity() {
         lifecycleScope.launch(coroutineExceptionHandler) {
             EnumUtil.cacheEnums(this@DemoActivity)
             goToTrailDiscovery()
+
+            // Let's resume the upload queue in case there are any upload requests unprocessed
+            withContext(Dispatchers.Default) {
+                val service = ServiceFactory.getSynchronizationService(applicationContext)
+                service.resumeUploadQueue()
+            }
         }
     }
 
@@ -104,10 +109,10 @@ class DemoActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onProgressChanged(progress: Int) {
-                Log.i(TAG, "Progress changed: $progress")
+            override fun onProgressChanged(progress: Float) {
+                Log.d(TAG, "Progress changed: $progress")
                 lifecycleScope.launch(Dispatchers.Main + coroutineExceptionHandler) {
-                    activity_demo_progress_bar.progress = progress
+                    activity_demo_progress_bar.progress = (progress * 100F).toInt()
                 }
             }
 
@@ -115,11 +120,30 @@ class DemoActivity : AppCompatActivity() {
 
         // Configuring AccuTerra SDK including download of the TRAIL DB if needed.
         lifecycleScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
+            // We need to get the valid access token for AccuTerra services
+            // Now we create the configuration
             val config = SdkConfig(
-                clientToken = BuildConfig.CLIENT_TOKEN,
-                wsUrl = BuildConfig.WS_BASE_URL
+                wsUrl = BuildConfig.WS_BASE_URL,
+                accuterraMapStyleUrl = BuildConfig.ACCUTERRA_MAP_STYLE_URL,
+                tripConfiguration = TripConfiguration(
+                    // Just to demonstrate the upload network type constraint
+                    uploadNetworkType = NetworkTypeConstraint.CONNECTED,
+                    // Let's keep the trip recording on the device for development reasons,
+                    // otherwise it should be deleted
+                    deleteRecordingAfterUpload = false
+                ),
+                trailConfiguration = TrailConfiguration(
+                    // Update trail DB during SDK initialization
+                    updateTrailDbDuringSdkInit = true,
+                    // Update trail User Data during SDK initialization
+                    updateTrailUserDataDuringSdkInit = true
+                )
             )
-            val result = SdkManager.initSdk(applicationContext, config, listener)
+            // This is the main initialization of the AccuTerra SDK.
+            // The listener is notified about progress of the initialization.
+            // This initialization must be called and successfully finish at least once
+            // (after APK installation) to be able to use the SDK.
+            val result = SdkManager.initSdk(applicationContext, config, DemoAccessManager(), DemoIdentityManager(), listener)
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
                     onSdkInitSuccess()
@@ -138,10 +162,32 @@ class DemoActivity : AppCompatActivity() {
     private fun showProgressBar(detail: SdkInitStateDetail?) {
         activity_demo_progress_bar.visibility = View.VISIBLE
         activity_demo_progress_bar_text.visibility = View.VISIBLE
-        if (detail == SdkInitStateDetail.TRAIL_DB_DOWNLOAD) {
-            activity_demo_progress_bar_text.text = getString(R.string.demo_activity_downloading_trail_db)
-        } else if (detail == SdkInitStateDetail.TRAIL_DB_UPDATE) {
-            activity_demo_progress_bar_text.text = getString(R.string.demo_activity_updating_trail_db)
+        when (detail) {
+            // Download
+            SdkInitStateDetail.TRAIL_DB_DOWNLOAD -> {
+                activity_demo_progress_bar_text.text =
+                    getString(R.string.demo_activity_downloading_trail_db)
+            }
+            // Unpack
+            SdkInitStateDetail.TRAIL_DB_UNPACK -> {
+                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_unpacking_trail_db)
+            }
+            // TRAIL DB Update
+            SdkInitStateDetail.TRAIL_DB_UPDATE -> {
+                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_updating_trail_db)
+            }
+            // TRAIL USER DATA Update
+            SdkInitStateDetail.TRAIL_USER_DATA_UPDATE -> {
+                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_updating_trail_user_data)
+            }
+            // Init Trail Paths
+            SdkInitStateDetail.TRAIL_PATHS_CACHE_INIT -> {
+                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_init_trail_paths_cache)
+            }
+            // Init Trail Markers
+            SdkInitStateDetail.TRAIL_MARKERS_CACHE_INIT -> {
+                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_init_trail_markers_cache)
+            }
         }
     }
 

@@ -5,21 +5,81 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.util.Log
 import java.util.*
 
-class NetworkStateReceiver(context: Context) :
-    BroadcastReceiver() {
+class NetworkStateReceiver(private val context: Context) : BroadcastReceiver() {
+
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private val mManager: ConnectivityManager
     private val mListeners: MutableList<NetworkStateReceiverListener>
     private var mConnected = true
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
+
+    companion object {
+        private const val TAG = "NetworkStateReceiver"
+    }
+
+    /* * * * * * * * * * * * */
+    /*      CONSTRUCTOR      */
+    /* * * * * * * * * * * * */
+
+    init {
+        mListeners = ArrayList()
+        mManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        checkStateChanged()
+    }
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.extras == null) return
         if (checkStateChanged()) notifyStateToAll()
     }
 
-    public fun isConnected() : Boolean {
+    /* * * * * * * * * * * * */
+    /*        PUBLIC         */
+    /* * * * * * * * * * * * */
+
+    fun onResume() {
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+        context.registerReceiver(this@NetworkStateReceiver, intentFilter)
+    }
+
+    fun onPause() {
+        try {
+            context.unregisterReceiver(this)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error while unregistering network state listener")
+        }
+    }
+
+    fun isConnected() : Boolean {
         return mConnected
     }
+
+    fun addListener(l: NetworkStateReceiverListener) {
+        mListeners.add(l)
+        notifyState(l)
+    }
+
+    fun removeListener(l: NetworkStateReceiverListener?) {
+        mListeners.remove(l)
+    }
+
+    /* * * * * * * * * * * * */
+    /*        PRIVATE        */
+    /* * * * * * * * * * * * */
 
     private fun checkStateChanged(): Boolean {
         val prev = mConnected
@@ -40,27 +100,13 @@ class NetworkStateReceiver(context: Context) :
         }
     }
 
-    fun addListener(l: NetworkStateReceiverListener) {
-        mListeners.add(l)
-        notifyState(l)
-    }
-
-    fun removeListener(l: NetworkStateReceiverListener?) {
-        mListeners.remove(l)
-    }
+    /* * * * * * * * * * * * */
+    /*     INNER CLASS       */
+    /* * * * * * * * * * * * */
 
     interface NetworkStateReceiverListener {
         fun onNetworkAvailable()
         fun onNetworkUnavailable()
     }
 
-    init {
-        mListeners = ArrayList()
-        mManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
-        context.registerReceiver(this@NetworkStateReceiver, intentFilter)
-        checkStateChanged()
-    }
 }

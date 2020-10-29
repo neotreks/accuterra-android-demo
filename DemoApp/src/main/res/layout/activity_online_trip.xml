@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity">
+
+    <!-- TOOLBAR -->
+    <include
+        android:id="@+id/activity_online_trip_toolbar"
+        layout="@layout/general_toolbar" />
+
+    <!-- USER AVATAR -->
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/activity_online_trip_user_avatar_card"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:elevation="12dp"
+        app:cardCornerRadius="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_online_trip_toolbar">
+
+        <ImageView
+            android:id="@+id/activity_online_trip_user_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:contentDescription="@string/general_cd_user_avatar"
+            android:scaleType="centerCrop"
+            android:src="@drawable/user_avatar" />
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- User Wrapper -->
+
+    <LinearLayout
+        android:id="@+id/activity_online_trip_user_wrapper"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@id/activity_online_trip_user_avatar_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/activity_online_trip_user_avatar_card"
+        app:layout_constraintTop_toTopOf="@id/activity_online_trip_user_avatar_card">
+
+        <!-- USER NAME -->
+        <TextView
+            android:id="@+id/activity_online_trip_user_name"
+            style="@style/DemoAppTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="My user name" />
+
+        <!-- TRIP DATE -->
+        <TextView
+            android:id="@+id/activity_online_trip_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="2020-10-11" />
+
+    </LinearLayout>
+
+    <!-- ANCHOR -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/activity_online_trip_anchor"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.65" />
+
+    <!-- TRIP NAME / LOCATION WRAPPER -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_online_trip_trip_name_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/activity_online_trip_user_avatar_card">
+
+        <!-- TRIP NAME -->
+
+        <TextView
+            android:id="@+id/activity_online_trip_trip_name"
+            style="@style/ActivityFeed_Trip_Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin"
+            android:ellipsize="end"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Red Cone Pass first trip of the year" />
+
+        <!-- TRIP LOCATION -->
+
+        <TextView
+            android:id="@+id/activity_online_trip_trip_location"
+            style="@style/ActivityFeed_Trip_Location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_margin"
+            app:layout_constraintBottom_toBottomOf="@id/activity_online_trip_trip_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/activity_online_trip_trip_name"
+            tools:text="Ophir, CO" />
+
+        <!-- RELATED TRAIL -->
+        <TextView
+            android:id="@+id/activity_online_trip_related_trail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/activity_online_trip_trip_name"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="visible"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            tools:text="Related trip name......"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- TABS -->
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/activity_online_trip_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/activity_online_trip_anchor"
+        app:layout_constraintTop_toBottomOf="@id/activity_online_trip_trip_name_wrapper">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/activity_online_trip_tab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- MAP TAB -->
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_online_trip_tab_map"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:text="@string/general_map" />
+
+            <!-- PHOTO TAB -->
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_online_trip_tab_photos"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:text="@string/general_photos" />
+
+            <!-- STATISTICS TAB -->
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_online_trip_tab_statistics"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:text="@string/general_statistics" />
+
+            <!-- STATISTICS POI -->
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/activity_online_trip_tab_pois"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:text="@string/general_pois" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+    </androidx.viewpager.widget.ViewPager>
+
+    <!-- Description and icon wrapper -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_online_trip_description_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/activity_online_trip_comments_list"
+        app:layout_constraintTop_toBottomOf="@id/activity_online_trip_view_pager">
+
+        <!-- SEPARATOR -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:background="@drawable/shadow_bottom"/>
+
+        <!-- DESCRIPTION -->
+
+        <TextView
+            android:id="@+id/activity_online_trip_description"
+            style="@style/DemoAppText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Feels great to get back out of a long winter. I was able to make it further and further..." />
+
+        <!-- COMMENTS -->
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activity_online_trip_description">
+
+            <!-- COMMENTS ICON -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/activity_online_trip_comments_icon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_comment_black_24dp" />
+
+            <!-- COMMENTS TEXT -->
+            <TextView
+                android:id="@+id/activity_online_trip_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_margin_internal"
+                tools:text="6 Comments" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        <!-- Middle anchor -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/activity_online_trip_mid_screen_anchor"
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            app:layout_constraintGuide_percent="0.5"
+            android:orientation="vertical" />
+
+        <!-- Add Comment -->
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/activity_online_trip_comments_add_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/default_margin"
+            android:paddingStart="@dimen/default_margin"
+            android:paddingEnd="@dimen/default_margin"
+            android:src="@drawable/ic_add_comment_black_24dp"
+            app:layout_constraintTop_toBottomOf="@id/activity_online_trip_description"
+            app:layout_constraintStart_toStartOf="@id/activity_online_trip_mid_screen_anchor"
+            app:layout_constraintEnd_toEndOf="@id/activity_online_trip_mid_screen_anchor"/>
+
+        <!-- LIKES -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/activity_online_trip_likes_envelope"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginEnd="@dimen/default_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activity_online_trip_description">
+
+            <!-- LIKES ICON -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/activity_online_trip_likes_icon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_thumb_up_alt_black_24dp" />
+
+            <!-- LIKES TEXT -->
+            <TextView
+                android:id="@+id/activity_online_trip_likes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_margin_internal"
+                tools:text="9 Likes" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- COMMENTS -->
+    <ListView
+        android:id="@+id/activity_online_trip_comments_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/default_margin"
+        android:nestedScrollingEnabled="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_online_trip_description_wrapper"
+        tools:listitem="@layout/comment_item" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

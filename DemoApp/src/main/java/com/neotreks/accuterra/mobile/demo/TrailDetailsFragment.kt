@@ -84,7 +84,6 @@ class TrailDetailsFragment: TrailInfoFragment() {
         appendSectionSeparator(name, builder)
         appendString("Nearest Town with Services", info.nearestTownWithServicesName, builder)
         appendString("Official Road name", info.officialRoadName, builder)
-        appendString("Is One Way", info.isOneWay.toString(), builder)
         appendList("Map Points", info.mapPoints, builder)
         appendSectionFooter(builder)
     }
@@ -128,17 +127,17 @@ class TrailDetailsFragment: TrailInfoFragment() {
     }
 
     private fun appendString(name: String, value: String?, builder: StringBuilder) {
-        builder.appendln("---")
-        builder.appendln("> $name: \n$value")
+        builder.appendLine("---")
+        builder.appendLine("> $name: \n$value")
     }
 
     private fun appendSectionSeparator(name: String, builder: StringBuilder) {
-        builder.appendln("= = = = = = = $name = = = = = = = =")
+        builder.appendLine("= = = = = = = $name = = = = = = = =")
     }
 
     private fun appendSectionFooter(builder: StringBuilder) {
-        builder.appendln()
-        builder.appendln()
+        builder.appendLine()
+        builder.appendLine()
     }
 
     private fun appendList(name: String, collection: List<Any>?, builder: StringBuilder) {
@@ -147,7 +146,7 @@ class TrailDetailsFragment: TrailInfoFragment() {
             return
         }
         for (item in collection) {
-            builder.appendln("   $item")
+            builder.appendLine("   $item")
         }
     }
 }

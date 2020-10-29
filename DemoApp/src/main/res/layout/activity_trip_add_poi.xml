@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.TripAddPoiActivity">
+
+    <!-- TOOLBAR -->
+    <include
+        android:id="@+id/activity_trip_add_poi_toolbar"
+        layout="@layout/general_action_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- LIST OF ATTRIBUTES -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_trip_add_poi_toolbar">
+
+
+        <!-- NAME -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/activity_trip_add_poi_trip_name"
+            android:text="@string/activity_trip_add_poi_name" />
+
+        <EditText
+            android:id="@+id/activity_trip_add_poi_trip_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            tools:text="Trip #3" />
+
+        <!-- DESCRIPTION -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_margin"
+            android:labelFor="@id/activity_trip_add_poi_trip_description"
+            android:text="@string/activity_trip_add_poi_description" />
+
+        <EditText
+            android:id="@+id/activity_trip_add_poi_trip_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:maxLines="4"
+            tools:text="Very long description that is possible not that long as it could be..." />
+
+        <!-- PHOTOS -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/activity_trip_add_poi_photos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:layout_margin="@dimen/default_margin_internal"
+            android:layout_marginStart="@dimen/default_margin"/>
+
+        <!-- PHOTOS: Add Photo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_margin"
+            tools:ignore="UseCompoundDrawables">
+
+            <!-- Add Photo From Gallery Icon -->
+            <ImageView
+                android:id="@+id/activity_trip_add_poi_select_photo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="@dimen/default_margin_internal"
+                android:src="@drawable/ic_add_photo_from_gallery_24px"
+                android:contentDescription="@string/activity_trip_add_poi_add_photos"/>
+
+            <!-- Take Photo Icon -->
+            <ImageView
+                android:id="@+id/activity_trip_add_poi_take_photo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="@dimen/default_margin_internal"
+                android:src="@drawable/ic_add_photo_24px"
+                android:contentDescription="@string/activity_trip_add_poi_add_photos"/>
+
+            <!-- Add Photo Text -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin_internal"
+                android:gravity="center"
+                android:text="@string/activity_trip_add_poi_add_photos" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center">
+
+            <!-- POI TYPE LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:text="@string/activity_trip_add_poi_poi_type_label" />
+
+            <!-- POI TYPE DROPDOWN -->
+            <Spinner
+                android:id="@+id/activity_trip_add_poi_poi_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:listitem="@android:layout/simple_spinner_item"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center">
+
+            <!-- POI TYPE LABEL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:text="@string/activity_trip_add_poi_is_wp_label" />
+
+            <!-- POI TYPE DROPDOWN -->
+            <CheckBox
+                android:id="@+id/activity_trip_add_poi_is_wp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+    
+</androidx.constraintlayout.widget.ConstraintLayout>

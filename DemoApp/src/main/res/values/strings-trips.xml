@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General Recording -->
+
+    <string name="general_recording_cannot_exit_while_recording">Cannot exit while recording a trip.</string>
+    <string name="activity_my_trips_cannot_open_trip">Cannot open trip in status: %1$s</string>
+
+    <!-- My Trips Activity -->
+    <string name="activity_my_trips_no_saved_trips">No Saved Trips</string>
+    <string name="activity_my_trips_source_local">Local Recordings</string>
+    <string name="activity_my_trips_source_online">Online Trips</string>
+
+    <!-- GENERAL -->
+
+    <string name="trips_updating_trip">Updating Trip</string>
+    <string name="trips_trip_updated">Trip updated</string>
+    <string name="trips_trip_update_failed">Trip update failed because of: %1$s</string>
+
+    <!-- Online Trip Activity -->
+    <string name="activity_online_trip_title">My Trip</string>
+    <string name="activity_online_trip_trail_with_name">Trail: %1$s</string>
+    <string name="activity_online_trip_promote">Promote to trail</string>
+
+    <string name="activity_online_trip_delete_trip_title">Delete trip?</string>
+    <string name="activity_online_trip_delete_trip_message">Do you rally want to delete the `%1$s` trip?</string>
+    <string name="activity_online_trip_deleting_trip">Deleting trip</string>
+    <string name="activity_online_trip_delete_success">The trip was deleted</string>
+    <string name="activity_online_trip_delete_failed">The trip deletion failed because of: %1$s</string>
+
+    <string name="activity_online_trip_promote_trip_title">Promote trip?</string>
+    <string name="activity_online_trip_promote_trip_message">Do you rally want to promote the `%1$s` trip to trail?</string>
+    <string name="activity_online_trip_promoting_trip">Promoting trip</string>
+    <string name="activity_online_trip_promote_success">The trip was promoted to state: %1$s</string>
+    <string name="activity_online_trip_promote_failed">The trip promotion failed because of: %1$s</string>
+
+    <string name="activity_online_trip_trip_not_loaded">Trip not loaded yet.</string>
+
+    <!-- New Trip Activity -->
+    <string name="activity_new_trip_title">Record New Trip</string>
+    <string name="activity_new_free_roam_trip_title">Record New Free Roam Trip</string>
+    <string name="activity_save_trip_trip_saved">Trip Saved</string>
+
+    <!-- Save Trip Activity -->
+    <string name="activity_save_trip_title">Save Trip</string>
+    <string name="activity_save_trip_name">Trip Name</string>
+    <string name="activity_save_trip_description">Description</string>
+    <string name="activity_save_trip_add_photos">Add Photos</string>
+    <string name="activity_save_trip_shuffle_photos">Shuffle Photos</string>
+    <string name="activity_save_trip_add_share">Share with:</string>
+    <string name="activity_save_trip_promote_to_trail">Promote to trail:</string>
+    <string name="activity_save_trip_my_rating">My Rating:️</string>
+    <string name="activity_save_trip_personal_note">Personal note</string>
+
+    <string name="activity_save_trip_delete_trip_title">Delete Trip</string>
+    <string name="activity_save_trip_delete_trip_message">Do you really want to delete this trip?</string>
+
+    <!-- Trip POI Add Activity -->
+    <string name="activity_trip_add_poi_title">Add POI</string>
+    <string name="activity_trip_add_poi_name">POI Name</string>
+    <string name="activity_trip_add_poi_description">Description</string>
+    <string name="activity_trip_add_poi_add_photos">Add Photos</string>
+    <string name="activity_trip_add_poi_poi_type_label">POI type:</string>
+    <string name="activity_trip_add_poi_is_wp_label">Is Waypoint:</string>
+
+    <!-- Trip POI EDIT Activity -->
+    <string name="activity_trip_edit_poi_title">Edit POI</string>
+
+    <string name="activity_trip_edit_poi_delete_poi_title">Delete POI</string>
+    <string name="activity_trip_edit_poi_delete_poi_message">Do you really want to delete this POI?</string>
+
+    <!-- Recorded Trip POI Activity -->
+    <string name="activity_recorded_trip_poi_title">POI</string>
+
+    <!-- Capture Image -->
+    <string name="activity_capture_image_capture">Capture</string>
+    <string name="activity_capture_image_torch">Torch</string>
+
+    <!-- Trip Choose Activity -->
+    <string name="activity_new_trip_chose_route_title">Follow an existing Curated or Community trail</string>
+    <string name="activity_new_trip_chose_route">Choose Route</string>
+
+    <string name="activity_new_trip_free_roam">Free Roam</string>
+    <string name="activity_new_trip_free_roam_title">Begin recording a new track for wherever the journey takes you</string>
+
+    <!-- Trip Recording Activity -->
+
+    <string name="activity_trip_recording_start_dialog_title">Start Trip Recording</string>
+    <string name="activity_trip_recording_start_dialog_message">Do you really want to start trip recording?</string>
+
+    <string name="activity_trip_recording_trip_recording_start_error">Cannot start recording because of: %1$s</string>
+    <string name="activity_trip_recording_recording_start_failed">Cannot start trip when there is another trip in %1$s state.</string>
+    <string name="activity_trip_recording_recording_pause_failed">Cannot pause trip which is in a %1$s state.</string>
+    <string name="activity_trip_recording_recording_resume_failed">Cannot resume trip which is in a %1$s state.</string>
+
+
+    <string name="activity_trip_recording_finish_dialog_title">Finish recording</string>
+    <string name="activity_trip_recording_finish_dialog_message">Do you really want to finish trip recording?</string>
+
+    <string name="trip_record_menu_item_display_raw">Display RAW path</string>
+
+    <!-- TRIP RECORDING COMPONENT -->
+
+    <string name="component_trip_recording_stats_speed">Speed</string>
+    <string name="component_trip_recording_stats_heading">Heading</string>
+    <string name="component_trip_recording_stats_elevation">Elevation</string>
+    <string name="component_trip_recording_stats_gps_lat">Lat</string>
+    <string name="component_trip_recording_stats_gps_lon">Lon</string>
+
+    <string name="component_trip_recording_recording_start">START</string>
+    <string name="component_trip_recording_recording_stop">STOP</string>
+    <string name="component_trip_recording_recording_resume">RESUME</string>
+    <string name="component_trip_recording_recording_finish">FINISH</string>
+
+    <!-- RECORDED TRIP -->
+    <string name="activity_recorded_trip_trip_not_found">Trip not found</string>
+
+    <!-- Location service -->
+    <string name="location_update_service_go_to_apk">Go to APK</string>
+    <string name="location_update_service_notification_title_trip_recording">Trip Recording</string>
+    <string name="location_update_service_notification_title_active">Location Service active</string>
+    <string name="location_update_service_notification_title_inactive">Location Service inactive</string>
+
+    <string name="location_update_service_notification_message_trip_recording">Recording trip: %1$s</string>
+    <string name="location_update_service_notification_message_active">Tracking device location</string>
+    <string name="location_update_service_notification_message_inactive">-</string>
+
+    <string name="location_update_service_permission_rationale">Location permission is needed for core functionality</string>
+    <string name="location_update_service_permission_denied_explanation">Permission was denied, but is needed for core functionality.</string>
+
+</resources>

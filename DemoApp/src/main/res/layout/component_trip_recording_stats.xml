@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    android:stretchColumns="*">
+
+    <!-- Speed, heading, Elevation, LatLon -->
+
+    <TableRow>
+
+        <!-- speed label-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="@string/component_trip_recording_stats_speed" />
+
+        <!-- elevation label-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="@string/component_trip_recording_stats_elevation" />
+
+        <!-- heading label-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="@string/component_trip_recording_stats_heading" />
+
+        <!-- Lat label-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="@string/component_trip_recording_stats_gps_lat" />
+
+        <!-- Lat label-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            android:text="@string/component_trip_recording_stats_gps_lon" />
+
+    </TableRow>
+
+    <TableRow>
+
+        <!-- speed-->
+        <TextView
+            android:id="@+id/component_trip_recording_stats_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            tools:text="20 MPH" />
+
+        <!-- elevation-->
+        <TextView
+            android:id="@+id/component_trip_recording_stats_elevation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            tools:text="255 ft" />
+
+        <!-- heading-->
+        <TextView
+            android:id="@+id/component_trip_recording_stats_heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            tools:text="45°" />
+
+        <!-- Lat-->
+        <TextView
+            android:id="@+id/component_trip_recording_stats_lat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            tools:text="39.45681" />
+
+        <TextView
+            android:id="@+id/component_trip_recording_stats_lon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2dp"
+            tools:text="-129.6591" />
+
+    </TableRow>
+
+    <TableRow>
+        <!-- LINE -->
+        <View
+            android:layout_height="1px"
+            android:layout_weight="5"
+            android:background="@color/primaryTextGrayed" />
+    </TableRow>
+
+</TableLayout>

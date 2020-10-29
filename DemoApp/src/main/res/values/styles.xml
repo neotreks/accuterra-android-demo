@@ -17,7 +17,13 @@
         <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
     </style>
 
+    <!-- ActionBar style -->
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.ActionBar" parent="@style/AppTheme.AppBarOverlay">
+        <!-- Customize color of navigation drawer icon and back arrow -->
+        <item name="colorControlNormal">@color/toolbarText</item>
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
@@ -44,4 +50,48 @@
         <item name="android:textColor">@android:color/holo_blue_light</item>
         <item name="android:textAllCaps">true</item>
     </style>
+
+    <style name="TextOnPrimaryColor">
+        <item name="android:textColor">@color/toolbarText</item>
+    </style>
+
+    <style name="ToolbarTitle" parent="TextOnPrimaryColor">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TextLink">
+        <item name="android:textColor">@color/primaryTextLink</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ColoredTextOnWhiteBackground">
+        <item name="android:textColor">@color/primaryTextLink</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextGrayedHint">
+        <item name="android:textColor">@color/primaryTextGrayed</item>
+    </style>
+
+    <!-- Custom General Screen Components -->
+
+    <style name="DemoAppText">
+        <item name="android:textColor">#000</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="DemoAppLink" parent="DemoAppText">
+        <item name="android:textColor">#2196F3</item>
+    </style>
+
+    <style name="DemoAppTitle">
+        <item name="android:textColor">#000</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- User Rating Component -->
+    <style name="UserRatingBar" parent="@style/Widget.AppCompat.RatingBar.Small">
+        <item name="android:progressTint">@color/colorUserRatingStarForeground</item>
+    </style>
+
 </resources>

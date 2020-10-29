@@ -8,13 +8,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/colorPrimary">
+        android:orientation="vertical">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_driving_toolbar_loading_panel"
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="56dp"
+            android:background="@color/colorPrimary">
 
             <TextView
                 android:layout_width="match_parent"
@@ -34,7 +34,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_driving_toolbar_trail_name_panel"
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="56dp"
+            android:background="@color/colorPrimary">
 
             <TextView
                 android:id="@+id/activity_driving_toolbar_trail_name"
@@ -55,10 +56,11 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_driving_toolbar_way_point_panel"
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="56dp"
+            android:background="@color/colorPrimary">
 
             <TextView
-                android:id="@+id/activity_driving_toolbar_way_point_panel_arrow_forward"
+                android:id="@+id/activity_driving_toolbar_way_point_panel_direction_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -69,21 +71,10 @@
                 android:text="@string/upwards_arrow_character" />
 
             <TextView
-                android:id="@+id/activity_driving_toolbar_way_point_panel_arrow_backward"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                app:layout_constraintStart_toEndOf="@id/activity_driving_toolbar_way_point_panel_arrow_forward"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                android:text="@string/downwards_arrow_character" />
-
-            <TextView
                 android:id="@+id/activity_driving_toolbar_way_point_distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@id/activity_driving_toolbar_way_point_panel_arrow_backward"
+                app:layout_constraintStart_toEndOf="@id/activity_driving_toolbar_way_point_panel_direction_icon"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginStart="8dp"
@@ -108,6 +99,35 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <FrameLayout
+            android:id="@+id/activity_driving_toolbar_wrong_direction"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/colorAccent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:text="@string/wrong_direction" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/activity_driving_toolbar_trail_lost"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/colorAccent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:text="@string/trail_lost" />
+
+        </FrameLayout>
     </LinearLayout>
 
 

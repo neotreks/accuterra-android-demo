@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.TripEditPoiActivity">
+
+    <item
+        android:id="@+id/trip_save_menu_item_trip_save_and_upload"
+        android:title="@string/general_save_and_upload"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/trip_save_menu_item_trip_save"
+        android:title="@string/general_save" />
+
+    <item
+        android:id="@+id/trip_save_menu_item_trip_delete"
+        android:title="@string/general_delete" />
+    <item
+        android:id="@+id/trip_save_menu_item_close_no_save"
+        android:title="@string/general_close_no_save" />
+
+</menu>

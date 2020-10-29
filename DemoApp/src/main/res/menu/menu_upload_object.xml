@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.neotreks.accuterra.mobile.demo.upload.ObjectUploadActivity">
+
+    <item
+        android:id="@+id/upload_object_menu_item_refresh"
+        android:title="@string/general_refresh"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_refresh_white_24px"/>
+
+    <item
+        android:id="@+id/upload_object_menu_item_copy"
+        android:title="@string/general_copy_to_clipboard" />
+
+    <item
+        android:id="@+id/upload_object_menu_item_resume_queue"
+        android:title="@string/upload_resume_upload_queue" />
+
+    <item
+        android:id="@+id/upload_object_menu_item_reset_access_token"
+        android:title="@string/upload_reset_access_token" />
+
+</menu>

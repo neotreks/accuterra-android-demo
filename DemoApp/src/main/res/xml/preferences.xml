@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="user_category"
+        app:title="@string/settings_user_category"
+        app:icon="@drawable/ic_face_black_24dp">
+
+        <!-- Please note the default value is not set here because it is set in the DemoIdentityManager.getUserId -->
+        <EditTextPreference
+            app:key="user_id"
+            app:title="Provide your user ID to be used in the interaction with the WS API"
+            app:dialogTitle="@string/settings_user_id"
+            app:enableCopying="true"
+            app:useSimpleSummaryProvider="true"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- PHOTOS -->
+
+    <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/fragment_recorded_trip_photos"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="80dp"
+    android:layout_margin="@dimen/default_margin_internal"
+    android:layout_marginStart="@dimen/default_margin"/>
+
+</LinearLayout>

@@ -8,78 +8,37 @@
     android:keepScreenOn="true"
     android:id="@+id/activity_driving_main_view">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/activity_driving_map_bottom_guideline">
-
-        <com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
-            android:id="@+id/activity_driving_accuterra_map_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/activity_driving_to_driving_mode_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="8dp"
-            android:src="@drawable/ic_location_driving_24px"
-            android:tint="@android:color/black"
-            android:backgroundTint="@android:color/white"
-            android:foregroundTint="@android:color/white"
-            android:visibility="gone"
-            android:contentDescription="@string/driving_mode"
-            app:borderWidth="0dp" />
-
-    </FrameLayout>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/activity_driving_map_bottom_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5"/>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/activity_driving_list_top_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5"/>
-
-    <FrameLayout
-        android:id="@+id/activity_driving_list_button_wrapper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="2dp"
-        android:outlineProvider="background"
-        android:background="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/activity_driving_list_top_guideline">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/activity_driving_show_list_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/holo_blue_light"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:textAllCaps="true"
-            android:text="@string/list"
-            android:layout_gravity="center"/>
-
-    </FrameLayout>
+    <!-- POI LIST -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/activity_driving_sliding_bottom_pane"
+        android:id="@+id/activity_drive_poi_list_wrapper"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:elevation="4dp"
         android:outlineProvider="bounds"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_driving_list_button_wrapper"
-        android:background="@android:color/white">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/activity_driving_list_bottom_guideline"
+        android:background="@android:color/white" >
+
+        <!-- LIST BUTTON -->
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/activity_driving_poi_list_expander"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="40dp"
+            android:layout_height="35dp"
+            android:textColor="@android:color/holo_blue_light"
+            android:background="@android:color/white"
+            android:textAllCaps="true"
+            android:text=""
+            android:drawableStart="@drawable/ic_keyboard_arrow_down_black_24dp" />
+
+        <!-- POI ITEM: Visible when list is not expanded -->
+
+        <include
+            android:id="@+id/activity_driving_poi_item"
+            layout="@layout/poi_item" />
 
         <ProgressBar
             android:id="@+id/activity_driving_list_loading_progress"
@@ -106,10 +65,129 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            tools:listitem="@layout/poi_list_item" />
-
+            tools:listitem="@layout/poi_list_item"
+            android:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+    <!-- LIST BOTTOM GUIDELINE -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/activity_driving_list_bottom_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="35dp" />
+
+    <!-- MAP TOP GUIDELINE -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/activity_driving_map_top_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="35dp"/>
+
+    <!-- MAP WRAPPER -->
+
+    <FrameLayout
+        android:id="@+id/activity_driving_map_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/activity_driving_map_top_guideline"
+        app:layout_constraintBottom_toTopOf="@id/activity_driving_recording_panel">
+
+        <com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
+            android:id="@+id/activity_driving_accuterra_map_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_driving_layer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_layers_24px"
+            android:tint="@android:color/black"
+            android:backgroundTint="@android:color/white"
+            android:foregroundTint="@android:color/white"
+            app:borderWidth="0dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:orientation="vertical"
+            >
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_driving_add_poi_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:src="@drawable/ic_location_record_add_poi"
+                android:tint="@android:color/black"
+                android:backgroundTint="@android:color/white"
+                android:foregroundTint="@android:color/white"
+                android:visibility="gone"
+                app:borderWidth="0dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_driving_to_driving_mode_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_location_driving_24px"
+                android:tint="@android:color/black"
+                android:backgroundTint="@android:color/white"
+                android:foregroundTint="@android:color/white"
+                android:visibility="gone"
+                android:contentDescription="@string/driving_mode"
+                app:borderWidth="0dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+
+
+    <!-- RECORDING PANEL -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_driving_recording_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Speed, heading, Elevation, LatLon -->
+
+        <include
+            layout="@layout/component_trip_recording_stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:stretchColumns="*"
+            app:layout_constraintBottom_toTopOf="@id/activity_trip_recording_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- BUTTONS -->
+
+        <include
+            android:id="@+id/activity_trip_recording_buttons"
+            layout="@layout/component_trip_recording_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

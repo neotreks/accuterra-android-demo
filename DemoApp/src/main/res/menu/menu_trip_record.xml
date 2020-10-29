@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.TripEditPoiActivity">
+
+    <item
+        android:id="@+id/trip_record_menu_item_display_raw"
+        android:title="@string/trip_record_menu_item_display_raw"
+        android:checkable="true"
+        app:showAsAction="never"/>
+
+</menu>

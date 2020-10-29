@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ActivityFeed_User_Name">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ActivityFeed_User_Trip_Date">
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_Title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_Description">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_Location">
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_Statistics_Label">
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_Statistics_Value">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ActivityFeed_Comment_UserName">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="ActivityFeed_Comment_Text">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_POI_Property_Label">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_POI_Property_Value">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="ActivityFeed_Trip_POI_Property_Value_Great">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+</resources>
