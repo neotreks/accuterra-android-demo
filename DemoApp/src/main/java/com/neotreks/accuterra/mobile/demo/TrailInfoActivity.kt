@@ -27,6 +27,7 @@ import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
 import com.neotreks.accuterra.mobile.sdk.trail.service.ITrailMediaService
 import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTrailCommentRequest
+import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTrailCommentRequestBuilder
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TrailComment
 import kotlinx.android.synthetic.main.activity_trail_info.*
 import kotlinx.coroutines.Dispatchers
@@ -547,7 +548,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             DialogUtil.buildInputDialog(activity,
                 title = activity.getString(R.string.general_comment_add),
                 positiveCode = { text ->
-                    val comment = PostTrailCommentRequest.build(trailId, text, null)
+                    val comment = PostTrailCommentRequestBuilder.build(trailId, text, null)
                     activity.postComment(comment)
                 },
                 hint = activity.getString(R.string.general_comment_hint_comment_text),
@@ -567,7 +568,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                 title = activity.getString(R.string.general_comment_edit),
                 positiveCode = { newText ->
                     val updatedComment = comment.copyWithText(newText)
-                    val request = PostTrailCommentRequest.build(updatedComment)
+                    val request = PostTrailCommentRequestBuilder.build(updatedComment)
                     activity.postComment(request)
                 },
                 hint = activity.getString(R.string.general_comment_hint_comment_text),

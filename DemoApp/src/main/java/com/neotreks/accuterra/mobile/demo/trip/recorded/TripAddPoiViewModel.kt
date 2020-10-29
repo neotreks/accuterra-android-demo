@@ -8,10 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neotreks.accuterra.mobile.demo.extensions.notifyObserver
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
-import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
+import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocationBuilder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecording
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaUtil
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaBuilder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 import kotlinx.coroutines.launch
 import java.io.File
@@ -54,8 +54,8 @@ class TripAddPoiViewModel: ViewModel() {
             throw IllegalStateException("Media file on given path is not available: ${file.path}")
         }
         viewModelScope.launch {
-            val mapLocation = MapLocation.buildFrom(location.value!!)
-            media.value!!.add(TripRecordingMediaUtil.buildFromFile(file, location = mapLocation))
+            val mapLocation = MapLocationBuilder.buildFrom(location.value!!)
+            media.value!!.add(TripRecordingMediaBuilder.buildFromFile(file, location = mapLocation))
             media.notifyObserver()
         }
     }
@@ -65,8 +65,8 @@ class TripAddPoiViewModel: ViewModel() {
      */
     fun addMedia(uri: Uri, context: Context) {
         viewModelScope.launch {
-            val mapLocation = MapLocation.buildFrom(location.value!!)
-            media.value!!.add(TripRecordingMediaUtil.buildFromUri(uri, context, location = mapLocation))
+            val mapLocation = MapLocationBuilder.buildFrom(location.value!!)
+            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context, location = mapLocation))
             media.notifyObserver()
         }
     }

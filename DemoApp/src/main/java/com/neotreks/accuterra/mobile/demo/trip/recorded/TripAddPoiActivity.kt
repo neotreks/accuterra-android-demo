@@ -18,10 +18,10 @@ import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
-import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
+import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocationBuilder
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointSubtype
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoiBuilder
 import kotlinx.android.synthetic.main.activity_trip_add_poi.*
 import kotlinx.android.synthetic.main.general_action_toolbar.*
 import kotlinx.coroutines.GlobalScope
@@ -204,13 +204,13 @@ class TripAddPoiActivity : AppCompatActivity() {
             val name = activity_trip_add_poi_trip_name.text.toString()
             val description = activity_trip_add_poi_trip_description.text.toString()
             val isWaypoint = activity_trip_add_poi_is_wp.isChecked
-            val mapLocation = MapLocation.buildFrom(location)
+            val mapLocation = MapLocationBuilder.buildFrom(location)
             val pointSubtype = activity_trip_add_poi_poi_type.selectedItem as PointSubtype
             val media = viewModel.media.value!!
             val enumService = ServiceFactory.getEnumService(applicationContext)
 
             // Build the new POI
-            val poi = TripRecordingPoi.buildNewPoi(
+            val poi = TripRecordingPoiBuilder.buildNewPoi(
                 name = name,
                 isWaypoint = isWaypoint,
                 description = description,

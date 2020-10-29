@@ -5,7 +5,7 @@ import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.model.Result
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailUserData
 import com.neotreks.accuterra.mobile.sdk.ugc.model.GetTrailCommentsResult
-import com.neotreks.accuterra.mobile.sdk.ugc.service.GetTrailCommentsCriteria
+import com.neotreks.accuterra.mobile.sdk.ugc.service.GetTrailCommentsCriteriaBuilder
 
 /**
  * Repo for the [TrailInfoViewModel]
@@ -14,7 +14,7 @@ class TrailInfoRepo {
 
     suspend fun loadTrailComments(context: Activity, trailId: Long): Result<GetTrailCommentsResult?> {
         val service = ServiceFactory.getTrailService(context)
-        val criteria = GetTrailCommentsCriteria.build(trailId)
+        val criteria = GetTrailCommentsCriteriaBuilder.build(trailId)
         return service.getTrailComments(criteria)
     }
 

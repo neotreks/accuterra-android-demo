@@ -10,7 +10,7 @@ import com.neotreks.accuterra.mobile.demo.extensions.notifyObserver
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecording
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaUtil
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaBuilder
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -43,7 +43,7 @@ class TripSaveViewModel: ViewModel() {
             throw IllegalStateException("Media file on given path is not available: $path")
         }
         viewModelScope.launch {
-            media.value!!.add(TripRecordingMediaUtil.buildFromFile(file))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromFile(file))
             media.notifyObserver()
         }
     }
@@ -53,7 +53,7 @@ class TripSaveViewModel: ViewModel() {
      */
     fun addMedia(uri: Uri, context: Context) {
         viewModelScope.launch {
-            media.value!!.add(TripRecordingMediaUtil.buildFromUri(uri, context))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context))
             media.notifyObserver()
         }
     }

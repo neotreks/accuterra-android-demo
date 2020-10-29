@@ -9,7 +9,7 @@ import com.neotreks.accuterra.mobile.demo.extensions.notifyObserver
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecording
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaUtil
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaBuilder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 import kotlinx.coroutines.launch
 import java.io.File
@@ -50,7 +50,7 @@ class TripEditPoiViewModel: ViewModel() {
         }
         viewModelScope.launch {
             val mapLocation = poi.value!!.mapLocation
-            media.value!!.add(TripRecordingMediaUtil.buildFromFile(file, location = mapLocation))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromFile(file, location = mapLocation))
             media.notifyObserver()
         }
     }
@@ -61,7 +61,7 @@ class TripEditPoiViewModel: ViewModel() {
     fun addMedia(uri: Uri, context: Context) {
         viewModelScope.launch {
             val mapLocation = poi.value!!.mapLocation
-            media.value!!.add(TripRecordingMediaUtil.buildFromUri(uri, context, location = mapLocation))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context, location = mapLocation))
             media.notifyObserver()
         }
     }

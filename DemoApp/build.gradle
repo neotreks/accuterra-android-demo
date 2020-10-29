@@ -60,7 +60,7 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.6.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.6.1"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
