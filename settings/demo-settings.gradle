@@ -3,7 +3,7 @@ ext {
     dist_username = '***'
     dist_password = '***'
     // URL to AccuTerra BE
-    ws_base_url = '"https://dev.accuterra.com:443/api/"'
+    ws_base_url = '"***"'
     // URL and credentials for the authentication service
     ws_auth_url = '"***"'
     ws_auth_client_id = '"***"'
