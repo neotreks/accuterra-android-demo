@@ -12,7 +12,7 @@ class RecordedTripPoiRepo(private val context: Context) {
     suspend fun loadTripPoi(poiUuid: String) : TripRecordingPoi {
 
         val tripService = ServiceFactory.getTripRecordingService(context)
-        return tripService.getTripPoiByUuid(poiUuid)
+        return tripService.getTripRecordingPoiByUuid(poiUuid)
             ?: throw IllegalStateException("Cannot find POI by uuid: $poiUuid")
 
     }

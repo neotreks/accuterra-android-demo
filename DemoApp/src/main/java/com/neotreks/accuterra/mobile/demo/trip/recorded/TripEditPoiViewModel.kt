@@ -30,7 +30,7 @@ class TripEditPoiViewModel: ViewModel() {
     suspend fun loadPoi(poiUuid: String, context: Context) {
 
         val tripService = ServiceFactory.getTripRecordingService(context)
-        val loadedPoi = tripService.getTripPoiByUuid(poiUuid)
+        val loadedPoi = tripService.getTripRecordingPoiByUuid(poiUuid)
             ?: throw IllegalStateException("Cannot find POI by uuid: $poiUuid")
 
         this.poi.value = loadedPoi
@@ -38,7 +38,7 @@ class TripEditPoiViewModel: ViewModel() {
         // Init also the `this.media` for easier manipulation
         this.media.value = loadedPoi.media.toMutableList()
         // Load trip to get it's status
-        tripRecording = tripService.getTripByPoiUuid(poiUuid)
+        tripRecording = tripService.getTripRecordingByPoiUuid(poiUuid)
     }
 
     /**

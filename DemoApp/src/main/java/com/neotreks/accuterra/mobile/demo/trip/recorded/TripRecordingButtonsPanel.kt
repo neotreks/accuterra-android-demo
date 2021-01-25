@@ -54,7 +54,7 @@ class TripRecordingButtonsPanel(
         recordPoiView.visibility = true.visibility
     }
 
-    fun updateStatistics(distance: Double?, drivingTime: Long?) {
+    fun updateStatistics(distance: Float?, drivingTime: Int?) {
         distanceView.text =
             if (distance == null) {
                 context.getString(R.string.general_na)

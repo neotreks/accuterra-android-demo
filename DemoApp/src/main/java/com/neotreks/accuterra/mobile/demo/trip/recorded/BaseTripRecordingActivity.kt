@@ -14,6 +14,7 @@ import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateString
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
+import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.map.TripLayersManager
 import com.neotreks.accuterra.mobile.sdk.map.query.TripPoisQueryBuilder
@@ -90,7 +91,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
         }
         // Check if we need location updates
         runBlocking {
-            if(getTripRecorder().getActiveTrip()?.recordingInfo?.status != TripRecordingStatus.RECORDING) {
+            if(getTripRecorder().getActiveTripRecording()?.recordingInfo?.status != TripRecordingStatus.RECORDING) {
                 stopLocationUpdates()
             }
         }
@@ -122,7 +123,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
     protected suspend fun updateRecordingButtons() {
 
-        val activeTrip = getTripRecorder().getActiveTrip()
+        val activeTrip = getTripRecorder().getActiveTripRecording()
         val status = activeTrip?.recordingInfo?.status
 
         when(status) {
@@ -145,16 +146,20 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
         component_trip_recording_start_button.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                DialogUtil.buildYesNoDialog(
-                    context = this@BaseTripRecordingActivity,
-                    title = getString(R.string.activity_trip_recording_start_dialog_title),
-                    message = getString(R.string.activity_trip_recording_start_dialog_message),
-                    positiveCode = {
-                        lifecycleScope.launchWhenResumed {
-                            onRecordingStartClicked()
+                if (LocationPermissionUtil.hasBackgroundLocationPermission(this@BaseTripRecordingActivity)) {
+                    DialogUtil.buildYesNoDialog(
+                        context = this@BaseTripRecordingActivity,
+                        title = getString(R.string.activity_trip_recording_start_dialog_title),
+                        message = getString(R.string.activity_trip_recording_start_dialog_message),
+                        positiveCode = {
+                            lifecycleScope.launchWhenResumed {
+                                onRecordingStartClicked()
+                            }
                         }
-                    }
-                ).show()
+                    ).show()
+                } else {
+                    LocationPermissionUtil.checkBackgroundLocationPermissions(this@BaseTripRecordingActivity, REQUEST_PERMISSIONS_REQUEST_CODE)
+                }
             }
         }
         component_trip_recording_stop_button.setOnClickListener {
@@ -176,7 +181,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
     protected open suspend fun onRecordingStartClicked() {
         val recorder = getTripRecorder()
-        val activeTrip = recorder.getActiveTrip()
+        val activeTrip = recorder.getActiveTripRecording()
 
         tripLayersManager.setTripRecorder(recorder)
 
@@ -216,7 +221,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
     protected open suspend fun onRecordPauseClicked() {
         val recorder = getTripRecorder()
-        val activeTrip = recorder.getActiveTrip()
+        val activeTrip = recorder.getActiveTripRecording()
 
         // Handle different statuses
         when(activeTrip?.recordingInfo?.status) {
@@ -236,7 +241,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
     protected open suspend fun onRecordingResumeClicked() {
         val recorder = getTripRecorder()
-        val activeTrip = recorder.getActiveTrip()
+        val activeTrip = recorder.getActiveTripRecording()
 
         // Handle different statuses
         when(activeTrip?.recordingInfo?.status) {
@@ -266,7 +271,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     }
 
     protected open suspend fun onRecordingFinishConfirmed() {
-        val uuid = getTripRecorder().getActiveTrip()?.tripInfo?.uuid
+        val uuid = getTripRecorder().getActiveTripRecording()?.tripInfo?.uuid
             ?: throw IllegalStateException("No trip UUID available.")
         stopLocationRecording()
         getTripRecorder().finishTripRecording()
@@ -301,7 +306,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
             tripLayersManager.addStandardTripLayers()
             isTripLayersManagerLoaded = true
             val recorder = getTripRecorder()
-            if (recorder.hasActiveTrip()) {
+            if (recorder.hasActiveTripRecording()) {
                 tripLayersManager.setTripRecorder(recorder)
             }
         }
@@ -382,10 +387,10 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
         val service = ServiceFactory.getTripRecordingService(this)
 
         lifecycleScope.launchWhenCreated {
-            service.getTripByUUID(tripUuid)
+            service.getTripRecordingByUUID(tripUuid)
                 ?: throw IllegalArgumentException("Trip #$tripUuid not found.")
 
-            val poi = service.getTripPoiByUuid(poiId)
+            val poi = service.getTripRecordingPoiByUuid(poiId)
                 ?: throw IllegalArgumentException("No POI #$poiId found for trip #$tripUuid.")
 
             snackBar

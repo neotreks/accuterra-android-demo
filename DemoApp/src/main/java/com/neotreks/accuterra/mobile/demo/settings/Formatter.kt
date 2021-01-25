@@ -8,7 +8,7 @@ import com.neotreks.accuterra.mobile.demo.util.roundTo
 object Formatter {
     fun getDistanceFormatter(): DistanceFormatter {
         return object: DistanceFormatter {
-            override fun formatDistance(context: Context, distanceInMeters: Double): String {
+            override fun formatDistance(context: Context, distanceInMeters: Float): String {
                 val distanceInMiles = distanceInMeters * 0.000621371
 
                 return if (distanceInMiles >= 1.0) {
@@ -68,8 +68,8 @@ object Formatter {
 
     fun getDrivingTimeFormatter(): DrivingTimeFormatter {
         return object: DrivingTimeFormatter {
-            override fun formatDrivingTime(context: Context, timeInSeconds: Long): String {
-                return DateUtils.formatElapsedTime(timeInSeconds)
+            override fun formatDrivingTime(context: Context, timeInSeconds: Int): String {
+                return DateUtils.formatElapsedTime(timeInSeconds.toLong())
             }
         }
     }

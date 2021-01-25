@@ -1,6 +1,5 @@
 package com.neotreks.accuterra.mobile.demo
 
-import android.Manifest
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -20,8 +19,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -45,6 +42,7 @@ import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailsQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
+import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import kotlinx.android.synthetic.main.activity_trail_discovery.*
 import kotlinx.android.synthetic.main.component_basic_tabs.*
 import kotlinx.android.synthetic.main.progress_value_dialog_view.*
@@ -865,8 +863,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun hasLocationPermissions(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        return LocationPermissionUtil.hasForegroundLocationPermissions(this)
     }
 
     private fun cycleStyle() {
@@ -996,13 +993,13 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         val userRatingSearchCriteria = if (minUserRating == null) {
             null
         } else {
-            UserRatingSearchCriteria(minUserRating.toDouble(), Comparison.GREATER_EQUALS)
+            UserRatingSearchCriteria(minUserRating.toFloat(), Comparison.GREATER_EQUALS)
         }
 
         val lengthSearchCriteria = if (maxTripDistance == null) {
             null
         } else {
-            LengthSearchCriteria(maxTripDistance.toDouble())
+            LengthSearchCriteria(maxTripDistance.toFloat())
         }
 
         val limit = Int.MAX_VALUE
@@ -1123,14 +1120,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         if (hasLocationPermissions()) {
             initializeLocationEngine()
         } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ),
-                SHOW_MY_LOCATION_PERMISSIONS_REQUEST
-            )
+            LocationPermissionUtil.checkForegroundLocationPermission(this, SHOW_MY_LOCATION_PERMISSIONS_REQUEST)
         }
     }
 

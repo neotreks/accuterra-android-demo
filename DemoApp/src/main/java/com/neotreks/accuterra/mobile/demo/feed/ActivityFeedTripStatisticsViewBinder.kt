@@ -41,7 +41,7 @@ BaseActivityFeedViewBinder(listener) {
         view.setOnClickListener { listener.onItemClick(item) }
         view.setOnLongClickListener { listener.onLongItemClick(item) }
         // Data
-        view.activity_feed_online_trip_statistics_distance.text = distanceFormatter.formatDistance(context, data.trip.length.toDouble())
+        view.activity_feed_online_trip_statistics_distance.text = distanceFormatter.formatDistance(context, data.trip.length)
         view.activity_feed_online_trip_statistics_duration.text = drivingTimeFormatter.formatDrivingTime(context, data.trip.drivingTime)
         view.activity_feed_online_trip_statistics_type.text = if (data.trip.trailId == null) {
             context.getString(R.string.activity_feed_trip_type_free_roam)

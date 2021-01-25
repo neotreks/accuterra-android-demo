@@ -303,7 +303,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
             this,
             title = getString(R.string.general_comment_edit),
             positiveCode = { newText ->
-                val updatedComment = comment.withEditedText(newText)
+                val updatedComment = comment.copyWithText(newText)
                 val request = PostTripCommentRequest.build(updatedComment)
                 postComment(request)
             },

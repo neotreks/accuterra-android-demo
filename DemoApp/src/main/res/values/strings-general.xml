@@ -6,6 +6,7 @@
     <string name="general_ok">OK</string>
     <string name="general_yes">Yes</string>
     <string name="general_cancel">Cancel</string>
+    <string name="general_continue">Continue</string>
     <string name="general_unexpected_error">Unexpected error</string>
     <string name="general_na">n/a</string>
     <string name="general_favorite">Favorite</string>

@@ -3,6 +3,7 @@ package com.neotreks.accuterra.mobile.demo
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -65,29 +66,37 @@ class TrailInfoViewModel: ViewModel() {
     @Throws(IllegalStateException::class)
     fun loadTrail(trailId: Long, context: Activity) {
         viewModelScope.launch {
-            val trailService = ServiceFactory.getTrailService(context)
-            val trailObject = trailService.getTrailById(trailId)
-            // Do not continue if trail cannot be found (e.g. after deletion/update)
-            if (trailObject == null) {
-                trail.value = null
-                return@launch
+            try {
+                val trailService = ServiceFactory.getTrailService(context)
+                val trailObject = trailService.getTrailById(trailId)
+                // Do not continue if trail cannot be found (e.g. after deletion/update)
+                if (trailObject == null) {
+                    trail.value = null
+                    return@launch
+                }
+                // Trail
+                trail.value = trailObject
+                // Drive
+                drive.value = trailService.getTrailDrives(trailId).first()
+                // User data
+                loadTrailUserData(context, trailId)
+                // Comments
+                loadTrailComments(context, trailId)
+                // Medias as last
+                // List trail and point media URls, use thumbnails if possible
+                val mediaList = trailObject.media.toMutableList()
+                for (media in trailObject.navigationInfo.mapPoints.map { it.media }) {
+                    mediaList.addAll(media)
+                }
+                // Images
+                imageUrls.value = mediaList
+            } catch (e: Exception) {
+                Log.e(TAG, "Error while loading trail: ${e.localizedMessage}", e)
+                Toast.makeText(context, context.getString(R.string.trail_errors_load_trail_failed_because_of,
+                    e.localizedMessage), Toast.LENGTH_LONG).show()
+                // Exit the activity - we cannot continue and use it
+                context.finish()
             }
-            // Trail
-            trail.value = trailObject
-            // Drive
-            drive.value = trailService.getTrailDrives(trailId).first()
-            // User data
-            loadTrailUserData(context, trailId)
-            // Comments
-            loadTrailComments(context, trailId)
-            // Medias as last
-            // List trail and point media URls, use thumbnails if possible
-            val mediaList = trailObject.media.toMutableList()
-            for (media in trailObject.navigationInfo.mapPoints.map { it.media }) {
-                mediaList.addAll(media)
-            }
-            // Images
-            imageUrls.value = mediaList
         }
     }
 

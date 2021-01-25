@@ -51,7 +51,7 @@ class RecordedTripStatsFragment : RecordedTripFragment() {
         })
     }
 
-    private fun getDistance(formatter: DistanceFormatter, value: Double?) : String {
+    private fun getDistance(formatter: DistanceFormatter, value: Float?) : String {
         if (value == null) {
             return requireContext().getString(R.string.general_na)
         }

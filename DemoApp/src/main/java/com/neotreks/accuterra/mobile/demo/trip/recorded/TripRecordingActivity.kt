@@ -96,7 +96,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     }
 
     override fun onBackPressed() {
-        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTrip()
+        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTripRecording()
         if (hasActiveTrip) {
             toast(getString(R.string.general_recording_cannot_exit_while_recording))
             return
@@ -172,7 +172,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     }
 
     override fun updateBackButton() {
-        val backButtonEnabled = !viewModel.getTripRecorder(this).hasActiveTrip()
+        val backButtonEnabled = !viewModel.getTripRecorder(this).hasActiveTripRecording()
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(backButtonEnabled)
             setHomeButtonEnabled(backButtonEnabled)

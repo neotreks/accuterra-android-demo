@@ -8,7 +8,7 @@ class TrailListItem(
     val id: Long,
     val title: String,
     val shortDescription: String,
-    val length: Double,
+    val length: Float,
     val rating: UserRating?,
     val isBookmarked: Boolean,
     val difficulty: TechnicalRating

@@ -164,7 +164,7 @@ class TripSaveActivity : AppCompatActivity() {
                 activity_trip_save_trip_name.setText(trip?.tripInfo?.name)
                 activity_trip_save_trip_description.setText(trip?.tripInfo?.description)
                 trip?.userInfo?.userRating?.let { rating ->
-                    activity_trip_save_my_rating.rating = rating.toFloat()
+                    activity_trip_save_my_rating.rating = rating
                 }
                 trip?.userInfo?.personalNote?.let { note ->
                     activity_trip_save_trip_personal_note.setText(note)
@@ -267,7 +267,7 @@ class TripSaveActivity : AppCompatActivity() {
         val note = activity_trip_save_trip_personal_note.text?.toString()
         val sharingType = activity_trip_save_share.selectedItem as TripSharingType
         userInfo = userInfo.copy(
-            userRating = rating.toDouble(),
+            userRating = rating,
             personalNote = note,
             sharingType = sharingType,
             promoteToTrail = activity_trip_save_trip_promote.isChecked
@@ -285,10 +285,10 @@ class TripSaveActivity : AppCompatActivity() {
         GlobalScope.launch {
             // Safe Trip Data into the DB
             val tripService = ServiceFactory.getTripRecordingService(applicationContext)
-            tripService.updateTrip(trip)
+            tripService.updateTripRecording(trip)
             // Trigger upload the recorded trip to the server
             if (doUpload) {
-                tripService.uploadTripToServer(trip.tripInfo.uuid)
+                tripService.uploadTripRecordingToServer(trip.tripInfo.uuid)
             }
             // Do UI stuff
             lifecycleScope.launchWhenCreated {
@@ -327,7 +327,7 @@ class TripSaveActivity : AppCompatActivity() {
             // In case the trip is actually recoded, it is possible to use
             // also the [ITripRecorder.deleteTrip] method.
             val service = ServiceFactory.getTripRecordingService(applicationContext)
-            service.deleteTrip(tripUuid)
+            service.deleteTripRecording(tripUuid)
 
             // Close this activity
             lifecycleScope.launchWhenCreated {

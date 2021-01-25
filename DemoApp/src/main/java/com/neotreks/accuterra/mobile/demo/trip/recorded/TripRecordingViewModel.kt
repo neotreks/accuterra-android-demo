@@ -28,7 +28,7 @@ class TripRecordingViewModel: ViewModel() {
         if (!::recorder.isInitialized) {
             runBlocking {
                 recorder = ServiceFactory.getTripRecorder(context)
-                tripUUID = recorder.getActiveTrip()?.tripInfo?.uuid
+                tripUUID = recorder.getActiveTripRecording()?.tripInfo?.uuid
             }
         }
         return recorder

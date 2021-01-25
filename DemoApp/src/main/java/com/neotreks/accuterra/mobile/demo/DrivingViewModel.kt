@@ -1,7 +1,10 @@
 package com.neotreks.accuterra.mobile.demo
 
+import android.app.Activity
 import android.content.Context
 import android.location.Location
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +19,18 @@ import kotlinx.coroutines.runBlocking
  * View-model for the [DrivingActivity]
  */
 class DrivingViewModel: ViewModel() {
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
+
+    companion object {
+        private const val TAG = "DrivingViewModel"
+    }
+
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
 
     /**
      * Public TRAIL live data
@@ -37,20 +52,28 @@ class DrivingViewModel: ViewModel() {
      */
     fun loadTrail(trailId: Long, context: Context) {
         viewModelScope.launch {
-            val service = ServiceFactory.getTrailService(context)
+            try {
+                val service = ServiceFactory.getTrailService(context)
 
-            val trail = service.getTrailById(trailId)
-                ?: throw IllegalArgumentException("Unknown trail ID ${trailId}.")
+                val trail = service.getTrailById(trailId)
+                    ?: throw IllegalArgumentException("Unknown trail ID ${trailId}.")
 
-            // For now always load the first trail drive
-            val trailDrive = service.getTrailDrives(trailId).first()
+                // For now always load the first trail drive
+                val trailDrive = service.getTrailDrives(trailId).first()
 
-            // keep the order of assignments to trailDrive and trail.
-            // trail is an observable and we want to guarantee that trailDrive exists if trail exists
-            this@DrivingViewModel.trailDrive = trailDrive
-            this@DrivingViewModel.sortedWayPoints.clear()
-            this@DrivingViewModel.sortedWayPoints.addAll(trailDrive.waypoints)
-            this@DrivingViewModel.trail.value = trail
+                // keep the order of assignments to trailDrive and trail.
+                // trail is an observable and we want to guarantee that trailDrive exists if trail exists
+                this@DrivingViewModel.trailDrive = trailDrive
+                this@DrivingViewModel.sortedWayPoints.clear()
+                this@DrivingViewModel.sortedWayPoints.addAll(trailDrive.waypoints)
+                this@DrivingViewModel.trail.value = trail
+            } catch (e: Exception) {
+                Log.e(TAG, "Error while loading trail: ${e.localizedMessage}", e)
+                Toast.makeText(context, context.getString(R.string.trail_errors_load_trail_failed_because_of,
+                    e.localizedMessage), Toast.LENGTH_LONG).show()
+                // Exit the activity - we cannot continue and use it
+                (context as Activity).finish()
+            }
         }
     }
 
@@ -68,7 +91,7 @@ class DrivingViewModel: ViewModel() {
         if (!::recorder.isInitialized) {
             runBlocking {
                 recorder = ServiceFactory.getTripRecorder(context)
-                tripUUID = recorder.getActiveTrip()?.tripInfo?.uuid
+                tripUUID = recorder.getActiveTripRecording()?.tripInfo?.uuid
             }
         }
         return recorder

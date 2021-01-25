@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.*
@@ -230,7 +229,7 @@ class MyTripsActivity : AppCompatActivity() {
     private fun updateNewTripButton() {
         lifecycleScope.launchWhenCreated {
             val recorder = ServiceFactory.getTripRecorder(applicationContext)
-            val hasActiveTrip = recorder.hasActiveTrip()
+            val hasActiveTrip = recorder.hasActiveTripRecording()
             // We cannot allow new recording if there is an active recording already
             activity_my_trips_add_trip_button.isEnabled = !hasActiveTrip
             val color = if (hasActiveTrip) {

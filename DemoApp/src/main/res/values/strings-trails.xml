@@ -16,4 +16,7 @@
     <string name="trail_updates_trail_no_updates">There were no updates of the Trail DB.</string>
     <string name="trail_updates_trail_db_update_failed">Trail DB update failed because of: %1$s</string>
 
+    <!-- Trail Errors -->
+    <string name="trail_errors_load_trail_failed_because_of">Error while loading trail: %1$s</string>
+
 </resources>

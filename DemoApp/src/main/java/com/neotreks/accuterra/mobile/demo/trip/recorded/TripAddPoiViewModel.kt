@@ -31,7 +31,7 @@ class TripAddPoiViewModel: ViewModel() {
     suspend fun loadTrip(location: Location, context: Context) {
 
         val tripService = ServiceFactory.getTripRecorder(context)
-        val trip = tripService.getActiveTrip()
+        val trip = tripService.getActiveTripRecording()
             ?: throw IllegalStateException("There is no currently recorded trip!")
 
         this.location.value = location

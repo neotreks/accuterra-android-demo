@@ -32,7 +32,7 @@ class MyTripsViewModel: ViewModel() {
     fun loadRecordedTrips(context: Context, criteria: TripRecordingSearchCriteria) {
         viewModelScope.launch {
             val service = ServiceFactory.getTripRecordingService(context)
-            val trips = service.findTrips(criteria)
+            val trips = service.findTripRecordings(criteria)
             listItems.value = convertRecordedTripToFeedItem(trips)
         }
     }

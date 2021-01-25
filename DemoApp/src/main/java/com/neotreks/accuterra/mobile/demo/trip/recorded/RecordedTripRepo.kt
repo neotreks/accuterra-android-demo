@@ -13,11 +13,11 @@ class RecordedTripRepo(applicationContext: Context) {
     private val tripService = ServiceFactory.getTripRecordingService(applicationContext)
 
     suspend fun getTrip(tripUuid: String): TripRecording? {
-        return tripService.getTripByUUID(tripUuid)
+        return tripService.getTripRecordingByUUID(tripUuid)
     }
 
     suspend fun getTripPois(tripUuid: String): List<TripRecordingPoi> {
-        return tripService.getTripPOIs(tripUuid)
+        return tripService.getTripRecordingPOIs(tripUuid)
     }
 
 }

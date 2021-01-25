@@ -26,7 +26,7 @@ class TripSaveViewModel: ViewModel() {
     fun loadTrip(tripUUID: String, context: Context) {
         viewModelScope.launch {
             val tripService = ServiceFactory.getTripRecordingService(context)
-            val loadedTrip = tripService.getTripByUUID(tripUUID)
+            val loadedTrip = tripService.getTripRecordingByUUID(tripUUID)
                 ?: throw IllegalStateException("")
             tripRecording.value = loadedTrip
             media.value = loadedTrip.media.toMutableList()

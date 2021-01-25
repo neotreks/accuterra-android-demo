@@ -19,6 +19,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.neotreks.accuterra.mobile.demo.BuildConfig
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import com.neotreks.accuterra.mobile.sdk.location.LocationUpdatesService
 
 
@@ -36,7 +37,7 @@ abstract class LocationActivity : AppCompatActivity(),
         private const val TAG = "LocationActivity"
 
         // Used in checking for runtime permissions.
-        private const val REQUEST_PERMISSIONS_REQUEST_CODE = 77
+        const val REQUEST_PERMISSIONS_REQUEST_CODE = 77
     }
 
     /* * * * * * * * * * * * */
@@ -289,12 +290,10 @@ abstract class LocationActivity : AppCompatActivity(),
                 R.string.location_update_service_permission_rationale,
                 Snackbar.LENGTH_INDEFINITE
             )
-                .setAction(R.string.general_ok) { // Request permission
-                    ActivityCompat.requestPermissions(
-                        this@LocationActivity,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        REQUEST_PERMISSIONS_REQUEST_CODE
-                    )
+                .setAction(R.string.general_ok) {
+                    // Request permission
+                    LocationPermissionUtil.checkForegroundLocationPermission(this@LocationActivity,
+                        REQUEST_PERMISSIONS_REQUEST_CODE)
                 }
                 .show()
         } else {
@@ -302,10 +301,8 @@ abstract class LocationActivity : AppCompatActivity(),
             // Request permission. It's possible this can be auto answered if device policy
             // sets the permission in a given state or the user denied the permission
             // previously and checked "Never ask again".
-            ActivityCompat.requestPermissions(
-                this@LocationActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_PERMISSIONS_REQUEST_CODE
-            )
+            LocationPermissionUtil.checkForegroundLocationPermission(this@LocationActivity,
+                REQUEST_PERMISSIONS_REQUEST_CODE)
         }
     }
 

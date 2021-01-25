@@ -185,7 +185,7 @@ class LocationService: LocationUpdatesService() {
             requestingLocationRecording(this) -> {
                 var tripName: String? = null
                 runBlocking {
-                    tripName = recorder.getActiveTrip()?.tripInfo?.name
+                    tripName = recorder.getActiveTripRecording()?.tripInfo?.name
                 }
                 getString(R.string.location_update_service_notification_message_trip_recording, tripName)
             }

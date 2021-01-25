@@ -31,7 +31,7 @@ class DemoApplication: Application() {
         // Please note that it is still needed to call at least once after application installation
         // the [SdkManager.initSdk(Context, IAccessProvider, SdkConfig)] to configure the SDK.
         // After that initialization just with the context is sufficient.
-        SdkManager.initSdkContext(this)
+        SdkManager.initSdkContext(applicationContext)
 
     }
 }

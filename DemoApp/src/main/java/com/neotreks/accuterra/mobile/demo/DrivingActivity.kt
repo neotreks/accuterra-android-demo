@@ -134,7 +134,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     override fun onBackPressed() {
-        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTrip()
+        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTripRecording()
         if (hasActiveTrip) {
             toast(getString(R.string.general_recording_cannot_exit_while_recording))
             return
@@ -549,7 +549,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     private fun showNextWayPointToolbar(icon: TrailNavigator.Direction?,
-                                        distance: Double?,
+                                        distance: Float?,
                                         title: String) {
 
         if (icon == null) {
