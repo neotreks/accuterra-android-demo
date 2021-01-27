@@ -171,7 +171,7 @@ class TripSaveActivity : AppCompatActivity() {
                 }
                 trip?.userInfo?.sharingType?.let { sharingType ->
                     // We expect sorting by ordinal
-                    activity_trip_save_share.setSelection(sharingType.id, true)
+                    activity_trip_save_share.setSelection(sharingType.ordinal, true)
                 }
                 trip?.userInfo?.promoteToTrail?.let { promote ->
                     activity_trip_save_trip_promote.isChecked = promote
