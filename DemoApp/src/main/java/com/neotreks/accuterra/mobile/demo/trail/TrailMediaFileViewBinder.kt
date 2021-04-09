@@ -6,13 +6,13 @@ import androidx.annotation.LayoutRes
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.bumptech.glide.Glide
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ComponentImageViewBinding
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariant
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariantUtil
 import com.neotreks.accuterra.mobile.demo.ui.ListItemAdapterViewBinder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
-import kotlinx.android.synthetic.main.component_image_view.view.*
 
 /**
  * View Binder for the [TrailMediaFileViewAdapter]
@@ -28,7 +28,8 @@ class TrailMediaFileViewBinder(private val context: Context,
         return R.layout.component_image_view
     }
 
-    override fun bindView(view: View, item: TrailMedia, isSelected: Boolean) {
+    override fun bindView(view: View, item: TrailMedia, isSelected: Boolean, isFavorite: Boolean) {
+        val binding = ComponentImageViewBinding.bind(view)
         lifecycleScope.launchWhenCreated {
             val options = UiUtils.getDefaultImageOptions()
             // Ge the URi Async to avoid UI freezing
@@ -37,7 +38,7 @@ class TrailMediaFileViewBinder(private val context: Context,
             Glide.with(context)
                 .applyDefaultRequestOptions(options)
                 .load(uri)
-                .into(view.image_view)
+                .into(binding.imageView)
         }
     }
 

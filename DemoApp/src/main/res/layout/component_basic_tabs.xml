@@ -10,27 +10,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
+        app:tabMode="scrollable"
         app:tabTextColor="@color/toolbarTextGrayed"
         app:tabSelectedTextColor="@color/toolbarText">
 
         <com.google.android.material.tabs.TabItem
-            android:layout_height="0dp"
-            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:text="@string/community" />
 
         <com.google.android.material.tabs.TabItem
-            android:layout_height="0dp"
-            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:text="@string/my_trips" />
 
         <com.google.android.material.tabs.TabItem
-            android:layout_height="0dp"
-            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:text="@string/discover" />
 
         <com.google.android.material.tabs.TabItem
-            android:layout_height="0dp"
-            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
             android:text="@string/profile" />
 
     </com.google.android.material.tabs.TabLayout>

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.model.ITrailPropertySearchCriteria
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapBounds.Companion.MAX_LATITUDE
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapBounds.Companion.MAX_LONGITUDE
@@ -46,47 +47,25 @@ class TrailDiscoveryViewModel: ViewModel() {
     var lastSearchedMapBounds = MapBounds(MIN_LATITUDE, MIN_LONGITUDE, MAX_LATITUDE, MAX_LONGITUDE)
 
     /**
-     * Find trails by [TrailMapBoundsSearchCriteria]
+     * Find trails by [ITrailPropertySearchCriteria]
      */
-    fun findTrailsByMapBoundsAsync(
-        criteria: TrailMapBoundsSearchCriteria,
+    suspend fun findTrails(
+        criteria: ITrailPropertySearchCriteria,
         context: Context,
-        onSuccessCallback: (Iterable<TrailBasicInfo>) -> Unit
-    ) {
-        findTrailsImpl(criteria, context, onSuccessCallback)
-    }
-
-    /**
-     * Find trails by [TrailMapSearchCriteria]
-     */
-    fun findTrailsByMapCenterAsync(
-        criteria: TrailMapSearchCriteria,
-        context: Context,
-        onSuccessCallback: (Iterable<TrailBasicInfo>) -> Unit
-    ) {
-        findTrailsImpl(criteria, context, onSuccessCallback)
-    }
-
-    private fun findTrailsImpl(
-        criteria: Any,
-        context: Context,
-        onSuccessCallback: (Iterable<TrailBasicInfo>) -> Unit
-    ) {
+    ): Iterable<TrailBasicInfo> {
         // Cancel previous search
         viewModelScope.coroutineContext.cancelChildren()
         // Run new search
-        viewModelScope.launch(Dispatchers.IO) {
-            val service = ServiceFactory.getTrailService(context)
-            val trails = when(criteria) {
-                is TrailMapSearchCriteria -> service.findTrails(criteria)
-                is TrailMapBoundsSearchCriteria -> service.findTrails(criteria)
-                else -> throw IllegalArgumentException("Unsupported criteria type.")
-            }
-            val items = trails.map { TrailListItem.from(it) }
-            setTrailsList(items)
-            withContext(Dispatchers.Main) {
-                onSuccessCallback(trails)
-            }
+        val service = ServiceFactory.getTrailService(context)
+        val trails = when(criteria) {
+            is TrailMapSearchCriteria -> service.findTrails(criteria)
+            is TrailMapBoundsSearchCriteria -> service.findTrails(criteria)
+            else -> throw IllegalArgumentException("Unsupported criteria type.")
+        }
+        val items = trails.map { TrailListItem.from(it) }
+        setTrailsList(items)
+        return withContext(Dispatchers.Main) {
+            return@withContext trails
         }
     }
 

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripSaveBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.toast
@@ -17,22 +18,31 @@ import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
+import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.CampingType
 import com.neotreks.accuterra.mobile.sdk.trail.model.SdkCampingType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripSharingType
-import kotlinx.android.synthetic.main.activity_trip_save.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class TripSaveActivity : AppCompatActivity() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private lateinit var viewModel: TripSaveViewModel
 
     private lateinit var mediaListManager: TripRecordingMediaListManager
+
+    private lateinit var binding: ActivityTripSaveBinding
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
@@ -40,6 +50,8 @@ class TripSaveActivity : AppCompatActivity() {
 
         private const val REQUEST_CAPTURE_PICTURE = 12
         private const val REQUEST_SELECT_PHOTO = 13
+        private const val REQUEST_SELECT_PHOTO_PERMISSION = 14
+        private const val REQUEST_TAKE_PHOTO_PERMISSIONS = 15
 
         fun createNavigateToIntent(context: Context, tripUUID: String): Intent {
             return Intent(context, TripSaveActivity::class.java)
@@ -55,11 +67,12 @@ class TripSaveActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_trip_save)
+        binding = ActivityTripSaveBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this).get(TripSaveViewModel::class.java)
         mediaListManager = TripRecordingMediaListManager(this,
-            activity_trip_save_photos,
+            binding.activityTripSavePhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
                     val intent = MediaDetailActivity.createNavigateToIntent(this@TripSaveActivity,
@@ -83,10 +96,6 @@ class TripSaveActivity : AppCompatActivity() {
         parseIntent()
     }
 
-    override fun onBackPressed() {
-        return
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CAPTURE_PICTURE) {
@@ -104,6 +113,26 @@ class TripSaveActivity : AppCompatActivity() {
                 return
             }
             viewModel.addMedia(uri, this)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_SELECT_PHOTO_PERMISSION) {
+            PermissionSupport.logSelectPhotoPermissionRequested(this)
+            if (PermissionSupport.isSelectPhotoPermissionGranted(this)) {
+                onSelectImage()
+            } else {
+                longToast(getString(R.string.general_permission_not_granted))
+            }
+        }
+        if (requestCode == REQUEST_TAKE_PHOTO_PERMISSIONS) {
+            PermissionSupport.logCameraPermissionRequested(this)
+            if (PermissionSupport.isCameraPermissionGranted(this)) {
+                onAddImage()
+            } else {
+                longToast(getString(R.string.general_permission_not_granted))
+            }
         }
     }
 
@@ -143,8 +172,25 @@ class TripSaveActivity : AppCompatActivity() {
                 finish()
                 return true
             }
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onBackPressed() {
+        DialogUtil.buildYesNoDialog(
+            context = this,
+            title = getString(R.string.general_close_without_saving_title),
+            message = getString(R.string.general_close_without_saving_message),
+            positiveCodeLabel = getString(R.string.general_close_without_saving_no_stay),
+            negativeCodeLabel = getString(R.string.general_close_without_saving_yes_exit),
+            negativeCode = {
+                super.onBackPressed()
+            }
+        ).show()
     }
 
     /* * * * * * * * * * * * */
@@ -152,7 +198,7 @@ class TripSaveActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private fun populateSharingType() {
-        val spinner = activity_trip_save_share
+        val spinner = binding.activityTripSaveShare
         val adapter = TripSharingTypeAdapter(this)
         spinner.adapter = adapter
     }
@@ -161,20 +207,20 @@ class TripSaveActivity : AppCompatActivity() {
 
         viewModel.tripRecording.observe(this, { trip ->
             lifecycleScope.launch {
-                activity_trip_save_trip_name.setText(trip?.tripInfo?.name)
-                activity_trip_save_trip_description.setText(trip?.tripInfo?.description)
+                binding.activityTripSaveTripName.setText(trip?.tripInfo?.name)
+                binding.activityTripSaveTripDescription.setText(trip?.tripInfo?.description)
                 trip?.userInfo?.userRating?.let { rating ->
-                    activity_trip_save_my_rating.rating = rating
+                    binding.activityTripSaveMyRating.rating = rating
                 }
                 trip?.userInfo?.personalNote?.let { note ->
-                    activity_trip_save_trip_personal_note.setText(note)
+                    binding.activityTripSaveTripPersonalNote.setText(note)
                 }
                 trip?.userInfo?.sharingType?.let { sharingType ->
                     // We expect sorting by ordinal
-                    activity_trip_save_share.setSelection(sharingType.ordinal, true)
+                    binding.activityTripSaveShare.setSelection(sharingType.ordinal, true)
                 }
                 trip?.userInfo?.promoteToTrail?.let { promote ->
-                    activity_trip_save_trip_promote.isChecked = promote
+                    binding.activityTripSaveTripPromote.isChecked = promote
                 }
                 // Refresh the menu
                 invalidateOptionsMenu()
@@ -198,39 +244,44 @@ class TripSaveActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.activity_save_trip_title)
+        setSupportActionBar(binding.activityTripSaveToolbar.generalToolbar)
+        binding.activityTripSaveToolbar.generalToolbarTitle.text = getString(R.string.activity_save_trip_title)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
-            setDisplayHomeAsUpEnabled(false)
-            setHomeButtonEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(true)
         }
 
     }
 
     private fun setupButtons() {
-        activity_trip_save_select_photo.setOnClickListener {
+        binding.activityTripSaveSelectPhoto.setOnClickListener {
             onSelectImage()
         }
-        activity_trip_save_take_photo.setOnClickListener {
+        binding.activityTripSaveTakePhoto.setOnClickListener {
             onAddImage()
         }
-        activity_trip_save_shuffle_photo.setOnClickListener {
+        binding.activityTripSaveShufflePhoto.setOnClickListener {
             onShuffleImage()
         }
     }
 
     private fun onAddImage() {
+        if (!PermissionSupport.isCameraPermissionGranted(this)) {
+            PermissionSupport.requestCameraPermissions(this, REQUEST_TAKE_PHOTO_PERMISSIONS)
+            return
+        }
         val intent = CaptureImageActivity.createNavigateToIntent(this)
         startActivityForResult(intent, REQUEST_CAPTURE_PICTURE)
     }
 
     private fun onSelectImage() {
-        val photoPickerIntent = Intent(Intent.ACTION_PICK)
-        photoPickerIntent.type = "image/*"
-        val mimeTypes = arrayOf("image/jpeg", "image/png")
-        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        if (!PermissionSupport.isSelectPhotoPermissionGranted(this)) {
+            PermissionSupport.requestSelectPhotoPermission(this, REQUEST_SELECT_PHOTO_PERMISSION)
+            return
+        }
+        val photoPickerIntent = ApkMediaUtil.buildSelectImageIntent()
         startActivityForResult(photoPickerIntent, REQUEST_SELECT_PHOTO)
     }
 
@@ -257,20 +308,20 @@ class TripSaveActivity : AppCompatActivity() {
         // Update the trip with gathered data
         var tripInfo = trip.tripInfo
         tripInfo = tripInfo.copy(
-            name = activity_trip_save_trip_name.text.toString(),
-            description = activity_trip_save_trip_description.text.toString(),
+            name = binding.activityTripSaveTripName.text.toString(),
+            description = binding.activityTripSaveTripDescription.text.toString(),
             campingTypes = listOf(campingType)
         )
         // Add dummy data for now
         var userInfo = trip.userInfo
-        val rating = activity_trip_save_my_rating.rating
-        val note = activity_trip_save_trip_personal_note.text?.toString()
-        val sharingType = activity_trip_save_share.selectedItem as TripSharingType
+        val rating = binding.activityTripSaveMyRating.rating
+        val note = binding.activityTripSaveTripPersonalNote.text?.toString()
+        val sharingType = binding.activityTripSaveShare.selectedItem as TripSharingType
         userInfo = userInfo.copy(
             userRating = rating,
             personalNote = note,
             sharingType = sharingType,
-            promoteToTrail = activity_trip_save_trip_promote.isChecked
+            promoteToTrail = binding.activityTripSaveTripPromote.isChecked
         )
         // Media
         var allMedia = viewModel.media.value!!

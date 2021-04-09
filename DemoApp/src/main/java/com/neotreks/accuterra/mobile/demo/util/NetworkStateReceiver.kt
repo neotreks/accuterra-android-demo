@@ -8,12 +8,13 @@ import android.net.ConnectivityManager
 import android.util.Log
 import java.util.*
 
-class NetworkStateReceiver(private val context: Context) : BroadcastReceiver() {
+class NetworkStateReceiver(context: Context) : BroadcastReceiver() {
 
     /* * * * * * * * * * * * */
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
 
+    private val context = context.applicationContext
     private val mManager: ConnectivityManager
     private val mListeners: MutableList<NetworkStateReceiverListener>
     private var mConnected = true
@@ -33,7 +34,7 @@ class NetworkStateReceiver(private val context: Context) : BroadcastReceiver() {
     init {
         mListeners = ArrayList()
         mManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            this.context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         checkStateChanged()
     }
 
@@ -61,6 +62,7 @@ class NetworkStateReceiver(private val context: Context) : BroadcastReceiver() {
             context.unregisterReceiver(this)
         } catch (e: Exception) {
             Log.e(TAG, "Error while unregistering network state listener")
+            CrashSupport.reportError(e, "Error while unregistering network state listener")
         }
     }
 

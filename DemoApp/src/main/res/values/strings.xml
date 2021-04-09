@@ -63,6 +63,8 @@
     <string name="driving_mode">Driving Mode</string>
     <string name="download">Download</string>
     <string name="download_percents">%1$d %%</string>
+    <string name="downloading_percents">Downloading %1$d %%</string>
+    <string name="estimated_download_size">Estimated download size %1$s</string>
     <string name="queued">Queued</string>
 
     <string name="download_overlay_prompt">Would you like to download Overlay map cache (~%1$s).</string>
@@ -81,6 +83,33 @@
     <string name="no">NO</string>
     <string name="wrong_direction">Wrong Direction</string>
     <string name="trail_lost">Trail Lost</string>
+    <string name="download_offline_maps">Download Offline Maps</string>
+    <string name="activity_offline_maps_title">Offline Maps</string>
+    <string name="activity_offline_maps_download_new_map">DOWNLOAD NEW MAP</string>
+    <string name="activity_offline_maps_downloaded_maps">Downloaded Maps</string>
+    <string name="activity_offline_maps_no_maps">No Downloaded Maps</string>
+    <string name="activity_new_offline_map_title">Pan and zoom to desired extent</string>
+    <string name="activity_new_offline_map_image">Include Imagery</string>
+    <string name="activity_new_offline_map_include_imagery">Include Imagery</string>
+    <string name="activity_new_offline_map_name_hint">Map Name</string>
+    <string name="activity_new_offline_map_download">DOWNLOAD</string>
+    <string name="activity_new_offline_map_map_too_big">Map too big</string>
+    <string name="activity_new_offline_map_max_map_size">Download size must be less than %1$s</string>
+    <string name="activity_new_offline_map_missing_name">Name not set</string>
+    <string name="activity_offline_maps_menu_cancel">Cancel</string>
+    <string name="activity_offline_maps_menu_delete">Delete</string>
+    <string name="activity_offline_maps_cancel_download_title">Cancel Download</string>
+    <string name="activity_offline_maps_cancel_download_message">Do you really want to cancel offline map \'%1$s\'?</string>
+    <string name="activity_offline_maps_delete_download_title">Delete Offline Map</string>
+    <string name="activity_offline_maps_delete_download_message">Do you really want to delete offline map \'%1$s\'?</string>
+    <string name="activity_offline_maps_menu_update">Update</string>
+    <string name="activity_offline_maps_menu_edit">Edit</string>
+    <string name="activity_offline_maps_menu_rename">Rename</string>
+    <string name="activity_offline_maps_rename_title">Enter New Name</string>
+    <string name="activity_offline_maps_rename_newname">New Name</string>
+    <string name="activity_offline_maps_menu_resume">Resume</string>
+    <string name="activity_offline_maps_menu_pause">Pause</string>
+    <string name="download_paused">Paused</string>
 
     <plurals name="star">
         <item quantity="one">%d Star</item>

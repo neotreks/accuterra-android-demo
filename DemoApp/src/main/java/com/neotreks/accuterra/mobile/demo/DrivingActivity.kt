@@ -9,7 +9,6 @@ import android.view.View
 import androidx.annotation.UiThread
 import androidx.appcompat.app.ActionBar
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -19,6 +18,9 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityDrivingBinding
+import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
+import com.neotreks.accuterra.mobile.demo.databinding.DrivingActivityToolbarBinding
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
 import com.neotreks.accuterra.mobile.demo.trail.WaypointListAdapter
 import com.neotreks.accuterra.mobile.demo.trail.TrailPoiDetailActivity
@@ -37,17 +39,13 @@ import com.neotreks.accuterra.mobile.sdk.map.navigation.ITrailNavigator
 import com.neotreks.accuterra.mobile.sdk.map.navigation.ITrailNavigatorListener
 import com.neotreks.accuterra.mobile.sdk.map.navigation.TrailNavigator
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
+import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
 import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDrive
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDriveWaypoint
 import com.neotreks.accuterra.mobile.sdk.trail.service.TrailLoadFilter
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
-import kotlinx.android.synthetic.main.activity_driving.*
-import kotlinx.android.synthetic.main.component_trip_recording_buttons.*
-import kotlinx.android.synthetic.main.component_trip_recording_stats.*
-import kotlinx.android.synthetic.main.driving_activity_toolbar.*
-import kotlinx.android.synthetic.main.poi_item.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -86,6 +84,10 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
     private lateinit var viewModel: DrivingViewModel
 
+    private lateinit var binding: ActivityDrivingBinding
+
+    private lateinit var bindingToolbar: DrivingActivityToolbarBinding
+
     private lateinit var trailLayersManager: TrailLayersManager
     private var isTrailsLayerManagersLoaded = false
 
@@ -107,7 +109,8 @@ class DrivingActivity : BaseTripRecordingActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate()")
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_driving)
+        binding = ActivityDrivingBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this).get(DrivingViewModel::class.java)
 
@@ -134,7 +137,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     override fun onBackPressed() {
-        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTripRecording()
+        val hasActiveTrip = viewModel.getTripRecorder(applicationContext).hasActiveTripRecording()
         if (hasActiveTrip) {
             toast(getString(R.string.general_recording_cannot_exit_while_recording))
             return
@@ -153,7 +156,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     /*  IMPLEMENTATION OF THE ABSTRACT METHODS   */
 
     override fun getAccuTerraMapView(): AccuTerraMapView {
-        return activity_driving_accuterra_map_view
+        return binding.activityDrivingAccuterraMapView
     }
 
     override fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
@@ -165,11 +168,11 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     override fun getDrivingModeButton(): FloatingActionButton {
-        return activity_driving_to_driving_mode_button
+        return binding.activityDrivingToDrivingModeButton
     }
 
-    override fun getMapLayerButton(): FloatingActionButton? {
-        return activity_driving_layer_button
+    override fun getMapLayerButton(): FloatingActionButton {
+        return binding.activityDrivingLayerButton
     }
 
     // Location Activity Abstract Methods Implementation
@@ -197,10 +200,10 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     override suspend fun getTripRecorder(): ITripRecorder {
-        return viewModel.getTripRecorder(this)
+        return viewModel.getTripRecorder(applicationContext)
     }
 
-    override fun getTrailId(): Long? {
+    override fun getTrailId(): Long {
         val trailId = viewModel.trail.value?.info?.id
         checkNotNull(trailId) { "The trail ID must be available!" }
         return trailId
@@ -210,17 +213,25 @@ class DrivingActivity : BaseTripRecordingActivity() {
         return viewModel.tripUUID
     }
 
+    override fun getExtProperties(): List<ExtProperties>? {
+        return null
+    }
+
     override fun onNewTripUuid(tripUuid: String?) {
         viewModel.tripUUID = tripUuid
     }
 
 
     override fun getSnackbarView(): View {
-        return activity_driving_recording_panel
+        return binding.activityDrivingRecordingPanel
     }
 
     override fun getAddPoiButton(): View {
-        return activity_driving_add_poi_button
+        return binding.activityDrivingAddPoiButton
+    }
+
+    override fun getRecButtonBinding(): ComponentTripRecordingButtonsBinding {
+        return binding.activityTripRecordingButtons
     }
 
     override fun updateBackButton() {
@@ -279,14 +290,14 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     private fun loadAndShowPoiInfoAsync(poiId: Long) {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             // Unfold the list view and make sure the item is displayed
             setMediumListView() // Search related waypoint and display it in the list
             val waypoint = viewModel.trailDrive.waypoints.find { it.point.id == poiId }
-                ?: return@launchWhenCreated
+                ?: return@launchWhenResumed
             subSelectPoiById(waypoint.id)
             val position = poiListAdapter.getPosition(waypoint)
-            activity_driving_list.smoothScrollToPosition(position)
+            binding.activityDrivingList.smoothScrollToPosition(position)
         }
     }
     private fun handleMultiTrailPoiMapClick() {
@@ -309,7 +320,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private fun registerTrailObserver() {
         Log.d(TAG, "registerTrailObserver()")
 
-        viewModel.trail.observe(this, Observer { trail ->
+        viewModel.trail.observe(this, { trail ->
             if (trail != null) {
                 onTrailDataLoaded(trail, viewModel.trailDrive)
             }
@@ -321,12 +332,12 @@ class DrivingActivity : BaseTripRecordingActivity() {
         poiListAdapter.addAll(trailDrive.waypoints)
         poiListAdapter.notifyDataSetChanged()
 
-        activity_driving_toolbar_trail_name.text = trail.info.name
-        activity_driving_toolbar_loading_panel.visibility = View.GONE
-        activity_driving_toolbar_trail_name_panel.visibility = View.VISIBLE
-        activity_driving_toolbar_way_point_panel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarTrailName.text = trail.info.name
+        bindingToolbar.activityDrivingToolbarLoadingPanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarTrailName.visibility = View.VISIBLE
+        bindingToolbar.activityDrivingToolbarWayPointPanel.visibility = View.GONE
 
-        viewModel.navigatorStatus.observe(this, Observer { navigatorStatus ->
+        viewModel.navigatorStatus.observe(this, { navigatorStatus ->
             // do not update the list if the trail is lost or when going in the wrong direction
             if (navigatorStatus.status == NavigatorStatusType.NOT_READY
                 || navigatorStatus.status == NavigatorStatusType.NAVIGATING) {
@@ -396,8 +407,8 @@ class DrivingActivity : BaseTripRecordingActivity() {
         val count = poiListAdapter.count
         if (selectedIndex == -1) {
             // Nothing is selected -> nothing to display
-            poi_item_name.text = ""
-            poi_item_millage.text = ""
+            binding.activityDrivingPoiItem.poiItemName.text = ""
+            binding.activityDrivingPoiItem.poiItemMillage.text = ""
             return
         }
         // Get the nextNext item but avoid out of index
@@ -408,9 +419,9 @@ class DrivingActivity : BaseTripRecordingActivity() {
             poiListAdapter.getItem(poiListAdapter.count - 1)
         }
         // Update the poi_item labels
-        poi_item_name.text = nextNextItem?.point?.name
+        binding.activityDrivingPoiItem.poiItemName.text = nextNextItem?.point?.name
         nextNextItem?.distanceMarker?.let { distance ->
-            poi_item_millage.text = Formatter.getDistanceFormatter().formatDistance(this, distance)
+            binding.activityDrivingPoiItem.poiItemMillage.text = Formatter.getDistanceFormatter().formatDistance(this, distance)
         }
     }
 
@@ -422,9 +433,14 @@ class DrivingActivity : BaseTripRecordingActivity() {
             setCustomView(R.layout.driving_activity_toolbar)
         } ?: throw IllegalStateException("Toolbar not found. Have you disabled it in manifest?")
 
-        activity_driving_toolbar_loading_panel.visibility = View.VISIBLE
-        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
-        activity_driving_toolbar_way_point_panel.visibility = View.GONE
+
+        val toolbarView = supportActionBar?.customView
+            ?: throw IllegalStateException("Cannot get toolbar view")
+
+        bindingToolbar = DrivingActivityToolbarBinding.bind(toolbarView)
+        bindingToolbar.activityDrivingToolbarLoadingPanel.visibility = View.VISIBLE
+        bindingToolbar.activityDrivingToolbarTrailNamePanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarWayPointPanel.visibility = View.GONE
     }
 
     override fun setupButtons() {
@@ -433,27 +449,30 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
         Log.v(TAG, "setupButtons()")
 
-        activity_driving_poi_list_expander.drawDownArrowOnLeftSide()
-        activity_driving_poi_list_expander.setOnClickListener {
+        binding.activityDrivingPoiListExpander.drawDownArrowOnLeftSide()
+        binding.activityDrivingPoiListExpander.setOnClickListener {
             toggleListView()
         }
 
-        activity_driving_layer_button.setOnClickListener {
+        binding.activityDrivingLayerButton.setOnClickListener {
             onToggleMapStyle()
         }
 
     }
 
     private fun initRecordingPanel() {
-        buttonsPanel = TripRecordingButtonsPanel(component_trip_recording_stat_duration,
-            component_trip_recording_stat_distance, component_trip_recording_start_button,
-            component_trip_recording_stop_button, component_trip_recording_resume_button,
-            component_trip_recording_finish_button, activity_driving_add_poi_button, this)
+        val buttons = binding.activityTripRecordingButtons
+        buttonsPanel = TripRecordingButtonsPanel(
+            buttons.componentTripRecordingStatDuration,
+            buttons.componentTripRecordingStatDistance, buttons.componentTripRecordingStartButton,
+            buttons.componentTripRecordingStopButton, buttons.componentTripRecordingResumeButton,
+            buttons.componentTripRecordingFinishButton, binding.activityDrivingAddPoiButton, this)
 
+        val stats = binding.activityTripRecordingStats
         statsPanel = TripRecordingStatsPanel(
-            component_trip_recording_stats_speed, component_trip_recording_stats_heading,
-            component_trip_recording_stats_elevation, component_trip_recording_stats_lat,
-            component_trip_recording_stats_lon, this
+            stats.componentTripRecordingStatsSpeed, stats.componentTripRecordingStatsHeading,
+            stats.componentTripRecordingStatsElevation, stats.componentTripRecordingStatsLat,
+            stats.componentTripRecordingStatsLon, this
         )
     }
 
@@ -461,7 +480,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private fun setupListView() {
 
         poiListAdapter = WaypointListAdapter(this, mutableListOf(), displayDescription = false, displayAction = true)
-        activity_driving_list.adapter = poiListAdapter
+        binding.activityDrivingList.adapter = poiListAdapter
 
         makeListVisible(false)
 
@@ -501,7 +520,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
     private fun scrollListToItem(point: TrailDriveWaypoint) {
         val position = poiListAdapter.getPosition(point)
-        activity_driving_list.smoothScrollToPosition(position)
+        binding.activityDrivingList.smoothScrollToPosition(position)
     }
 
     private fun isListMediumSize() = listSize == ListViewSize.MEDIUM
@@ -509,7 +528,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private fun setupNextWayPointLabels() {
         Log.v(TAG, "setupNextWayPointLabels()")
 
-        viewModel.navigatorStatus.observe(this, Observer { navigatorStatus ->
+        viewModel.navigatorStatus.observe(this, { navigatorStatus ->
             @Suppress("REDUNDANT_ELSE_IN_WHEN")
             when(navigatorStatus.status) {
                 NavigatorStatusType.NOT_READY -> {
@@ -553,49 +572,49 @@ class DrivingActivity : BaseTripRecordingActivity() {
                                         title: String) {
 
         if (icon == null) {
-            activity_driving_toolbar_way_point_panel_direction_icon.visibility = View.GONE
+            bindingToolbar.activityDrivingToolbarWayPointPanelDirectionIcon.visibility = View.GONE
         } else {
-            activity_driving_toolbar_way_point_panel_direction_icon.visibility = View.VISIBLE
+            bindingToolbar.activityDrivingToolbarWayPointPanelDirectionIcon.visibility = View.VISIBLE
             val iconId = when(icon) {
                 TrailNavigator.Direction.AT_POINT -> R.string.chequered_flag_character
                 TrailNavigator.Direction.FORWARD -> R.string.upwards_arrow_character
                 TrailNavigator.Direction.BACKWARD -> R.string.downwards_arrow_character
             }
-            activity_driving_toolbar_way_point_panel_direction_icon.text = getString(iconId)
+            bindingToolbar.activityDrivingToolbarWayPointPanelDirectionIcon.text = getString(iconId)
         }
 
         if (distance == null) {
-            activity_driving_toolbar_way_point_distance.visibility = View.GONE
+            bindingToolbar.activityDrivingToolbarWayPointDistance.visibility = View.GONE
         } else {
-            activity_driving_toolbar_way_point_distance.visibility = View.VISIBLE
-            activity_driving_toolbar_way_point_distance.text =
+            bindingToolbar.activityDrivingToolbarWayPointDistance.visibility = View.VISIBLE
+            bindingToolbar.activityDrivingToolbarWayPointDistance.text =
                 distanceFormatter.formatDistance(this, distance)
         }
 
-        activity_driving_toolbar_way_point_name.text = title
+        bindingToolbar.activityDrivingToolbarWayPointName.text = title
 
-        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
-        activity_driving_toolbar_way_point_panel.visibility = View.VISIBLE
-        activity_driving_toolbar_wrong_direction.visibility = View.GONE
-        activity_driving_toolbar_trail_lost.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarTrailNamePanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarWayPointPanel.visibility = View.VISIBLE
+        bindingToolbar.activityDrivingToolbarWrongDirection.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarTrailLost.visibility = View.GONE
     }
 
     private fun showTrailLost() {
         Log.v(TAG, "showTrailLost()")
 
-        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
-        activity_driving_toolbar_way_point_panel.visibility = View.GONE
-        activity_driving_toolbar_wrong_direction.visibility = View.GONE
-        activity_driving_toolbar_trail_lost.visibility = View.VISIBLE
+        bindingToolbar.activityDrivingToolbarTrailNamePanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarWayPointPanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarWrongDirection.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarTrailLost.visibility = View.VISIBLE
     }
 
     private fun showWrongDirection() {
         Log.v(TAG, "showWrongDirection()")
 
-        activity_driving_toolbar_trail_name_panel.visibility = View.GONE
-        activity_driving_toolbar_way_point_panel.visibility = View.GONE
-        activity_driving_toolbar_wrong_direction.visibility = View.VISIBLE
-        activity_driving_toolbar_trail_lost.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarTrailNamePanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarWayPointPanel.visibility = View.GONE
+        bindingToolbar.activityDrivingToolbarWrongDirection.visibility = View.VISIBLE
+        bindingToolbar.activityDrivingToolbarTrailLost.visibility = View.GONE
     }
 
     private fun moveListViewGuideLine() {
@@ -606,47 +625,47 @@ class DrivingActivity : BaseTripRecordingActivity() {
                 makeListVisible(false)
                 //make only the activity_driving_main_view visible
                 val guidelinePercent =
-                        (activity_driving_poi_item.height.toFloat() / activity_driving_main_view.height)
+                        (binding.activityDrivingPoiItem.root.height.toFloat() / binding.activityDrivingMainView.height)
 
-                activity_driving_list_bottom_guideline.setGuidelinePercent(guidelinePercent)
-                activity_driving_map_top_guideline.setGuidelinePercent(guidelinePercent)
-                activity_driving_poi_list_expander.drawDownArrowOnLeftSide()
+                binding.activityDrivingListBottomGuideline.setGuidelinePercent(guidelinePercent)
+                binding.activityDrivingMapTopGuideline.setGuidelinePercent(guidelinePercent)
+                binding.activityDrivingPoiListExpander.drawDownArrowOnLeftSide()
             }
             ListViewSize.MEDIUM -> {
                 makeListVisible(true)
-                activity_driving_list_bottom_guideline.setGuidelinePercent(0.4f)
-                activity_driving_map_top_guideline.setGuidelinePercent(0.4f)
-                activity_driving_poi_list_expander.drawUpArrowOnLeftSide()
+                binding.activityDrivingListBottomGuideline.setGuidelinePercent(0.4f)
+                binding.activityDrivingMapTopGuideline.setGuidelinePercent(0.4f)
+                binding.activityDrivingPoiListExpander.drawUpArrowOnLeftSide()
             }
             ListViewSize.MAXIMUM -> {
                 makeListVisible(true)
                 val guidelinePercent = 1.0f -
-                        (activity_driving_recording_panel.height.toFloat() / activity_driving_main_view.height)
+                        (binding.activityDrivingRecordingPanel.height.toFloat() / binding.activityDrivingMainView.height)
 
-                activity_driving_list_bottom_guideline.setGuidelinePercent(guidelinePercent)
+                binding.activityDrivingListBottomGuideline.setGuidelinePercent(guidelinePercent)
                 // keep map visible to avoid mapbox crashes caused by its height being 0
                 // the list will overflow the map so it will look like it's hidden
-                activity_driving_poi_list_expander.drawUpArrowOnLeftSide()
+                binding.activityDrivingPoiListExpander.drawUpArrowOnLeftSide()
             }
         }
     }
 
     private fun makeListVisible(visible: Boolean) {
         if (visible) {
-            activity_driving_list.emptyView = activity_driving_empty_list_label
+            binding.activityDrivingList.emptyView = binding.activityDrivingEmptyListLabel
         } else {
             // Need to remove the emptyView to make the `visibility = View.GONE` working
-            activity_driving_list.emptyView = null
+            binding.activityDrivingList.emptyView = null
         }
-        activity_driving_list.visibility = visible.visibility
-        activity_driving_empty_list_label.visibility = visible.visibility
-        activity_driving_poi_item.visibility = (!visible).visibility
+        binding.activityDrivingList.visibility = visible.visibility
+        binding.activityDrivingEmptyListLabel.visibility = visible.visibility
+        binding.activityDrivingPoiItem.root.visibility = (!visible).visibility
     }
 
     @UiThread
     private fun hideProgressBar() {
         Log.d(TAG, "hideProgressBar()")
-        activity_driving_list_loading_progress.visibility = View.GONE
+        binding.activityDrivingListLoadingProgress.visibility = View.GONE
     }
 
     private fun onAccuTerraMapViewReady() {
@@ -654,7 +673,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
         // Try to register location observers to obtain device location
         tryRegisteringLocationObservers()
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             addTrailLayers()
             setupRecordingAfterOnAccuTerraMapViewReady()
             getDrivingModeButton().show()
@@ -677,12 +696,12 @@ class DrivingActivity : BaseTripRecordingActivity() {
             trailLayersManager = getAccuTerraMapView().trailLayersManager
             isTrailsLayerManagersLoaded = true
 
-            viewModel.trail.observe(this@DrivingActivity, Observer { trail ->
+            viewModel.trail.observe(this@DrivingActivity, { trail ->
                 if (trail == null) {
                     Log.d(TAG, "addTrailLayers() - the trail has not been loaded yet")
                 } else {
                     // Load the one particular trail
-                    lifecycleScope.launchWhenCreated {
+                    lifecycleScope.launchWhenResumed {
                         val filter = TrailLoadFilter(listOf(trail.info.id))
                         trailLayersManager.addStandardLayers(filter)
                         filterTrail(trail)
@@ -695,14 +714,14 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private fun filterTrail(trail: Trail) {
         Log.i(TAG, "filterTrail(trail=${trail.info.id})")
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Main) {
                 trailLayersManager.setVisibleTrails(setOf(trail.info.id))
                 trailLayersManager.highlightTrail(trail.info.id)
 
                 trailLayersManager.showTrailPOIs(trail)
 
-                viewModel.navigatorStatus.observe(this@DrivingActivity, Observer { navigatorStatus ->
+                viewModel.navigatorStatus.observe(this@DrivingActivity, { navigatorStatus ->
                     if (navigatorStatus.status == NavigatorStatusType.NAVIGATING) {
                         trailLayersManager.highlightPOI(navigatorStatus.nextWayPoint!!.trailPOI.id)
                     }
@@ -720,11 +739,11 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     private fun registerLocationObservers() {
-        viewModel.lastLocation.observe(this, Observer { lastLocation ->
+        viewModel.lastLocation.observe(this, { lastLocation ->
             updateLocationOnMap(lastLocation)
         })
 
-        viewModel.trail.observe(this, Observer { trail ->
+        viewModel.trail.observe(this, { trail ->
             if (trail != null) {
                 initializeTrailNavigator(trail, viewModel.trailDrive)
             }
@@ -749,7 +768,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
                 addListener(trailNavigatorListener)
             }
 
-        viewModel.lastLocation.observe(this, Observer { lastLocation ->
+        viewModel.lastLocation.observe(this, { lastLocation ->
             Log.v(TAG, "update trailNavigator location $lastLocation")
 
             if (lastLocation != null) {
@@ -760,7 +779,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
     @UiThread
     private fun initializeTrailPathSimulatorLocationEngine() {
-        viewModel.trail.observe(this, Observer { trail ->
+        viewModel.trail.observe(this, { trail ->
             if (trail != null) {
                 trailPathLocationSimulator = TrailPathLocationSimulator(viewModel.trailDrive, this)
                 trailPathLocationSimulator?.start()
@@ -778,7 +797,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
             if (isNewWayPoint && listSize != ListViewSize.MINIMUM) {
                 val position = poiListAdapter.getPosition(status.nextWayPoint.trailPOI)
-                activity_driving_list.smoothScrollToPosition(position)
+                binding.activityDrivingList.smoothScrollToPosition(position)
             }
         }
 
@@ -801,7 +820,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
         override fun onStyleChanged(mapboxMap: MapboxMap) {
             Log.v(TAG, "AccuTerraMapViewListener.onStyleChanged()")
             weakActivity.get()?.let { activity ->
-                activity.getMapLayerButton()?.isEnabled = true
+                activity.getMapLayerButton().isEnabled = true
                 activity.getDrivingModeButton().isEnabled = true
             }
         }
@@ -824,6 +843,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
         override fun onDidFailLoadingMap(errorMessage: String?) {
             Log.e(TAG, "MapLoadingFailListener.onDidFailLoadingMap(errorMessage=$errorMessage)")
+            CrashSupport.reportError(errorMessage)
 
             weakActivity.get()?.let { context ->
                 DialogUtil.buildOkDialog(context,"Error",

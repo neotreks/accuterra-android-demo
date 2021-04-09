@@ -81,6 +81,7 @@
         <!-- Speed, heading, Elevation, LatLon -->
 
         <include
+            android:id="@+id/activity_trip_recording_stats"
             layout="@layout/component_trip_recording_stats"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

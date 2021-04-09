@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <!-- COMMENTS ICON -->
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/fragment_trail_ugc_comments_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
 
         <!-- Add Comment -->
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/fragment_trail_ugc_add_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/fragment_trail_ugc_rating_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
                 android:textColor="@android:color/holo_blue_light"
                 tools:text="4.5" />
 
-            <androidx.appcompat.widget.AppCompatRatingBar
+            <RatingBar
                 android:id="@+id/fragment_trail_ugc_rating_stars"
                 style="@style/UserRatingBar"
                 android:layout_width="wrap_content"

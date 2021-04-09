@@ -7,12 +7,22 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import kotlinx.android.synthetic.main.fragment_trail_description_content.view.*
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentTrailDescriptionContentBinding
 import kotlinx.coroutines.launch
 
 class TrailDescriptionFragment: TrailInfoFragment() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private val viewModel: TrailInfoViewModel by activityViewModels()
+
+    private lateinit var binding: FragmentTrailDescriptionContentBinding
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -21,8 +31,9 @@ class TrailDescriptionFragment: TrailInfoFragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 val highlights = trail?.info?.highlights
                     ?: return@launch
-                view.fragment_trail_info_description.text = HtmlCompat.fromHtml(highlights, HtmlCompat.FROM_HTML_MODE_LEGACY)
-                view.fragment_trail_info_description.movementMethod = LinkMovementMethod.getInstance()
+                val binding = FragmentTrailDescriptionContentBinding.bind(view)
+                binding.fragmentTrailInfoDescription.text = HtmlCompat.fromHtml(highlights, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                binding.fragmentTrailInfoDescription.movementMethod = LinkMovementMethod.getInstance()
 
             }
         })

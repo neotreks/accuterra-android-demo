@@ -8,8 +8,8 @@ import android.text.InputFilter
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.DialogUserInputTextBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
-import kotlinx.android.synthetic.main.dialog_user_input_text.view.*
 
 /**
  * Utility class to display dialogs
@@ -75,7 +75,8 @@ object DialogUtil {
 
         // Create input view
         val view = context.layoutInflater.inflate(R.layout.dialog_user_input_text, null)
-        val textView = view.dialog_user_input_text_text
+        val binding = DialogUserInputTextBinding.bind(view)
+        val textView = binding.dialogUserInputTextText
 
         val opt = options ?: InputDialogOptions()
         val minInputLength = opt.minInputLength

@@ -8,18 +8,24 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityObjectUploadBinding
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.toast
+import com.neotreks.accuterra.mobile.demo.ui.OnListItemLongClickListener
+import com.neotreks.accuterra.mobile.demo.util.DemoAppFileProvider
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
+import com.neotreks.accuterra.mobile.demo.util.MimeUtil
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
-import kotlinx.android.synthetic.main.activity_object_upload.*
-import kotlinx.android.synthetic.main.general_toolbar.*
+import com.neotreks.accuterra.mobile.sdk.sync.model.UploadRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Activity displaying upload request related to given object
@@ -31,6 +37,8 @@ class ObjectUploadActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private val viewModel: ObjectUploadViewModel by viewModels()
+
+    private lateinit var binding: ActivityObjectUploadBinding
 
     private lateinit var adapter: UploadRequestAdapter
 
@@ -59,7 +67,8 @@ class ObjectUploadActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_object_upload)
+        binding = ActivityObjectUploadBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setupToolbar()
         registerObservers()
@@ -70,7 +79,7 @@ class ObjectUploadActivity : AppCompatActivity() {
         lifecycleScope.launchWhenCreated {
             viewModel.uuid.value?.let { uuid ->
                 displayProgressBar()
-                viewModel.loadUploadRequests(this@ObjectUploadActivity, uuid)
+                viewModel.loadData(this@ObjectUploadActivity, uuid)
                 hideProgressBar()
             }
         }
@@ -131,8 +140,8 @@ class ObjectUploadActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.upload_resume_upload_title)
+        setSupportActionBar(binding.activityObjectUploadToolbar.generalToolbar)
+        binding.activityObjectUploadToolbar.generalToolbarTitle.text = getString(R.string.upload_resume_upload_title)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -142,24 +151,32 @@ class ObjectUploadActivity : AppCompatActivity() {
     }
 
     private fun registerObservers() {
-        viewModel.uuid.observe(this, Observer { uuid ->
-            activity_object_upload_title_value.text = uuid
+        viewModel.uuid.observe(this, { uuid ->
+            binding.activityObjectUploadTitleValue.text = uuid
         })
-        viewModel.requests.observe(this, Observer { requests ->
+        viewModel.requests.observe(this, { requests ->
             Log.d(TAG, "Upload requests count: ${requests.size}")
             adapter.setItems(requests)
+        })
+        viewModel.workerInfo.observe(this, { info ->
+            binding.activityObjectUploadWorkerStatus.text = info.joinToString { "State: ${it.state}, attempt count: ${it.attemptCount}" }
         })
     }
 
     private fun setupListView() {
         adapter = UploadRequestAdapter(this, mutableListOf())
-        activity_object_upload_list.adapter = adapter
+        binding.activityObjectUploadList.adapter = adapter
+        adapter.setOnListItemLongClickListener(object : OnListItemLongClickListener<UploadRequest> {
+            override fun onListItemLongClick(item: UploadRequest, view: View) {
+                onShareUpload(item)
+            }
+        })
         // Swipe listener
-        activity_object_upload_swipe_refresh.setOnRefreshListener {
+        binding.activityObjectUploadSwipeRefresh.setOnRefreshListener {
             onDoRefresh()
         }
         // Set `no data` view
-        activity_object_upload_list.emptyView = activity_object_upload_list_no_data_label
+        binding.activityObjectUploadList.emptyView = binding.activityObjectUploadListNoDataLabel
     }
 
     private fun onDoRefresh() {
@@ -179,9 +196,12 @@ class ObjectUploadActivity : AppCompatActivity() {
                 UploadRequestViewBinder.buildFullInfo(request)
             }
 
+            // Worker info
+            val workerStates = viewModel.workerInfo.value
+
             // Build full list of data
             val label = "Upload requests for: ${viewModel.uuid.value}"
-            val data = listOf(label) + (infos ?: listOf())
+            val data = listOf(label) + (workerStates?.map { it.toString() } ?: listOf())  + (infos ?: listOf())
 
             // Gets a handle to the clipboard service.
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -219,12 +239,48 @@ class ObjectUploadActivity : AppCompatActivity() {
         }
     }
 
+    private fun onShareUpload(item: UploadRequest) {
+        try {
+            val path = item.dataPath
+            if (path.isNullOrBlank()) {
+                toast(getString(R.string.activity_upload_object_error_no_file))
+                return
+            }
+            val file = File(path)
+            if (!file.exists()) {
+                toast(getString(R.string.activity_upload_object_error_file_not_exists, file.path))
+                return
+            }
+            val uri = FileProvider.getUriForFile(
+                applicationContext, DemoAppFileProvider.AUTHORITY, file
+            )
+            val mime = MimeUtil.getMimeType(file)
+            if (mime == null) {
+                toast(getString(R.string.activity_upload_object_error_getting_mime, file.path))
+                return
+            }
+            val shareIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.activity_upload_object_sharing_trip_file, item.dataUuid))
+                putExtra(Intent.EXTRA_TEXT, item.toString())
+                type = mime
+            }
+            shareIntent.clipData = ClipData.newUri(contentResolver, file.name, uri)
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(Intent.createChooser(shareIntent, "Send to"))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error while sharing a file: ${item.dataPath}", e)
+            CrashSupport.reportError(e, "Error while sharing a file: ${item.dataPath}")
+        }
+    }
+
     private fun displayProgressBar() {
-        activity_object_upload_swipe_refresh.isRefreshing = true
+        binding.activityObjectUploadSwipeRefresh.isRefreshing = true
     }
 
     private fun hideProgressBar() {
-        activity_object_upload_swipe_refresh.isRefreshing = false
+        binding.activityObjectUploadSwipeRefresh.isRefreshing = false
     }
 
 }

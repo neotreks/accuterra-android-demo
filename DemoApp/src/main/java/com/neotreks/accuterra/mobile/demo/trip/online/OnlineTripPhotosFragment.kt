@@ -4,18 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentOnlineTripPhotosBinding
 import com.neotreks.accuterra.mobile.demo.ui.GlideProgressIndicator
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripMedia
 import com.neotreks.accuterra.mobile.sdk.trip.service.ITripMediaService
-import kotlinx.android.synthetic.main.fragment_online_trip_photos.*
-import kotlinx.android.synthetic.main.fragment_online_trip_photos.view.*
 
 /**
  * Online trip Map fragment
@@ -25,6 +22,8 @@ class OnlineTripPhotosFragment : OnlineTripFragment() {
     /* * * * * * * * * * * * */
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
+
+    private lateinit var binding: FragmentOnlineTripPhotosBinding
 
     private lateinit var mediaListManager: OnlineTripMediaListManager
 
@@ -39,8 +38,9 @@ class OnlineTripPhotosFragment : OnlineTripFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_online_trip_photos, container, false)
+    ): View {
+        binding = FragmentOnlineTripPhotosBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /** Load trip data into the UI */
@@ -50,11 +50,11 @@ class OnlineTripPhotosFragment : OnlineTripFragment() {
         mediaService = ServiceFactory.getTripMediaService(requireContext())
 
         // Setup the photo manager
-        mediaListManager = buildMediaManager(view)
+        mediaListManager = buildMediaManager()
         mediaListManager.setupPhotoGrid()
 
         // Load trip photos into the UI
-        viewModel.trip.observe(viewLifecycleOwner, Observer { trip ->
+        viewModel.trip.observe(viewLifecycleOwner, { trip ->
             if (trip != null) {
                 // We do merge trip photos with POI photos to show everything together
                 val poiMedia = trip.navigation.points.flatMap { point ->
@@ -77,11 +77,11 @@ class OnlineTripPhotosFragment : OnlineTripFragment() {
     /*        PRIVATE        */
     /* * * * * * * * * * * * */
 
-    private fun buildMediaManager(view: View): OnlineTripMediaListManager {
+    private fun buildMediaManager(): OnlineTripMediaListManager {
         return OnlineTripMediaListManager(
             requireContext(),
             lifecycleScope,
-            view.fragment_online_trip_photos,
+            binding.fragmentOnlineTripPhotos,
             object : OnlineTripMediaListManager.TripMediaListClickListener {
                 override fun onItemClicked(media: TripMedia) {
                     viewModel.selectedMediaUrl = media.url
@@ -96,7 +96,7 @@ class OnlineTripPhotosFragment : OnlineTripFragment() {
     }
 
     private fun setupImageDetailListener() {
-        fragment_online_trip_photo_detail.setOnClickListener {
+        binding.fragmentOnlineTripPhotoDetail.setOnClickListener {
             val selectedUrl = viewModel.selectedMediaUrl
                 ?: return@setOnClickListener
             val intent = OnlineTripMediaActivity.createNavigateToIntent(
@@ -116,14 +116,14 @@ class OnlineTripPhotosFragment : OnlineTripFragment() {
             val uri = mediaService.getMediaFile(imageUrl).value
             Glide.with(this@OnlineTripPhotosFragment)
                 .applyDefaultRequestOptions(options)
-                .addDefaultRequestListener(GlideProgressIndicator(fragment_online_trip_photo_detail_progress))
+                .addDefaultRequestListener(GlideProgressIndicator(binding.fragmentOnlineTripPhotoDetailProgress))
                 .load(uri)
-                .into(fragment_online_trip_photo_detail)
+                .into(binding.fragmentOnlineTripPhotoDetail)
         }
     }
 
     private fun displayProgress() {
-        fragment_online_trip_photo_detail_progress.visibility = true.visibility
+        binding.fragmentOnlineTripPhotoDetailProgress.visibility = true.visibility
     }
 
 }

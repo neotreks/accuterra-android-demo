@@ -9,12 +9,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentRecordedTripMapBinding
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
-import kotlinx.android.synthetic.main.fragment_recorded_trip_map.*
 import java.lang.ref.WeakReference
 
 /**
@@ -34,6 +33,8 @@ class RecordedTripMapFragment : RecordedTripFragment() {
     // Current style id
     private var currentStyle = AccuTerraStyle.VECTOR
 
+    private lateinit var binding: FragmentRecordedTripMapBinding
+
     /* * * * * * * * * * * * */
     /*       COMPANION       */
     /* * * * * * * * * * * * */
@@ -51,8 +52,9 @@ class RecordedTripMapFragment : RecordedTripFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_recorded_trip_map, container, false)
+    ): View {
+        binding = FragmentRecordedTripMapBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -106,7 +108,7 @@ class RecordedTripMapFragment : RecordedTripFragment() {
     /* * * * * * * * * * * * */
 
     private fun getAccuTerraMapView(): AccuTerraMapView {
-        return fragment_recorded_trip_map_map
+        return binding.fragmentRecordedTripMapMap
     }
 
     private fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
@@ -137,14 +139,14 @@ class RecordedTripMapFragment : RecordedTripFragment() {
         getAccuTerraMapView().getMapboxMap().uiSettings.isCompassEnabled = false
         // Try to register location observers to obtain device location
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             // Add trip layers to the map
             getAccuTerraMapView().tripLayersManager.addStandardTripLayers()
             // Load trip data into the UI
             viewModel.trip.observe(viewLifecycleOwner, Observer { trip ->
                 if (trip == null) return@Observer
                 // Description
-                activity_recorded_trip_description.text = trip.tripInfo.description
+                binding.activityRecordedTripDescription.text = trip.tripInfo.description
                 // Load trip into the map
                 addTripToMap(trip.systemAttributes.uuid)
                 // Zoom to path area
@@ -154,7 +156,7 @@ class RecordedTripMapFragment : RecordedTripFragment() {
     }
 
     private fun addTripToMap(tripUuid: String) {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             val tripLayersManager = getAccuTerraMapView().tripLayersManager
             tripLayersManager.setVisibleTripId(tripUuid)
         }
@@ -181,7 +183,7 @@ class RecordedTripMapFragment : RecordedTripFragment() {
         override fun onStyleChanged(mapboxMap: MapboxMap) {
             weakFragment.get()?.let { fragment ->
                 // Reload recorded trip path after the style has changed
-                fragment.lifecycleScope.launchWhenCreated {
+                fragment.lifecycleScope.launchWhenResumed {
                     fragment.getAccuTerraMapView().tripLayersManager.setVisibleTripId(fragment.viewModel.tripUuid)
                 }
             }

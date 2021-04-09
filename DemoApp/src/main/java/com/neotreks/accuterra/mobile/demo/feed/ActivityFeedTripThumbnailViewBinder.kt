@@ -2,15 +2,17 @@ package com.neotreks.accuterra.mobile.demo.feed
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.bumptech.glide.Glide
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityFeedOnlineTripThumbnailItemBinding
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariant
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariantUtil
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
-import kotlinx.android.synthetic.main.activity_feed_online_trip_thumbnail_item.view.*
 
 /**
  * View binder for the Trip Thumbnail item
@@ -32,6 +34,7 @@ class ActivityFeedTripThumbnailViewBinder(
     /* * * * * * * * * * * * */
 
     companion object {
+        private const val TAG = "ActFeedTripThumbnailVB"
         fun getViewResourceId(): Int {
             return R.layout.activity_feed_online_trip_thumbnail_item
         }
@@ -49,7 +52,8 @@ class ActivityFeedTripThumbnailViewBinder(
         val options = UiUtils.getDefaultImageOptions()
 
         // Set the placeholder before getting the right image
-        val imageView = view.activity_feed_online_trip_thumbnail_map
+        val binding =  ActivityFeedOnlineTripThumbnailItemBinding.bind(view)
+        val imageView = binding.activityFeedOnlineTripThumbnailMap
         imageView.setImageResource(options.placeholderId)
 
         lifecycleScope.launchWhenCreated {
@@ -61,6 +65,10 @@ class ActivityFeedTripThumbnailViewBinder(
                 val result = mediaService.getMediaFile(url)
                 if (result.isSuccess) {
                     uri = result.value!!
+                } else {
+                    Log.e(TAG, "Error while binding a view: ${result.buildErrorMessage()}",
+                        result.error)
+                    CrashSupport.reportError(result)
                 }
             }
             if (uri == null) {

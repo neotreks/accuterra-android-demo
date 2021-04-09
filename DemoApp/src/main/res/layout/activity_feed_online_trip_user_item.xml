@@ -9,7 +9,7 @@
 
     <!-- ICON -->
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/activity_feed_trip_user_icon_card"
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -28,7 +28,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/user_avatar" />
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="0dp"
@@ -40,7 +40,7 @@
         android:orientation="vertical">
 
         <!-- NAME -->
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/activity_feed_trip_user_user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             android:ellipsize="end" />
 
         <!-- DATE -->
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/activity_feed_trip_user_trip_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

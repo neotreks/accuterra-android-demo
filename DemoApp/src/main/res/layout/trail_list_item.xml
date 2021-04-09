@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:padding="8dp">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/trail_list_item_difficulty_level"
         android:layout_width="16dp"
         android:layout_height="0dp"
@@ -24,12 +24,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/trail_list_item_zoom_to_trail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_zoom_in_24px"
-            android:tint="@android:color/holo_blue_light"
+            app:tint="@android:color/holo_blue_light"
             android:background="@drawable/background_circle_ripple"
             android:backgroundTint="@android:color/holo_blue_light"
             android:padding="4dp"
@@ -38,12 +38,12 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/trail_list_item_show_trail_info_screen"/>
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/trail_list_item_show_trail_info_screen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_chevron_right_24px"
-            android:tint="@android:color/holo_blue_light"
+            app:tint="@android:color/holo_blue_light"
             android:background="@drawable/background_circle_ripple"
             android:backgroundTint="@android:color/holo_blue_light"
             android:padding="4dp"
@@ -72,7 +72,7 @@
             app:layout_constraintBottom_toTopOf="@id/trail_list_item_zoom_to_trail"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/trail_list_item_bookmark_unchecked"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -80,19 +80,19 @@
                 android:background="@drawable/background_circle"
                 android:padding="4dp" />
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/trail_list_item_bookmark_checked"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_bookmark_border_24px"
-                android:tint="@color/colorPrimaryDark"
+                app:tint="@color/colorPrimaryDark"
                 android:background="@drawable/background_circle"
                 android:backgroundTint="@color/colorPrimaryDark"
                 android:padding="4dp" />
 
         </FrameLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/trail_list_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
         app:layout_constraintStart_toStartOf="@id/trail_list_item_title_wrapper"
         android:gravity="center_vertical">
 
-        <androidx.appcompat.widget.AppCompatRatingBar
+        <RatingBar
             android:id="@+id/trail_list_item_rating_stars"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -126,7 +126,7 @@
             android:isIndicator="true"
             style="@style/Widget.AppCompat.RatingBar.Small" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/trail_list_item_rating_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -134,7 +134,7 @@
             tools:text="(37)"
             tools:ignore="KeyboardInaccessibleWidget" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/trail_list_item_no_rating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
 
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/trail_list_item_length"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -152,7 +152,7 @@
         app:layout_constraintStart_toStartOf="@id/trail_list_item_title_wrapper"
         tools:text="12.8 mil" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/trail_list_item_short_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

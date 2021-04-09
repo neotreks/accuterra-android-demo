@@ -25,6 +25,10 @@ class DemoApplication: Application() {
 
         Mapbox.getInstance(this, BuildConfig.MAPBOX_TOKEN)
 
+        // When set to true the Mapbox SDK will append SKU to each offline download request
+        // This way the offline request is charged per user session
+        Mapbox.UseSKUForOfflineDownload = true
+
         //
         // It is recommended to initialize the SDK context at the very beginning of the APK start.
         //

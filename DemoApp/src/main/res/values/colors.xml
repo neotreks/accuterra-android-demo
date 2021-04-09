@@ -6,6 +6,8 @@
     <color name="colorListSelection">#2000574B</color>
     <color name="colorListText">#000000</color>
     <color name="colorListTextSelection">#2161FF</color>
+    <color name="colorButtonBackground">#2161FF</color>
+    <color name="colorButtonText">#FFFFFF</color>
     <color name="colorListTextSubSelection">#4CAF50</color>
     <color name="colorDisabled">#929292</color>
     <!-- Rating -->
@@ -23,4 +25,12 @@
     <!-- ToolBar -->
     <color name="toolbarText">#FFFFFF</color>
     <color name="toolbarTextGrayed">#929292</color>
+
+    <!-- Trail Collection -->
+    <color name="trailCollectionBackground">#FFFFFF</color>
+    <color name="trailCollectionPrimaryBackground">#3EBFFF</color>
+
+    <color name="trailCollectionStatusRecording">#BF9F9F9F</color>
+    <color name="trailCollectionStatusPaused">#BFFFC570</color>
+
 </resources>

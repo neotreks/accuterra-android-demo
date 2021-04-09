@@ -11,15 +11,12 @@ import android.os.Bundle
 import android.os.Looper
 import android.text.format.Formatter
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.Window
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
@@ -29,6 +26,8 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
+import com.neotreks.accuterra.mobile.demo.databinding.ProgressValueDialogViewBinding
 import com.neotreks.accuterra.mobile.demo.extensions.setOnSingleClickListener
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItemAdapter
@@ -41,12 +40,11 @@ import com.neotreks.accuterra.mobile.sdk.map.*
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailsQueryBuilder
+import com.neotreks.accuterra.mobile.sdk.model.QueryLimitBuilder
+import com.neotreks.accuterra.mobile.sdk.model.TextSearchCriteriaBuilder
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
+import com.neotreks.accuterra.mobile.sdk.util.DelayedLastCallExecutor
 import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
-import kotlinx.android.synthetic.main.activity_trail_discovery.*
-import kotlinx.android.synthetic.main.component_basic_tabs.*
-import kotlinx.android.synthetic.main.progress_value_dialog_view.*
-import kotlinx.android.synthetic.main.trail_filter_dialog.*
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
 
@@ -69,6 +67,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
+
+    private lateinit var binding: ActivityTrailDiscoveryBinding
 
     private var bottomListSize = ListViewSize.MEDIUM
 
@@ -102,6 +102,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private lateinit var viewModel: TrailDiscoveryViewModel
 
+    private val listRefreshExecutor = DelayedLastCallExecutor(1500)
+
     private var lastSnackbar: Snackbar? = null
 
     // Current style id
@@ -113,21 +115,25 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         override fun onConnected(service: OfflineMapService) {
             offlineMapService = service
 
-            activity_trail_offlinemap_progress_layout.visibility = View.GONE
+            lifecycleScope.launchWhenCreated {
+                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                binding.activityTrailOfflinemapProgressLayout.visibility = View.GONE
 
-            if (networkStateReceiver?.isConnected() == true) {
-                checkOverlayMapCache()
+                if (networkStateReceiver.isConnected()) {
+                    checkOverlayMapCache()
+                }
             }
         }
 
         override fun onDisconnected() {
+            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
             offlineMapService = null
-            Log.e(TAG, "offlineMapService disconnected")
+            Log.d(TAG, "offlineMapService disconnected")
         }
     }
 
     private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
-        connectionListener, cacheProgressListener
+        connectionListener
     )
 
     private lateinit var networkStateReceiver: NetworkStateReceiver
@@ -156,17 +162,18 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this).get(TrailDiscoveryViewModel::class.java)
 
-        setContentView(R.layout.activity_trail_discovery)
+        binding = ActivityTrailDiscoveryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setupToolbar()
 
-        activity_trail_discovery_main_view.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        binding.activityTrailDiscoveryMainView.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         setupTabs()
         setupButtons()
         setupList()
         setupMap(savedInstanceState)
 
-        viewModel.trailsListItems.observe(this, Observer { items ->
+        viewModel.trailsListItems.observe(this, { items ->
             updateItemList(items)
         })
 
@@ -180,7 +187,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         networkStateReceiver.onResume()
 
         // Select the discovery tab if needed
-        component_basic_tabs.getTabAt(AppBasicTabs.TAB_DISCOVER_INDEX)?.select()
+        binding.activityTrailDiscoveryTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_DISCOVER_INDEX)?.select()
     }
 
     override fun onPause() {
@@ -195,6 +202,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             networkStateReceiver.onPause()
         } catch (ex: IllegalArgumentException) {
             Log.e(TAG, ex.message ?: "Error while unregistering network state listener")
+            CrashSupport.reportError(ex)
         }
     }
 
@@ -207,10 +215,16 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
-        accuTerraMapView.onStop()
         // this doesn't stop the service, because we called "startService" explicitly
         unbindService(offlineMapServiceConnection)
+        // Call standard stop functions
+        super.onStop()
+        try {
+            accuTerraMapView.onStop()
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error while stopping TrailDiscoveryActivity", e)
+            CrashSupport.reportError(e)
+        }
     }
 
     override fun onLowMemory() {
@@ -233,6 +247,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             SHOW_MY_LOCATION_PERMISSIONS_REQUEST -> {
                 if (grantResults.isNotEmpty() &&
@@ -245,7 +260,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (activity_trail_discovery_toolbar_search_field.visibility == View.VISIBLE) {
+        if (binding.activityTrailDiscoveryToolbarSearchField.visibility == View.VISIBLE) {
             setTrailNameFilter(null, isGlobalSearch = false)
         } else {
             super.onBackPressed()
@@ -266,7 +281,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         super.onPrepareOptionsMenu(menu)
 
         if (menu != null) {
-            val isShowingSearchField = activity_trail_discovery_toolbar_search_field.visibility == View.VISIBLE
+            val isShowingSearchField = binding.activityTrailDiscoveryToolbarSearchField.visibility == View.VISIBLE
 
             menu.findItem(R.id.trail_discovery_menu_item_search).isVisible  = !isShowingSearchField
             menu.findItem(R.id.trail_discovery_menu_item_cancel_search).isVisible  = isShowingSearchField
@@ -299,7 +314,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private fun setupMap(savedInstanceState: Bundle?) {
-        accuTerraMapView = accuterra_map_view
+        accuTerraMapView = binding.accuterraMapView
         accuTerraMapView.onCreate(savedInstanceState)
         accuTerraMapView.addListener(accuTerraMapViewListener)
         accuTerraMapView.addOnDidFailLoadingMapListener(mapViewLoadingFailListener)
@@ -307,7 +322,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         // Get previous map setup if available
         var mapSetup = getSavedMapSetup()
 
-        val networkAvailable = networkStateReceiver?.isConnected() ?: true
+        val networkAvailable = networkStateReceiver.isConnected()
         if (!networkAvailable) {
             styleId = styles.indexOfFirst { it == offlineStyles.first() }
         } else {
@@ -335,7 +350,9 @@ class TrailDiscoveryActivity : AppCompatActivity() {
      */
     private fun saveMapSetup(accuTerraMapView: AccuTerraMapView) {
         val setup =  accuTerraMapView.getMapSetupSnapshot()
-        DemoAppPreferences.saveMapSetup(this, MAP_ID, setup)
+        GlobalScope.launch {
+            DemoAppPreferences.saveMapSetup(applicationContext, MAP_ID, setup)
+        }
     }
 
     /**
@@ -349,10 +366,10 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         viewModel.defaultTitle = title
         viewModel.trailNameFilter = null // to keep this demo simple
 
-        activity_trail_discovery_toolbar_search_field.text = viewModel.trailNameFilter
-        activity_trail_discovery_toolbar_search_field.visibility = View.GONE
+        binding.activityTrailDiscoveryToolbarSearchField.text = viewModel.trailNameFilter
+        binding.activityTrailDiscoveryToolbarSearchField.visibility = View.GONE
 
-        activity_trail_discovery_toolbar_search_field.setOnEditorActionListener { view, actionId, _ ->
+        binding.activityTrailDiscoveryToolbarSearchField.setOnEditorActionListener { view, actionId, _ ->
 
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val searchString = view.text.toString().trim()
@@ -388,27 +405,30 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         })
 
         // Add layers and register map click handler
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             addTrailLayers()
             registerMapClickHandler()
             // Check if we need start the location tracking
             if (trackingOption.isShowLocationOption()) {
                 tryInitializeLocationTracking()
             }
-            // Register trail observers
-            registerTrailsObserverForMap()
+
+            binding.activityTrailDiscoveryMyLocationButton.show()
+            binding.activityTrailDiscoveryLayerButton.show()
+
+            refreshTrailsList(false, applyMapBoundsFilter = true)
         }
 
-        activity_trail_discovery_my_location_button.show()
-        activity_trail_discovery_layer_button.show()
-
-        refreshTrailsListAsync(false, applyMapBoundsFilter = true)
     }
 
     private fun checkOverlayMapCache() {
         val offlineCacheManager = offlineMapService?.offlineMapManager ?: return
-        lifecycleScope.launchWhenCreated {
-            when(offlineCacheManager.getOfflineMapStatus(OfflineMapType.OVERLAY)) {
+        lifecycleScope.launchWhenResumed {
+            val overlayOfflineMapStatus =
+                offlineCacheManager.getOverlayOfflineMap()?.status
+                ?: OfflineMapStatus.NOT_CACHED
+
+            when(overlayOfflineMapStatus) {
                 OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED ->
                 {
                     val estimateBytes = offlineCacheManager.estimateOverlayCacheSize()
@@ -421,8 +441,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                         title = getString(R.string.download),
                         message = getString(R.string.download_overlay_prompt, estimateText),
                         code = {
-                            lifecycleScope.launchWhenCreated {
-                                offlineCacheManager.downloadOfflineMap(OfflineMapType.OVERLAY)
+                            lifecycleScope.launchWhenResumed {
+                                offlineCacheManager.downloadOverlayOfflineMap()
                             }
                         }
                     ).show()
@@ -432,16 +452,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun registerTrailsObserverForMap() {
-        viewModel.trailsListItems.observe(this,
-            Observer { trailsListItems ->
-                val trailIds = trailsListItems
-                    ?.map { trailListItem -> trailListItem.id }
-                    ?.toSet()
-                    ?: emptySet()
-            })
     }
 
     private fun handleMapViewClick(latLng: LatLng) {
@@ -504,7 +514,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private fun handleMultipleTrailsMapClick() {
         val snackBar = Snackbar
-            .make(activity_trail_discovery_main_view, R.string.multiple_trails_in_this_area, Snackbar.LENGTH_SHORT)
+            .make(binding.activityTrailDiscoveryMainView, R.string.multiple_trails_in_this_area, Snackbar.LENGTH_SHORT)
 
         showNewSnackBar(snackBar)
 
@@ -525,7 +535,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         lastSnackbar?.dismiss()
 
         snackBar?.apply {
-            anchorView = accuterra_map_view
+            anchorView = binding.accuterraMapView
             animationMode = Snackbar.ANIMATION_MODE_FADE
             show()
         }
@@ -535,7 +545,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private fun handleTrailPoiMapClick(trailId: Long, poiId: Long) {
         val snackBar = Snackbar
-            .make(activity_trail_discovery_main_view, R.string.loading, Snackbar.LENGTH_INDEFINITE)
+            .make(binding.activityTrailDiscoveryMainView, R.string.loading, Snackbar.LENGTH_INDEFINITE)
 
         showNewSnackBar(snackBar)
 
@@ -565,7 +575,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private fun handleMultiTrailPoiMapClick() {
         val snackBar = Snackbar
-            .make(activity_trail_discovery_main_view, R.string.multiple_pois_in_this_area, Snackbar.LENGTH_SHORT)
+            .make(binding.activityTrailDiscoveryMainView, R.string.multiple_pois_in_this_area, Snackbar.LENGTH_SHORT)
 
         showNewSnackBar(snackBar)
 
@@ -581,7 +591,11 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
             zoomingToSearchedTrails = false
         } else {
-            refreshTrailsListAsync(zoomToResult = false, applyMapBoundsFilter = true)
+            lifecycleScope.launchWhenResumed {
+                listRefreshExecutor.execute {
+                    refreshTrailsList(zoomToResult = false, applyMapBoundsFilter = true)
+                }
+            }
         }
     }
 
@@ -594,7 +608,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         if (listItem != null) {
             val listIndex = trailsListItems.indexOf(listItem)
 
-            activity_trail_discovery_list.setSelection(listIndex)
+            binding.activityTrailDiscoveryList.setSelection(listIndex)
         } else {
             toast("Trail #$trailId is not on the current list.")
         }
@@ -633,16 +647,16 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             }
         })
 
-        activity_trail_discovery_list.emptyView = activity_trail_discovery_empty_list_label
-        activity_trail_discovery_list.adapter = trailsListAdapter
+        binding.activityTrailDiscoveryList.emptyView = binding.activityTrailDiscoveryEmptyListLabel
+        binding.activityTrailDiscoveryList.adapter = trailsListAdapter
 
-        activity_trail_discovery_list.setOnItemClickListener { _, _, position, _ ->
+        binding.activityTrailDiscoveryList.setOnItemClickListener { _, _, position, _ ->
             val trailListItem = trailsListAdapter.getItem(position)
                 ?: return@setOnItemClickListener
             handleTrailsListItemClick(trailListItem)
         }
 
-        activity_trail_discovery_download_updates_button.setOnSingleClickListener(
+        binding.activityTrailDiscoveryDownloadUpdatesButton.setOnSingleClickListener(
             onClicked = { onDownloadUpdates() }
         )
 
@@ -689,14 +703,15 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         val listener = object: ProgressChangedListener {
             override fun onProgressChanged(progress: Float) {
                 lifecycleScope.launchWhenCreated {
-                    dialog.progress_value_dialog_view_progress_bar.progress = (progress * 100).toInt()
+                    val binding = ProgressValueDialogViewBinding.bind(dialog.listView)
+                    binding.progressValueDialogViewProgressBar.progress = (progress * 100).toInt()
                 }
             }
         }
         GlobalScope.launch(Dispatchers.IO) {
             val result = service.updateTrailDb(listener)
             // Close the dialog
-            lifecycleScope.launchWhenCreated {
+            lifecycleScope.launchWhenResumed {
                 // Lets refresh the map in case of changes
                 if (result.value?.hasChangeActions() == true) {
                     accuTerraMapView.trailLayersManager.reloadLayers()
@@ -714,6 +729,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 } else {
                     dialog.dismiss()
                     longToast(getString(R.string.trail_updates_trail_db_update_failed, result.errorMessage))
+                    CrashSupport.reportError(result)
                 }
             }
         }
@@ -746,7 +762,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         if (trailId == null) {
             trailLayersManager.hideAllTrailPOIs()
         } else {
-            lifecycleScope.launchWhenCreated {
+            lifecycleScope.launchWhenResumed {
                 val trail = loadTrail(trailId)
 
                 if (trailId == viewModel.selectedTrailId) {
@@ -770,7 +786,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun zoomMapToTrail(trailId: Long) {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             val fullTrail = loadTrail(trailId)
 
             setLocationTracking(TrackingOption.NONE)
@@ -790,7 +806,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             return
         }
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             zoomingToSearchedTrails = true
 
             val mapBounds =
@@ -805,13 +821,13 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(activity_trail_discovery_toolbar)
+        setSupportActionBar(binding.activityTrailDiscoveryToolbar)
 
         setupSearchEditText()
     }
 
     private fun setupTabs() {
-        component_basic_tabs.addOnTabSelectedListener(
+        binding.activityTrailDiscoveryTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object : MainTabListener.MainTabListenerHelper {
                 override val context: Activity
                     get() = this@TrailDiscoveryActivity
@@ -837,29 +853,29 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        activity_trail_discovery_show_list_button.drawUpArrowOnLeftSide()
-        activity_trail_discovery_show_list_button.setOnClickListener {
+        binding.activityTrailDiscoveryShowListButton.drawUpArrowOnLeftSide()
+        binding.activityTrailDiscoveryShowListButton.setOnClickListener {
             toggleListView()
             trailsListAdapter.showActionIcons = bottomListSize.showListViewIcons
         }
 
-        activity_trail_discovery_my_location_button.setOnClickListener {
+        binding.activityTrailDiscoveryMyLocationButton.setOnClickListener {
             cycleTrackingOption()
         }
 
-        activity_trail_discovery_layer_button.setOnClickListener {
+        binding.activityTrailDiscoveryLayerButton.setOnClickListener {
             cycleStyle()
         }
     }
 
     private fun showSoftKeyboard() {
         val manager = this.getSystemService(Context.INPUT_METHOD_SERVICE) as (InputMethodManager)
-        manager.showSoftInput(activity_trail_discovery_toolbar_search_field, 0)
+        manager.showSoftInput(binding.activityTrailDiscoveryToolbarSearchField, 0)
     }
 
     private fun hideSoftKeyboard() {
         val manager = this.getSystemService(Context.INPUT_METHOD_SERVICE) as (InputMethodManager)
-        manager.hideSoftInputFromWindow(activity_trail_discovery_toolbar_search_field.windowToken, 0)
+        manager.hideSoftInputFromWindow(binding.activityTrailDiscoveryToolbarSearchField.windowToken, 0)
     }
 
     private fun hasLocationPermissions(): Boolean {
@@ -867,10 +883,10 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun cycleStyle() {
-        val isConnected = networkStateReceiver?.isConnected() ?: true
+        val isConnected = networkStateReceiver.isConnected()
         if (accuTerraMapView.isStyleLoaded()) {
-            activity_trail_discovery_layer_button.isEnabled = false
-            activity_trail_discovery_my_location_button.isEnabled = false
+            binding.activityTrailDiscoveryLayerButton.isEnabled = false
+            binding.activityTrailDiscoveryMyLocationButton.isEnabled = false
             styleId += 1
             if (styleId == styles.count()) {
                 styleId = 0
@@ -925,7 +941,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private fun updateLocationTrackingButton() {
         val icon = UiUtils.getLocationTrackingIcon(trackingOption, this)
-        activity_trail_discovery_my_location_button.setImageDrawable(icon)
+        binding.activityTrailDiscoveryMyLocationButton.setImageDrawable(icon)
     }
 
     private fun toggleListView() {
@@ -937,19 +953,19 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     private fun moveListViewGuideLine() {
         when(bottomListSize) {
             ListViewSize.MINIMUM -> {
-                activity_trail_discovery_list_top_guideline.setGuidelinePercent(
+                binding.activityTrailDiscoveryListTopGuideline.setGuidelinePercent(
                     //make only the activity_trail_discovery_main_view visible
-                    1.0f - activity_trail_discovery_show_list_button.height.toFloat() / activity_trail_discovery_main_view.height.toFloat()
+                    1.0f - binding.activityTrailDiscoveryShowListButton.height.toFloat() / binding.activityTrailDiscoveryMainView.height.toFloat()
                 )
-                activity_trail_discovery_show_list_button.drawUpArrowOnLeftSide()
+                binding.activityTrailDiscoveryShowListButton.drawUpArrowOnLeftSide()
             }
             ListViewSize.MEDIUM -> {
-                activity_trail_discovery_list_top_guideline.setGuidelinePercent(0.5f)
-                activity_trail_discovery_show_list_button.drawUpArrowOnLeftSide()
+                binding.activityTrailDiscoveryListTopGuideline.setGuidelinePercent(0.5f)
+                binding.activityTrailDiscoveryShowListButton.drawUpArrowOnLeftSide()
             }
             ListViewSize.MAXIMUM -> {
-                activity_trail_discovery_list_top_guideline.setGuidelinePercent(0.0f)
-                activity_trail_discovery_show_list_button.drawDownArrowOnLeftSide()
+                binding.activityTrailDiscoveryListTopGuideline.setGuidelinePercent(0.0f)
+                binding.activityTrailDiscoveryShowListButton.drawDownArrowOnLeftSide()
             }
         }
     }
@@ -963,96 +979,89 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun selectCurrentTab() {
-        component_basic_tabs.getTabAt(AppBasicTabs.TAB_DISCOVER_INDEX)!!.select()
+        binding.activityTrailDiscoveryTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_DISCOVER_INDEX)!!.select()
     }
 
     @UiThread
-    private fun refreshTrailsListAsync(zoomToResult: Boolean, applyMapBoundsFilter: Boolean) {
-        // Display progress bar
-        displayProgressBar()
+    private suspend fun refreshTrailsList(zoomToResult: Boolean, applyMapBoundsFilter: Boolean) {
+        withContext(Dispatchers.Main) {
+            // Display progress bar
+            displayProgressBar()
 
-        val cameraZoomCallback = { trailBasicInfos: Iterable<TrailBasicInfo> ->
-            if (zoomToResult) {
-                val trailIds = trailBasicInfos.map { trailInfo -> trailInfo.id }
-                zoomMapToTrails(trailIds)
+            val zoomCamera = { trails: Iterable<TrailBasicInfo> ->
+                if (zoomToResult) {
+                    val trailIds = trails.map { trailInfo -> trailInfo.id }
+                    zoomMapToTrails(trailIds)
+                }
             }
-        }
 
-        val trailNameFilter = viewModel.trailNameFilter
-        val maxDifficultyLevel = viewModel.maxDifficultyLevel?.level
-        val minUserRating = viewModel.minUserRating
-        val maxTripDistance = viewModel.maxTripDistance
-        val favorite = if (viewModel.favoriteOnly) true else null // We wan to use filter only in `favorite = true`
+            val trailNameFilter = viewModel.trailNameFilter?.let { TextSearchCriteriaBuilder.build(it) }
+            val maxDifficultyLevel = viewModel.maxDifficultyLevel?.level
+            val minUserRating = viewModel.minUserRating
+            val maxTripDistance = viewModel.maxTripDistance
+            val favorite = if (viewModel.favoriteOnly) true else null // We wan to use filter only in `favorite = true`
 
-        val techRatingSearchCriteria = if (maxDifficultyLevel == null) {
-            null
-        } else {
-            TechRatingSearchCriteria(maxDifficultyLevel, Comparison.LESS_EQUALS)
-        }
+            val techRatingSearchCriteria = maxDifficultyLevel?.let { TechRatingSearchCriteria(maxDifficultyLevel, Comparison.LESS_EQUALS) }
+            val userRatingSearchCriteria = minUserRating?.let { UserRatingSearchCriteria(minUserRating.toFloat(), Comparison.GREATER_EQUALS) }
+            val lengthSearchCriteria = maxTripDistance?.let { LengthSearchCriteriaBuilder.build(maxTripDistance.toFloat()) }
 
-        val userRatingSearchCriteria = if (minUserRating == null) {
-            null
-        } else {
-            UserRatingSearchCriteria(minUserRating.toFloat(), Comparison.GREATER_EQUALS)
-        }
+            val limit = QueryLimitBuilder.build(200)
 
-        val lengthSearchCriteria = if (maxTripDistance == null) {
-            null
-        } else {
-            LengthSearchCriteria(maxTripDistance.toFloat())
-        }
+            if (applyMapBoundsFilter) {
+                // Map Bounds filter
 
-        val limit = Int.MAX_VALUE
+                val mapBounds = if (bottomListSize == ListViewSize.MAXIMUM) {
+                    viewModel.lastSearchedMapBounds
+                } else {
+                    getVisibleMapBounds()
+                }
 
-        if (applyMapBoundsFilter) {
-            val mapBounds = if (bottomListSize == ListViewSize.MAXIMUM) {
-                viewModel.lastSearchedMapBounds
+                val searchCriteria = TrailMapBoundsSearchCriteria(
+                    mapBounds,
+                    nameSearchCriteria = trailNameFilter,
+                    techRating = techRatingSearchCriteria,
+                    userRating = userRatingSearchCriteria,
+                    length = lengthSearchCriteria,
+                    favorite = favorite,
+                    limit = limit
+                )
+
+                // Run the query
+                val trails = viewModel.findTrails(searchCriteria, this@TrailDiscoveryActivity)
+                zoomCamera.invoke(trails)
+
+                // backup the bounds settings. otherwise we won't be able to get them
+                // if the map is hidden and user wants to filter it
+                viewModel.lastSearchedMapBounds = mapBounds
             } else {
-                getVisibleMapBounds()
+
+                val searchCriteria = TrailMapSearchCriteria(
+                    mapCenter = getVisibleMapCenter(),
+                    nameSearchCriteria = trailNameFilter,
+                    techRating = techRatingSearchCriteria,
+                    userRating = userRatingSearchCriteria,
+                    length = lengthSearchCriteria,
+                    favorite = favorite,
+                    limit = limit
+                )
+
+                // Run the query
+                val trails = viewModel.findTrails(searchCriteria, this@TrailDiscoveryActivity)
+                zoomCamera.invoke(trails)
             }
-
-            val searchCriteria = TrailMapBoundsSearchCriteria(
-                mapBounds,
-                trailNameFilter,
-                techRatingSearchCriteria,
-                userRatingSearchCriteria,
-                lengthSearchCriteria,
-                favorite = favorite,
-                limit = limit
-            )
-
-            // Run the query
-            viewModel.findTrailsByMapBoundsAsync(searchCriteria, this, cameraZoomCallback)
-
-            // backup the bounds settings. otherwise we won't be able to get them
-            // if the map is hidden and user wants to filter it
-            viewModel.lastSearchedMapBounds = mapBounds
-        } else {
-            val searchCriteria = TrailMapSearchCriteria(
-                getVisibleMapCenter(),
-                trailNameFilter,
-                techRatingSearchCriteria,
-                userRatingSearchCriteria,
-                lengthSearchCriteria,
-                favorite = favorite,
-                limit = limit
-            )
-
-            // Run the query
-            viewModel.findTrailsByMapCenterAsync(searchCriteria, this, cameraZoomCallback)
         }
     }
 
     @UiThread
     private fun displayProgressBar() {
-        activity_trail_discovery_list_wrapper.visibility = View.GONE
-        activity_trail_discovery_list_loading_progress.visibility = View.VISIBLE
+        binding.activityTrailDiscoveryListWrapper.visibility = View.GONE
+        binding.activityTrailDiscoveryListLoadingProgress.visibility = View.VISIBLE
     }
 
     @UiThread
     private fun hideProgressBar() {
-        activity_trail_discovery_list_wrapper.visibility = View.VISIBLE
-        activity_trail_discovery_list_loading_progress.visibility = View.GONE
+        binding.activityTrailDiscoveryListWrapper.visibility = View.VISIBLE
+        binding.activityTrailDiscoveryListLoadingProgress.visibility = View.GONE
     }
 
     @UiThread
@@ -1075,7 +1084,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun showSearchUi() {
-        activity_trail_discovery_toolbar_search_field.apply {
+        binding.activityTrailDiscoveryToolbarSearchField.apply {
             setText(viewModel.trailNameFilter)
             visibility = View.VISIBLE
             requestFocus()
@@ -1103,12 +1112,14 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             viewModel.trailNameFilter
         }
 
-        activity_trail_discovery_toolbar_search_field.visibility = View.GONE
+        binding.activityTrailDiscoveryToolbarSearchField.visibility = View.GONE
 
         hideSoftKeyboard()
         invalidateOptionsMenu()
 
-        refreshTrailsListAsync(isGlobalSearch, !isGlobalSearch)
+        lifecycleScope.launchWhenResumed {
+            refreshTrailsList(isGlobalSearch, !isGlobalSearch)
+        }
     }
 
     private fun showFilterDialog() {
@@ -1166,17 +1177,17 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private class CacheProgressListener(activity: TrailDiscoveryActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.CacheProgressListener {
+        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
-        override fun onComplete(mapType: OfflineMapType, trailId: Long) {
+        override fun onComplete(offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
-                it.activity_trail_offlinemap_progress_layout.visibility = View.GONE
+                it.binding.activityTrailOfflinemapProgressLayout.visibility = View.GONE
             }
         }
 
-        override fun onError(error: HashMap<IOfflineResource, String>, mapType: OfflineMapType, trailId: Long) {
+        override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
                 val errorMessage = error.map { e ->
                     "${e.key.getResourceTypeName()}: ${e.value}"
@@ -1185,18 +1196,22 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             }
         }
 
-        override fun onProgressChanged(progress: Double, mapType: OfflineMapType, trailId: Long) {
+        override fun onProgressChanged(offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
                 // Show what is downloading and progress
-                val progressPercents = (100.0 * progress).toInt()
-                it.activity_trail_offlinemap_progress_layout.visibility = View.VISIBLE
-                it.activity_trail_offlinemap_progress_bar.progress = progressPercents
+                val progressPercents = (100.0 * offlineMap.progress).toInt()
+                it.binding.activityTrailOfflinemapProgressLayout.visibility = View.VISIBLE
+                it.binding.activityTrailOfflinemapProgressBar.progress = progressPercents
 
-                var cacheName = "$mapType"
-                if (mapType == OfflineMapType.TRAIL) {
-                    cacheName += "($trailId)"
+                var cacheName = offlineMap.type.name
+                when (offlineMap) {
+                    is ITrailOfflineMap ->
+                        cacheName += "(${offlineMap.trailId})"
+                    is IAreaOfflineMap ->
+                        cacheName += "(${offlineMap.areaName})"
                 }
-                it.activity_trail_offlinemap_progress_label.text = it.getString(R.string.downloading_cache, cacheName, progressPercents)
+
+                it.binding.activityTrailOfflinemapProgressLabel.text = it.getString(R.string.downloading_cache, cacheName, progressPercents)
             }
         }
     }
@@ -1226,15 +1241,15 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         override fun onNetworkAvailable() {
             weakActivity.get()?.let {
-                it.activity_trail_discovery_layer_button.isEnabled = true
+                it.binding.activityTrailDiscoveryLayerButton.isEnabled = true
             }
         }
 
         override fun onNetworkUnavailable() {
             weakActivity.get()?.let {
                 val offlineCacheManager = it.offlineMapService?.offlineMapManager ?: return
-                it.lifecycleScope.launchWhenCreated {
-                    if (offlineCacheManager.getOfflineMapStatus(OfflineMapType.OVERLAY) == OfflineMapStatus.COMPLETE) {
+                it.lifecycleScope.launchWhenResumed {
+                    if (offlineCacheManager.getOverlayOfflineMap()?.status == OfflineMapStatus.COMPLETE) {
                         if (it.accuTerraMapView.isStyleLoaded()) {
                             val currentStyle = it.styles[it.styleId]
                             if (!it.offlineStyles.contains(currentStyle)) {
@@ -1242,7 +1257,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                             }
                         }
                     } else {
-                        it.activity_trail_discovery_layer_button.isEnabled = false
+                        it.binding.activityTrailDiscoveryLayerButton.isEnabled = false
                     }
                 }
             }
@@ -1265,8 +1280,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         override fun onStyleChanged(mapboxMap: MapboxMap) {
             val activity = weakActivity.get()
                 ?: return
-            activity.activity_trail_discovery_layer_button.isEnabled = true
-            activity.activity_trail_discovery_my_location_button.isEnabled = true
+            activity.binding.activityTrailDiscoveryLayerButton.isEnabled = true
+            activity.binding.activityTrailDiscoveryMyLocationButton.isEnabled = true
         }
 
         override fun onSignificantMapBoundsChange() {
@@ -1298,18 +1313,25 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         private var maxTripDistance: Int? = activity.viewModel.maxTripDistance
         private var favoriteOnly: Boolean = activity.viewModel.favoriteOnly
 
+        private lateinit var filter: TrailFilterControl
+
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
             requestWindowFeature(Window.FEATURE_NO_TITLE)
+            // The `TrailFilterDialogBinding.inflate()` does not work correctly here - we need to use findViewById instead
             setContentView(R.layout.trail_filter_dialog)
 
-            trail_filter_dialog_filter.maxDifficultyLevel = maxDifficultyLevel
-            trail_filter_dialog_filter.minUserRating = minUserRating
-            trail_filter_dialog_filter.maxTripDistance = maxTripDistance
-            trail_filter_dialog_filter.favoriteOnly = favoriteOnly
+            filter = findViewById(R.id.trail_filter_dialog_filter)
+                ?: throw IllegalStateException("Cannot find the filter component: R.id.trail_filter_dialog_filter")
+            val doneButton = findViewById<Button>(R.id.trail_filter_dialog_done_button)
 
-            trail_filter_dialog_done_button.setOnClickListener {
+            filter.maxDifficultyLevel = maxDifficultyLevel
+            filter.minUserRating = minUserRating
+            filter.maxTripDistance = maxTripDistance
+            filter.favoriteOnly = favoriteOnly
+
+            doneButton.setOnClickListener {
                 applyFilter()
                 dismiss()
             }
@@ -1318,12 +1340,12 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         override fun onStart() {
             super.onStart()
 
-            trail_filter_dialog_filter.setOnTrailFilterChangeListener(this)
+            filter.setOnTrailFilterChangeListener(this)
         }
 
         override fun onStop() {
             super.onStop()
-            trail_filter_dialog_filter.setOnTrailFilterChangeListener(null)
+            filter.setOnTrailFilterChangeListener(null)
         }
 
         override fun onMaxDifficultyLevelChanged(
@@ -1357,7 +1379,9 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             activity.viewModel.maxTripDistance = maxTripDistance
             activity.viewModel.favoriteOnly = favoriteOnly
 
-            activity.refreshTrailsListAsync(false, applyMapBoundsFilter = true)
+            activity.lifecycleScope.launchWhenResumed {
+                activity.refreshTrailsList(false, applyMapBoundsFilter = true)
+            }
         }
     }
 }

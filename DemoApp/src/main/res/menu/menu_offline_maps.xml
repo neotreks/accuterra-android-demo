@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.neotreks.accuterra.mobile.demo.offlinemap.OfflineMapsActivity">
+
+    <item
+        android:id="@+id/activity_offline_maps_menu_update"
+        android:title="@string/activity_offline_maps_menu_update" />
+    <item
+        android:id="@+id/activity_offline_maps_menu_edit"
+        android:title="@string/activity_offline_maps_menu_edit" />
+    <item
+        android:id="@+id/activity_offline_maps_menu_rename"
+        android:title="@string/activity_offline_maps_menu_rename" />
+    <item
+        android:id="@+id/activity_offline_maps_menu_cancel"
+        android:title="@string/activity_offline_maps_menu_cancel" />
+    <item
+        android:id="@+id/activity_offline_maps_menu_delete"
+        android:title="@string/activity_offline_maps_menu_delete" />
+    <item
+        android:id="@+id/activity_offline_maps_menu_resume"
+        android:title="@string/activity_offline_maps_menu_resume" />
+    <item
+        android:id="@+id/activity_offline_maps_menu_pause"
+        android:title="@string/activity_offline_maps_menu_pause" />
+</menu>

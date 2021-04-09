@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.*
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityCommunityFeedBinding
 import com.neotreks.accuterra.mobile.demo.feed.*
 import com.neotreks.accuterra.mobile.demo.trip.community.CommunityFeedViewModel.Companion.DEFAULT_LOCATION
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity
@@ -17,6 +18,7 @@ import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripTabDefinition
 import com.neotreks.accuterra.mobile.demo.trip.recorded.RecordedTripActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.NetworkStateReceiver
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
@@ -26,9 +28,6 @@ import com.neotreks.accuterra.mobile.sdk.ugc.model.ActivityFeedEntry
 import com.neotreks.accuterra.mobile.sdk.ugc.model.GetCommunityFeedCriteria
 import com.neotreks.accuterra.mobile.sdk.ugc.model.SetTripLikedResult
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TripProcessingStatus
-import kotlinx.android.synthetic.main.accuterra_toolbar.*
-import kotlinx.android.synthetic.main.activity_community_feed.*
-import kotlinx.android.synthetic.main.component_basic_tabs.*
 import java.lang.ref.WeakReference
 
 class CommunityFeedActivity : AppCompatActivity() {
@@ -44,6 +43,8 @@ class CommunityFeedActivity : AppCompatActivity() {
     private val activityFeedListener by lazy { FeedListener(WeakReference(this)) }
 
     private lateinit var networkStateReceiver: NetworkStateReceiver
+
+    private lateinit var binding: ActivityCommunityFeedBinding
 
     /* * * * * * * * * * * * */
     /*       COMPANION       */
@@ -75,14 +76,15 @@ class CommunityFeedActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_community_feed)
+        binding = ActivityCommunityFeedBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         networkStateReceiver = NetworkStateReceiver(this)
 
         setupToolbar()
         selectCurrentTab()
         setupTabListener()
-        UiUtils.setApkVersionText(general_toolbar_sdk_version)
+        UiUtils.setApkVersionText(binding.activityCommunityFeedToolbar.generalToolbarSdkVersion)
 
         setupListView()
         registerViewModelObservers()
@@ -132,16 +134,16 @@ class CommunityFeedActivity : AppCompatActivity() {
         viewModel.listItems.observe(this, { trips ->
             hideProgressBar()
             communityFeedAdapter.setItems(trips)
-            activity_community_feed_no_trips_label.visibility = trips.isEmpty().visibility
+            binding.activityCommunityFeedNoTripsLabel.visibility = trips.isEmpty().visibility
         })
     }
 
     private fun hideProgressBar() {
-        activity_community_feed_list_swipe_refresh.isRefreshing = false
+        binding.activityCommunityFeedListSwipeRefresh.isRefreshing = false
     }
 
     private fun displayProgressBar() {
-        activity_community_feed_list_swipe_refresh.isRefreshing = true
+        binding.activityCommunityFeedListSwipeRefresh.isRefreshing = true
     }
 
     private fun loadTrips(forceReload: Boolean) {
@@ -178,15 +180,15 @@ class CommunityFeedActivity : AppCompatActivity() {
         communityFeedAdapter = ActivityFeedRecycleViewAdapter(context = this,
             items = viewModel.listItems.value ?: listOf(), listener = activityFeedListener,
             lifecycleScope = lifecycleScope)
-        activity_community_feed_list.layoutManager = LinearLayoutManager(this)
-        activity_community_feed_list.adapter = communityFeedAdapter
-        activity_community_feed_list_swipe_refresh.setOnRefreshListener {
+        binding.activityCommunityFeedList.layoutManager = LinearLayoutManager(this)
+        binding.activityCommunityFeedList.adapter = communityFeedAdapter
+        binding.activityCommunityFeedListSwipeRefresh.setOnRefreshListener {
             loadTrips(forceReload = true)
         }
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(accuterra_toolbar)
+        setSupportActionBar(binding.activityCommunityFeedToolbar.accuterraToolbar)
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
             setDisplayHomeAsUpEnabled(false)
@@ -195,11 +197,11 @@ class CommunityFeedActivity : AppCompatActivity() {
     }
 
     private fun selectCurrentTab() {
-        component_basic_tabs.getTabAt(AppBasicTabs.TAB_COMMUNITY_INDEX)!!.select()
+        binding.activityCommunityFeedTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_COMMUNITY_INDEX)!!.select()
     }
 
     private fun setupTabListener() {
-        component_basic_tabs.addOnTabSelectedListener(
+        binding.activityCommunityFeedTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object: MainTabListener.MainTabListenerHelper {
                 override val context: Activity
                     get() = this@CommunityFeedActivity
@@ -275,10 +277,13 @@ class CommunityFeedActivity : AppCompatActivity() {
                                 R.string.trips_trip_update_failed,
                                 response.errorMessage ?: "Unknown error"
                             )
+                            CrashSupport.reportError(response, "onLikeClicked(), item = $item")
                             activity.longToast(text)
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error while liking the trip: ${item.tripUUID}", e)
+                        val message = "Error while liking the trip: ${item.tripUUID}"
+                        Log.e(TAG, message, e)
+                        CrashSupport.reportError(e, message)
                     } finally {
                         activity.dialogHolder.hideProgressDialog()
                     }

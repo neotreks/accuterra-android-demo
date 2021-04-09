@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neotreks.accuterra.mobile.demo.feed.*
 import com.neotreks.accuterra.mobile.demo.longToast
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.model.Result
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingBasicInfo
@@ -48,9 +49,11 @@ class MyTripsViewModel: ViewModel() {
                 } else {
                     listItems.value = listOf()
                     Toast.makeText(context, result.errorMessage ?: "Error", Toast.LENGTH_LONG).show()
+                    CrashSupport.reportError(result, "Error wile loading online trips")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error wile loading online trips", e)
+                CrashSupport.reportError(e, "Error wile loading online trips")
                 context.longToast("Error while loading online trips: ${e.localizedMessage}")
             }
         }

@@ -188,7 +188,7 @@
                 android:text="@string/activity_save_trip_my_rating" />
 
             <!-- MY RATING -->
-            <androidx.appcompat.widget.AppCompatRatingBar
+            <RatingBar
                 android:id="@+id/activity_trip_save_my_rating"
                 style="@style/UserRatingBar"
                 android:layout_width="wrap_content"

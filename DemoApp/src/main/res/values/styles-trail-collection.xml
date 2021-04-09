@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TrailCollection_POI_Header_Text">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TrailCollection_POI_Form_Header">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/colorDisabled</item>
+    </style>
+
+</resources>

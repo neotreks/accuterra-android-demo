@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.DemoApplication
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityOnlineTripBinding
 import com.neotreks.accuterra.mobile.demo.extensions.getLikeIconResource
 import com.neotreks.accuterra.mobile.demo.extensions.getLocationLabelString
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateTimeString
@@ -23,13 +24,12 @@ import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.ui.OnListItemLongClickListener
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTripCommentRequest
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TripComment
-import kotlinx.android.synthetic.main.activity_online_trip.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 import kotlinx.coroutines.runBlocking
 
 class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
@@ -63,6 +63,8 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
 
     private lateinit var viewModel: OnlineTripViewModel
 
+    private lateinit var binding: ActivityOnlineTripBinding
+
     private lateinit var commentAdapter: OnlineTripCommentAdapter
 
     private var dialogHolder = ProgressDialogHolder()
@@ -73,7 +75,8 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_online_trip)
+        binding = ActivityOnlineTripBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initViewModel()
         setupToolbar()
@@ -152,7 +155,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
             viewModel.loadTrip(this@OnlineTripActivity, tripUuid)
             // Try to switch to the default tab index
             if (tabPosition > 0) {
-                activity_online_trip_view_pager.setCurrentItem(tabPosition, true)
+                binding.activityOnlineTripViewPager.setCurrentItem(tabPosition, true)
             }
             // Load also comments
             viewModel.loadTripComments(this@OnlineTripActivity, tripUuid)
@@ -166,13 +169,13 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                 return@Observer
             }
             // Header
-            activity_online_trip_user_name.text = trip.userInfo.driverId
-            activity_online_trip_date.text = trip.info.tripStart.toLocalDateTimeString()
+            binding.activityOnlineTripUserName.text = trip.userInfo.driverId
+            binding.activityOnlineTripDate.text = trip.info.tripStart.toLocalDateTimeString()
             // Name + Location
-            activity_online_trip_trip_name.text = trip.info.name
+            binding.activityOnlineTripTripName.text = trip.info.name
             trip.location.let { location ->
                 val locationString = location.getLocationLabelString()
-                activity_online_trip_trip_location.text = locationString
+                binding.activityOnlineTripTripLocation.text = locationString
             }
             // Related trail name
             val trailId = trip.info.trailId
@@ -182,20 +185,20 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                     val trailBasicInfo = service.getTrailBasicInfoById(trailId)
                     trailBasicInfo?.name?.let { trailName ->
                         val trailNameText = getString(R.string.activity_online_trip_trail_with_name, trailName)
-                        activity_online_trip_related_trail.visibility = true.visibility
-                        activity_online_trip_related_trail.text = trailNameText
+                        binding.activityOnlineTripRelatedTrail.visibility = true.visibility
+                        binding.activityOnlineTripRelatedTrail.text = trailNameText
                     }
                 }
             } else {
-                activity_online_trip_related_trail.visibility = false.visibility
+                binding.activityOnlineTripRelatedTrail.visibility = false.visibility
             }
             // Description
-            activity_online_trip_description.text = trip.info.description
+            binding.activityOnlineTripDescription.text = trip.info.description
             // Comments
-            activity_online_trip_comments.text = this.getString(R.string.general_comments_number, trip.commentsCount)
+            binding.activityOnlineTripComments.text = this.getString(R.string.general_comments_number, trip.commentsCount)
         })
         // Comments Observer
-        viewModel.comments.observe(this, Observer { comments ->
+        viewModel.comments.observe(this, { comments ->
             commentAdapter.setItems(comments ?: listOf())
         })
         // User likes
@@ -203,13 +206,13 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
             if (userData == null) {
                 return@Observer
             }
-            activity_online_trip_likes.text = this.getString(R.string.general_likes_number, userData.likes)
-            activity_online_trip_likes_icon.setImageResource(getLikeIconResource(userData.userLike))
+            binding.activityOnlineTripLikes.text = this.getString(R.string.general_likes_number, userData.likes)
+            binding.activityOnlineTripLikesIcon.setImageResource(getLikeIconResource(userData.userLike))
         })
     }
 
     private fun setupFragments() {
-        activity_online_trip_view_pager.adapter = OnlineTripPageAdapter(
+        binding.activityOnlineTripViewPager.adapter = OnlineTripPageAdapter(
             supportFragmentManager,
             this
         )
@@ -223,9 +226,9 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                 showCommentItemMenu(item, view)
             }
         })
-        activity_online_trip_comments_list.adapter = commentAdapter
+        binding.activityOnlineTripCommentsList.adapter = commentAdapter
         // Comments sending
-        activity_online_trip_comments_add_icon.setOnClickListener {
+        binding.activityOnlineTripCommentsAddIcon.setOnClickListener {
             onAddCommentIconClicked()
         }
     }
@@ -283,9 +286,11 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                     viewModel.updateTripCommentsCount(result.value?.commentsCount)
                 } else {
                     longToast("Cannot add a comment because of: ${result.errorMessage}")
+                    CrashSupport.reportError(result, commentRequest.toString())
                 }
             } catch (e: Exception) {
                 longToast("Cannot add a comment because of: ${e.localizedMessage}")
+                CrashSupport.reportError(e, commentRequest.toString())
             } finally {
                 dialogHolder.hideProgressDialog()
             }
@@ -350,9 +355,11 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                     setResult(RESULT_COMMENTS_COUNT_UPDATED)
                 } else {
                     longToast("Cannot delete a comment $commentUuid because of: ${result.errorMessage}")
+                    CrashSupport.reportError(result, comment.toString())
                 }
             } catch (e: Exception) {
                 longToast("Cannot delete a comment $commentUuid because of: ${e.localizedMessage}")
+                CrashSupport.reportError(e, comment.toString())
             } finally {
                 dialogHolder.hideProgressDialog()
             }
@@ -360,10 +367,10 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
     }
 
     private fun setupLikes() {
-        activity_online_trip_likes_icon.setOnClickListener {
+        binding.activityOnlineTripLikesIcon.setOnClickListener {
             onLikesClicked()
         }
-        activity_online_trip_likes.setOnClickListener {
+        binding.activityOnlineTripLikes.setOnClickListener {
             onLikesClicked()
         }
     }
@@ -391,9 +398,12 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                         response.errorMessage ?: "Unknown error"
                     )
                     longToast(text)
+                    CrashSupport.reportError(response)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error while liking the trip: $tripUuid", e)
+                val message = "Error while liking the trip: $tripUuid"
+                Log.e(TAG, message, e)
+                CrashSupport.reportError(e, message)
             } finally {
                 dialogHolder.hideProgressDialog()
             }
@@ -401,8 +411,8 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.general_trip)
+        setSupportActionBar(binding.activityOnlineTripToolbar.generalToolbar)
+        binding.activityOnlineTripToolbar.generalToolbarTitle.text = getString(R.string.general_trip)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -449,6 +459,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                 finish() // Close the screen
             } else {
                 longToast(getString(R.string.activity_online_trip_delete_failed, result.errorMessage ?: "Unknown"))
+                CrashSupport.reportError(result, "Trip UUID: $tripUuid")
             }
         }
     }
@@ -483,6 +494,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                 longToast(getString(R.string.activity_online_trip_promote_success, result.value?.promotionState?.getName() ?: "Unknown"))
             } else {
                 longToast(getString(R.string.activity_online_trip_promote_failed, result.errorMessage ?: "Unknown"))
+                CrashSupport.reportError(result, "Trip UUID: $tripUuid")
             }
         }
 

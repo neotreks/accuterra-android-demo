@@ -7,19 +7,27 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityRecordedTripPoiBinding
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import kotlinx.android.synthetic.main.activity_recorded_trip_poi.*
-import kotlinx.android.synthetic.main.general_action_toolbar.*
 
 class RecordedTripPoiActivity : AppCompatActivity() {
+
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
 
     private val viewModel: RecordedTripPoiViewModel by viewModels()
 
     private lateinit var mediaListManager: TripRecordingMediaListManager
+
+    private lateinit var binding: ActivityRecordedTripPoiBinding
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
@@ -42,9 +50,10 @@ class RecordedTripPoiActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recorded_trip_poi)
+        binding = ActivityRecordedTripPoiBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         mediaListManager = TripRecordingMediaListManager(this,
-            activity_recorded_trip_poi_photos,
+            binding.activityRecordedTripPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
                     val intent = MediaDetailActivity.createNavigateToIntent(
@@ -93,9 +102,10 @@ class RecordedTripPoiActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(action_toolbar)
-        action_toolbar_title.text = getString(R.string.activity_recorded_trip_poi_title)
-        action_toolbar_action.text = ""
+        val toolbar = binding.activityRecordedTripPoiToolbar
+        setSupportActionBar(toolbar.actionToolbar)
+        toolbar.actionToolbarTitle.text = getString(R.string.activity_recorded_trip_poi_title)
+        toolbar.actionToolbarAction.text = ""
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -106,13 +116,12 @@ class RecordedTripPoiActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.poi.observe(this, Observer { poi ->
-            activity_recorded_trip_poi_trip_name.text = poi.name
-            activity_recorded_trip_poi_trip_description.text = poi.description
-            activity_recorded_trip_poi_is_wp.isChecked = poi.isWaypoint
-            activity_recorded_trip_poi_poi_type.text = poi.pointSubtype.name
+        viewModel.poi.observe(this, { poi ->
+            binding.activityRecordedTripPoiTripName.text = poi.name
+            binding.activityRecordedTripPoiTripDescription.text = poi.description
+            binding.activityRecordedTripPoiPoiType.text = poi.pointType.name
         })
-        viewModel.media.observe(this, Observer { mediaList ->
+        viewModel.media.observe(this, { mediaList ->
             mediaListManager.refreshPhotoGridAdapter(mediaList)
         })
     }

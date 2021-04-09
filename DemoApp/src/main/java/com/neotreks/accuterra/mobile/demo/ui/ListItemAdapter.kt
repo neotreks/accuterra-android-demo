@@ -24,6 +24,8 @@ abstract class ListItemAdapter<T>(context: Context,
     private var actionListener: OnListItemActionClickedListener<T>? = null
     private val inflater = LayoutInflater.from(context)
 
+    protected var favoritePosition: Int? = null
+
     /**
      * A setting to avoid using converted views
      */
@@ -48,7 +50,7 @@ abstract class ListItemAdapter<T>(context: Context,
         val item = getItem(position)!!
 
         // Fill the item view with data
-        viewBinder.bindView(view, item, selectedItemId == getItemId(item))
+        viewBinder.bindView(view, item, selectedItemId == getItemId(item), favoritePosition == position)
 
         // Attach click handler
         attachClickHandlers(view, item)
@@ -168,6 +170,14 @@ abstract class ListItemAdapter<T>(context: Context,
         return getPosition(item)
     }
 
+    /**
+     * Returns selected item
+     */
+    fun getSelectedItem(): T? {
+        val id = selectedItemId ?: return null
+        return items.find { getItemId(it) == id }
+    }
+
 }
 
 interface OnListItemClickedListener<T> {
@@ -183,7 +193,7 @@ interface OnListItemLongClickListener<T> {
 }
 
 interface ListItemAdapterViewBinder<T> {
-    fun bindView(view: View, item: T, isSelected: Boolean)
+    fun bindView(view: View, item: T, isSelected: Boolean, isFavorite: Boolean)
     fun getViewResourceId(): Int
     fun getDropDownViewResourceId(): Int = android.R.layout.simple_spinner_dropdown_item
 

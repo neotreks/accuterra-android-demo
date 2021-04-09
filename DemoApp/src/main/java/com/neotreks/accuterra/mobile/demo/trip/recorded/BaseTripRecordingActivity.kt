@@ -1,15 +1,16 @@
 package com.neotreks.accuterra.mobile.demo.trip.recorded
 
+import android.content.Intent
 import android.location.Location
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.neotreks.accuterra.mobile.demo.BaseDrivingActivity
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateString
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
@@ -18,11 +19,11 @@ import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.map.TripLayersManager
 import com.neotreks.accuterra.mobile.sdk.map.query.TripPoisQueryBuilder
+import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.TripStartResultType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingStatus
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
-import kotlinx.android.synthetic.main.component_trip_recording_buttons.*
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -63,11 +64,18 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
     protected abstract fun getTripUuid(): String?
 
+    /**
+     * Provide custom trip recording data to be stored with the trip recording
+     */
+    protected abstract fun getExtProperties(): List<ExtProperties>?
+
     protected abstract suspend fun getTripRecorder(): ITripRecorder
 
     protected abstract fun getTripStatisticsLiveData(): MutableLiveData<TripStatistics?>
 
     protected abstract fun getAddPoiButton(): View
+
+    protected abstract fun getRecButtonBinding(): ComponentTripRecordingButtonsBinding
 
     protected abstract fun updateBackButton()
 
@@ -116,12 +124,12 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     }
 
     protected fun registerStatisticsObserver() {
-        getTripStatisticsLiveData().observe(this, Observer { statistics ->
+        getTripStatisticsLiveData().observe(this, { statistics ->
             buttonsPanel.updateStatistics(statistics?.length, statistics?.drivingTime)
         })
     }
 
-    protected suspend fun updateRecordingButtons() {
+    protected open suspend fun updateRecordingButtons() {
 
         val activeTrip = getTripRecorder().getActiveTripRecording()
         val status = activeTrip?.recordingInfo?.status
@@ -144,7 +152,9 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
 
         // Expecting usage of the: component_trip_recording_buttons
 
-        component_trip_recording_start_button.setOnClickListener {
+        val bindingButton = getRecButtonBinding()
+
+        bindingButton.componentTripRecordingStartButton.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 if (LocationPermissionUtil.hasBackgroundLocationPermission(this@BaseTripRecordingActivity)) {
                     DialogUtil.buildYesNoDialog(
@@ -162,17 +172,17 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
                 }
             }
         }
-        component_trip_recording_stop_button.setOnClickListener {
+        bindingButton.componentTripRecordingStopButton.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 onRecordPauseClicked()
             }
         }
-        component_trip_recording_resume_button.setOnClickListener {
+        bindingButton.componentTripRecordingResumeButton.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 onRecordingResumeClicked()
             }
         }
-        component_trip_recording_finish_button.setOnClickListener {
+        bindingButton.componentTripRecordingFinishButton.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 onRecordingFinishClicked()
             }
@@ -193,7 +203,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
                 lifecycleScope.launchWhenResumed {
                             val driverId = DemoIdentityManager().getUserId(this@BaseTripRecordingActivity)
                             val vehicleId = "test_vehicle" // TODO: Load vehicle ID
-                            val result = recorder.startTripRecording(tripName, getTrailId(), driverId, vehicleId)
+                            val result = recorder.startTripRecording(tripName, getTrailId(), driverId, vehicleId, getExtProperties())
                             when {
                                 result.isFailure -> {
                                     toast(getString(R.string.activity_trip_recording_trip_recording_start_error, result.errorMessage))
@@ -271,14 +281,24 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     }
 
     protected open suspend fun onRecordingFinishConfirmed() {
-        val uuid = getTripRecorder().getActiveTripRecording()?.tripInfo?.uuid
+        val recorder = getTripRecorder()
+        val uuid = recorder.getActiveTripRecording()?.tripInfo?.uuid
             ?: throw IllegalStateException("No trip UUID available.")
         stopLocationRecording()
-        getTripRecorder().finishTripRecording()
+        // We want to copy tags from POIs to Trip itself
+        val pois = ServiceFactory.getTripRecordingService(this).getTripRecordingPOIs(uuid)
+        val poisTags = pois.flatMap { it.tags }
+        recorder.setTripRecordingTags(poisTags)
+        // Now we want to finish trip recording
+        recorder.finishTripRecording()
         updateRecordingButtons()
         getAccuTerraMapView().tripLayersManager.setTripRecorder(null)
-        val intent = TripSaveActivity.createNavigateToIntent(this@BaseTripRecordingActivity, uuid)
+        val intent = buildOnRecordingFinishedIntent(uuid)
         startActivityForResult(intent, REQUEST_SAVE_TRIP)
+    }
+
+    protected open fun buildOnRecordingFinishedIntent(uuid: String): Intent {
+        return TripSaveActivity.createNavigateToIntent(this@BaseTripRecordingActivity, uuid)
     }
 
     protected open fun onAddPoiClicked() {
@@ -296,6 +316,10 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     protected open fun onEditPoiClicked(poiUuid: String) {
         val intent = TripEditPoiActivity.createNavigateToIntent(poiUuid, this)
         startActivityForResult(intent, REQUEST_EDIT_POI)
+    }
+
+    protected open fun canHandleTripPoiMapClick(): Boolean {
+        return true
     }
 
     protected suspend fun addTripLayers() {
@@ -364,6 +388,9 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     }
 
     private fun handleMultiTripPoiMapClick() {
+        if (!canHandleTripPoiMapClick()) {
+            return
+        }
         val snackBar = Snackbar
             .make(getSnackbarView(), R.string.multiple_pois_in_this_area, Snackbar.LENGTH_SHORT)
 
@@ -373,6 +400,9 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     }
 
     private fun handleTripPoiMapClick(tripUuid: String, poiUuid: String) {
+        if (!canHandleTripPoiMapClick()) {
+            return
+        }
         val snackBar = Snackbar
             .make(getSnackbarView(), R.string.loading, Snackbar.LENGTH_LONG)
 

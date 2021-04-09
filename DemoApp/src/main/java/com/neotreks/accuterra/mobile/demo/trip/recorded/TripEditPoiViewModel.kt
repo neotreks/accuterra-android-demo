@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * View model for the [TripAddPoiActivity]
+ * View model for the [TripEditPoiActivity]
  */
 class TripEditPoiViewModel: ViewModel() {
 

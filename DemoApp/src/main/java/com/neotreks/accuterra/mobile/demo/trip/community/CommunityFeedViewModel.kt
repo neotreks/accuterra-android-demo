@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neotreks.accuterra.mobile.demo.feed.*
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.model.Result
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
@@ -54,6 +55,7 @@ class CommunityFeedViewModel: ViewModel() {
             } else {
                 listItems.value = listOf()
                 Toast.makeText(context, result.errorMessage ?: "Error", Toast.LENGTH_LONG).show()
+                CrashSupport.reportError(result, criteria.toString())
             }
         }
     }

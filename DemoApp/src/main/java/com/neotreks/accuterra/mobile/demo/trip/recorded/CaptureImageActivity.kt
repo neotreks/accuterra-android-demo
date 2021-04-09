@@ -1,33 +1,36 @@
 package com.neotreks.accuterra.mobile.demo.trip.recorded
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.OrientationEventListener
+import android.view.Surface
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.load.ImageHeaderParser.UNKNOWN_ORIENTATION
 import com.google.common.util.concurrent.ListenableFuture
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityCaptureImageBinding
 import com.neotreks.accuterra.mobile.demo.loadDrawable
 import com.neotreks.accuterra.mobile.demo.longToast
+import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.toast
-import com.neotreks.accuterra.mobile.demo.ui.ApkIOUtils
-import kotlinx.android.synthetic.main.activity_capture_image.*
+import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.Executors
 
 class CaptureImageActivity : AppCompatActivity() {
+
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
 
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
@@ -35,6 +38,7 @@ class CaptureImageActivity : AppCompatActivity() {
 
     private lateinit var imagePreview: Preview
     private lateinit var imageCapture: ImageCapture
+    private lateinit var imageAnalysis: ImageAnalysis
 
     private lateinit var cameraControl: CameraControl
     private lateinit var cameraInfo: CameraInfo
@@ -44,6 +48,32 @@ class CaptureImageActivity : AppCompatActivity() {
 
     private val executor = Executors.newSingleThreadExecutor()
 
+    private lateinit var binding: ActivityCaptureImageBinding
+
+    private val orientationEventListener by lazy {
+        object : OrientationEventListener(this) {
+            override fun onOrientationChanged(orientation: Int) {
+                if (orientation == UNKNOWN_ORIENTATION) {
+                    return
+                }
+
+                val rotation = when (orientation) {
+                    in 45 until 135 -> Surface.ROTATION_270
+                    in 135 until 225 -> Surface.ROTATION_180
+                    in 225 until 315 -> Surface.ROTATION_90
+                    else -> Surface.ROTATION_0
+                }
+
+                imageAnalysis.targetRotation = rotation
+                imageCapture.targetRotation = rotation
+            }
+        }
+    }
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
+
     companion object {
 
         const val RESULT_PATH = "RESULT_PATH"
@@ -51,38 +81,38 @@ class CaptureImageActivity : AppCompatActivity() {
         private const val TAG = "CaptureImageActivity"
 
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
-        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val PHOTO_EXTENSION = ".jpg"
         private lateinit var outputDirectory: File
 
         fun createNavigateToIntent(context: Context): Intent {
             return Intent(context, CaptureImageActivity::class.java)
         }
 
-        private fun createFile(baseFolder: File, format: String, extension: String): File {
-            val file = File(
-                baseFolder, SimpleDateFormat(format, Locale.US)
-                    .format(System.currentTimeMillis()) + extension
-            )
-            ApkIOUtils.ensureFilePath(file)
-            return file
-        }
-
-
     }
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_capture_image)
-        previewView = activity_capture_image_preview_view
+        binding = ActivityCaptureImageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        previewView = binding.activityCaptureImagePreviewView
+
+        imageCapture = ImageCapture.Builder().apply {
+            setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+        }.build()
+
+        imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
 
         // Let's put images into the `files\camera` folder
         outputDirectory = File(this.filesDir, "camera")
 
-        cameraCaptureButton = activity_capture_image_camera_capture_button
-        cameraTorchButton = activity_capture_image_camera_torch_button
+        cameraCaptureButton = binding.activityCaptureImageCameraCaptureButton
+        cameraTorchButton = binding.activityCaptureImageCameraTorchButton
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -90,12 +120,19 @@ class CaptureImageActivity : AppCompatActivity() {
             previewView.post { startCamera() }
             setupButtons()
         } else {
-            requestPermissions(
-                REQUIRED_PERMISSIONS,
-                REQUEST_CODE_PERMISSIONS
-            )
+            PermissionSupport.requestCameraPermissions(this, REQUEST_CODE_PERMISSIONS)
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        orientationEventListener.enable()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        orientationEventListener.disable()
     }
 
     /* * * * * * * * * * * * */
@@ -109,18 +146,15 @@ class CaptureImageActivity : AppCompatActivity() {
             setTargetRotation(previewView.display.rotation)
         }.build()
 
-        imageCapture = ImageCapture.Builder().apply {
-            setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-        }.build()
-
         val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
             val camera = cameraProvider.bindToLifecycle(
                 this,
                 cameraSelector,
                 imagePreview,
-                imageCapture
+                imageCapture,
+                imageAnalysis,
             )
             cameraControl = camera.cameraControl
             cameraInfo = camera.cameraInfo
@@ -135,7 +169,7 @@ class CaptureImageActivity : AppCompatActivity() {
     private fun takePicture() {
 
         // Create destination file
-        val file = createFile(outputDirectory, FILENAME, PHOTO_EXTENSION)
+        val file = ApkMediaUtil.createTempCameraFile(this)
 
         val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
         imageCapture.takePicture(outputFileOptions, executor, object : ImageCapture.OnImageSavedCallback {
@@ -167,11 +201,13 @@ class CaptureImageActivity : AppCompatActivity() {
      */
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            PermissionSupport.logCameraPermissionRequested(this)
             if (allPermissionsGranted()) {
-                activity_capture_image_preview_view.post { startCamera() }
+                binding.activityCaptureImagePreviewView.post { startCamera() }
             } else {
-                toast("Permissions not granted by the user.")
+                toast(getString(R.string.general_permission_not_granted))
                 finish()
             }
         }
@@ -180,9 +216,8 @@ class CaptureImageActivity : AppCompatActivity() {
     /**
      * Check if all permission specified in the manifest have been granted
      */
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(
-               baseContext, it) == PackageManager.PERMISSION_GRANTED
+    private fun allPermissionsGranted(): Boolean {
+        return PermissionSupport.isCameraPermissionGranted(this)
     }
 
     private fun setupButtons() {
@@ -203,7 +238,7 @@ class CaptureImageActivity : AppCompatActivity() {
     }
 
     private fun setTorchStateObserver() {
-        cameraInfo.torchState.observe(this, Observer { state ->
+        cameraInfo.torchState.observe(this, { state ->
             if (state == TorchState.ON) {
                 cameraTorchButton.setImageDrawable(
                     loadDrawable(

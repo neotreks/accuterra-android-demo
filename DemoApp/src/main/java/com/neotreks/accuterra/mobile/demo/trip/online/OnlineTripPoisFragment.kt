@@ -5,23 +5,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentOnlineTripPoisBinding
 import com.neotreks.accuterra.mobile.demo.ui.OnListItemClickedListener
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripPoint
-import kotlinx.android.synthetic.main.fragment_online_trip_pois.view.*
 
 /**
  * Trip POIs fragment
  */
 class OnlineTripPoisFragment : OnlineTripFragment() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private lateinit var binding: FragmentOnlineTripPoisBinding
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
+
     /** Provide view layout */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_online_trip_pois, container, false)
+    ): View {
+        binding = FragmentOnlineTripPoisBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /** Load trip data into the UI */
@@ -38,7 +48,7 @@ class OnlineTripPoisFragment : OnlineTripFragment() {
                 trip.navigation.points
             )
             // Attach the adapter
-            view.fragment_trip_pois_list.adapter = tripPoiListAdapter
+            binding.fragmentTripPoisList.adapter = tripPoiListAdapter
             // Display POI detail
             tripPoiListAdapter.setOnListItemClickedListener(object : OnListItemClickedListener<TripPoint> {
                 override fun onListItemClicked(item: TripPoint, view: View) {

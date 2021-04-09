@@ -16,12 +16,15 @@
         android:orientation="vertical">
 
         <include
+            android:id="@+id/activity_community_feed_toolbar"
             layout="@layout/accuterra_toolbar"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <include layout="@layout/component_basic_tabs" />
+        <include
+            android:id="@+id/activity_community_feed_tabs"
+            layout="@layout/component_basic_tabs" />
 
     </LinearLayout>
 

@@ -5,21 +5,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import com.neotreks.accuterra.mobile.demo.R
-import kotlinx.android.synthetic.main.fragment_recorded_trip_info.view.*
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentRecordedTripInfoBinding
 
 /**
  * Recorded trip Map fragment
  */
 class RecordedTripInfoFragment : RecordedTripFragment() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private lateinit var binding: FragmentRecordedTripInfoBinding
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
+
     /** Provide view layout */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_recorded_trip_info, container, false)
+    ): View {
+        binding = FragmentRecordedTripInfoBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /** Load trip data into the UI */
@@ -28,12 +38,12 @@ class RecordedTripInfoFragment : RecordedTripFragment() {
         // Load trip data into the UI
         viewModel.trip.observe(viewLifecycleOwner, Observer { trip ->
             if (trip == null) return@Observer
-            view.fragment_recorded_trip_info_share.text = trip.userInfo.sharingType.getName()
+            binding.fragmentRecordedTripInfoShare.text = trip.userInfo.sharingType.getName()
             trip.userInfo.userRating?.let { rating ->
-                view.fragment_recorded_trip_info_my_rating.rating = rating.toFloat()
-                }
-            view.fragment_recorded_trip_info_promote.isChecked = trip.userInfo.promoteToTrail
-            view.fragment_recorded_trip_info_trip_personal_note.text = trip.userInfo.personalNote
+                binding.fragmentRecordedTripInfoMyRating.rating = rating
+            }
+            binding.fragmentRecordedTripInfoPromote.isChecked = trip.userInfo.promoteToTrail
+            binding.fragmentRecordedTripInfoTripPersonalNote.text = trip.userInfo.personalNote
         })
     }
 

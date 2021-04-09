@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.neotreks.accuterra.mobile.demo.longToast
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.trip.model.Trip
 import com.neotreks.accuterra.mobile.sdk.ugc.model.SetTripLikedResult
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TripComment
@@ -58,6 +59,7 @@ class OnlineTripViewModel : ViewModel() {
             } else {
                 val errorMessage = "Error while loading trip: $uuid, ${result.buildErrorMessage()}"
                 Log.e(TAG, errorMessage, result.error ?: Exception())
+                CrashSupport.reportError(result, "Error while loading trip: $uuid")
                 context.longToast(errorMessage)
             }
             trip.value = null
@@ -79,6 +81,7 @@ class OnlineTripViewModel : ViewModel() {
             } else {
                 val errorMessage = "Error while loading trip comments: $tripUuid, ${result.buildErrorMessage()}"
                 Log.e(TAG, errorMessage, result.error ?: Exception())
+                CrashSupport.reportError(result, "Error while loading trip comments: $tripUuid")
                 context.longToast(errorMessage)
             }
             trip.postValue(null)

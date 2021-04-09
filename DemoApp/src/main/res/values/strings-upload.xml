@@ -8,4 +8,11 @@
     <string name="upload_reset_access_token_done">Access token reset finished</string>
     <string name="upload_reset_access_token_failed">Access token reset failed because of: %1$s</string>
 
+    <!-- Sharing -->
+    <string name="activity_upload_object_sharing_trip_file">Sharing trip file: %1$s</string>
+    <string name="activity_upload_object_error_no_file">No file to share</string>
+    <string name="activity_upload_object_error_file_not_exists">The file no longer exists: %1$s</string>
+    <string name="activity_upload_object_error_getting_mime">Cannot determinate mime type for: %1$s</string>
+    <string name="activity_upload_object_worker_status">Upload worker status</string>
+
 </resources>

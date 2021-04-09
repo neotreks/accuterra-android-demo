@@ -6,23 +6,34 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentOnlineTripStatsBinding
 import com.neotreks.accuterra.mobile.demo.settings.DistanceFormatter
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
 import com.neotreks.accuterra.mobile.demo.settings.SpeedFormatter
-import kotlinx.android.synthetic.main.fragment_online_trip_stats.view.*
 
 /**
  * Trip Statistics fragment
  */
 class OnlineTripStatsFragment : OnlineTripFragment() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private lateinit var binding: FragmentOnlineTripStatsBinding
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
+
     /** Provide view layout */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_online_trip_stats, container, false)
+    ): View {
+        binding = FragmentOnlineTripStatsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /** Load trip data into the UI */
@@ -38,17 +49,17 @@ class OnlineTripStatsFragment : OnlineTripFragment() {
             val timeFormatter = Formatter.getDrivingTimeFormatter()
             val speedFormatter = Formatter.getSpeedFormatter()
 
-            view.fragment_trip_stats_length.text = distanceFormatter.formatDistance(requireContext(), trip.statistics.length)
-            view.fragment_trip_stats_driving_time.text = timeFormatter.formatDrivingTime(requireContext(), trip.statistics.drivingTime)
+            binding.fragmentTripStatsLength.text = distanceFormatter.formatDistance(requireContext(), trip.statistics.length)
+            binding.fragmentTripStatsDrivingTime.text = timeFormatter.formatDrivingTime(requireContext(), trip.statistics.drivingTime)
 
-            view.fragment_trip_stats_cumulative_ascent.text = getDistance(distanceFormatter, trip.statistics.cumulativeAscent)
-            view.fragment_trip_stats_cumulative_descent.text = distanceFormatter.formatDistance(requireContext(), trip.statistics.cumulativeDescent)
+            binding.fragmentTripStatsCumulativeAscent.text = getDistance(distanceFormatter, trip.statistics.cumulativeAscent)
+            binding.fragmentTripStatsCumulativeDescent.text = distanceFormatter.formatDistance(requireContext(), trip.statistics.cumulativeDescent)
 
-            view.fragment_trip_stats_min_elevation.text = getDistance(distanceFormatter, trip.statistics.minElevation)
-            view.fragment_trip_stats_max_elevation.text = getDistance(distanceFormatter, trip.statistics.maxElevation)
+            binding.fragmentTripStatsMinElevation.text = getDistance(distanceFormatter, trip.statistics.minElevation)
+            binding.fragmentTripStatsMaxElevation.text = getDistance(distanceFormatter, trip.statistics.maxElevation)
 
-            view.fragment_trip_stats_max_speed.text = getSpeed(speedFormatter, trip.statistics.maxSpeed)
-            view.fragment_trip_stats_avg_speed.text = getSpeed(speedFormatter, trip.statistics.avgSpeed)
+            binding.fragmentTripStatsMaxSpeed.text = getSpeed(speedFormatter, trip.statistics.maxSpeed)
+            binding.fragmentTripStatsAvgSpeed.text = getSpeed(speedFormatter, trip.statistics.avgSpeed)
 
         })
     }

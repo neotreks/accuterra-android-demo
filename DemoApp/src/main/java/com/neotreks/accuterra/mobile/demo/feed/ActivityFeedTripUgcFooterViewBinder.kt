@@ -3,8 +3,8 @@ package com.neotreks.accuterra.mobile.demo.feed
 import android.content.Context
 import android.view.View
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityFeedOnlineTripUgcFooterItemBinding
 import com.neotreks.accuterra.mobile.demo.extensions.getLikeIconResource
-import kotlinx.android.synthetic.main.activity_feed_online_trip_ugc_footer_item.view.*
 
 /**
  * View binder for the Trip UGC Footer item
@@ -29,34 +29,35 @@ class ActivityFeedTripUgcFooterViewBinder(
     /* * * * * * * * * * * * */
 
     fun bindView(view: View, item: ActivityFeedTripUgcFooterItem) {
+        val binding = ActivityFeedOnlineTripUgcFooterItemBinding.bind(view)
         val data = item.data ?: return
         // Listeners
         view.setOnClickListener { listener.onItemClick(item) }
         view.setOnLongClickListener { listener.onLongItemClick(item) }
         // Likes listener
-        view.activity_feed_online_trip_ugc_footer_likes_icon.setOnClickListener {
+        binding.activityFeedOnlineTripUgcFooterLikesIcon.setOnClickListener {
             listener.onLikeClicked(item)
         }
-        view.activity_feed_online_trip_ugc_footer_likes_envelope.setOnClickListener {
+        binding.activityFeedOnlineTripUgcFooterLikesEnvelope.setOnClickListener {
             listener.onLikeClicked(item)
         }
-        view.activity_feed_online_trip_ugc_footer_likes.setOnClickListener {
+        binding.activityFeedOnlineTripUgcFooterLikes.setOnClickListener {
             listener.onLikeClicked(item)
         }
         // Photos listener
-        view.activity_feed_online_trip_ugc_footer_photos_icon.setOnClickListener {
+        binding.activityFeedOnlineTripUgcFooterPhotosIcon.setOnClickListener {
             listener.onPhotosClicked(item)
         }
-        view.activity_feed_online_trip_ugc_footer_photos.setOnClickListener {
+        binding.activityFeedOnlineTripUgcFooterPhotos.setOnClickListener {
             listener.onPhotosClicked(item)
         }
         // Data
-        view.activity_feed_online_trip_ugc_footer_likes.text = context.getString(R.string.general_likes_number, data.trip.likesCount)
-        view.activity_feed_online_trip_ugc_footer_comments.text = context.getString(R.string.general_comments_number, data.trip.commentsCount)
-        view.activity_feed_online_trip_ugc_footer_photos.text = context.getString(R.string.general_photos_number, data.trip.imageResourceUuids.size)
+        binding.activityFeedOnlineTripUgcFooterLikes.text = context.getString(R.string.general_likes_number, data.trip.likesCount)
+        binding.activityFeedOnlineTripUgcFooterComments.text = context.getString(R.string.general_comments_number, data.trip.commentsCount)
+        binding.activityFeedOnlineTripUgcFooterPhotos.text = context.getString(R.string.general_photos_number, data.trip.imageResourceUuids.size)
         // Like icon
         val likeIcon = getLikeIconResource(data.trip.userLike)
-        view.activity_feed_online_trip_ugc_footer_likes_icon.setImageResource(likeIcon)
+        binding.activityFeedOnlineTripUgcFooterLikesIcon.setImageResource(likeIcon)
     }
 
 }

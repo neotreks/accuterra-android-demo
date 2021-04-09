@@ -3,7 +3,7 @@ package com.neotreks.accuterra.mobile.demo.settings
 import android.content.Context
 import android.text.format.DateUtils
 import com.neotreks.accuterra.mobile.demo.R
-import com.neotreks.accuterra.mobile.demo.util.roundTo
+import com.neotreks.accuterra.mobile.demo.extensions.roundTo
 
 object Formatter {
     fun getDistanceFormatter(): DistanceFormatter {

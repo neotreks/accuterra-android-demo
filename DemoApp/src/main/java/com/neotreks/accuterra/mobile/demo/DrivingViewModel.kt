@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
@@ -69,6 +70,7 @@ class DrivingViewModel: ViewModel() {
                 this@DrivingViewModel.trail.value = trail
             } catch (e: Exception) {
                 Log.e(TAG, "Error while loading trail: ${e.localizedMessage}", e)
+                CrashSupport.reportError(e, "Trail ID: $trailId")
                 Toast.makeText(context, context.getString(R.string.trail_errors_load_trail_failed_because_of,
                     e.localizedMessage), Toast.LENGTH_LONG).show()
                 // Exit the activity - we cannot continue and use it

@@ -101,29 +101,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start|center"
-            android:orientation="horizontal">
-
-            <!-- POI TYPE LABEL -->
-            <TextView
-                style="@style/DemoAppTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_margin"
-                android:text="@string/activity_trip_add_poi_is_wp_label" />
-
-            <!-- POI TYPE DROPDOWN -->
-            <CheckBox
-                android:id="@+id/activity_recorded_trip_poi_is_wp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="false" />
-
-        </LinearLayout>
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

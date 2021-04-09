@@ -9,7 +9,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -17,26 +16,35 @@ import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripRecordingBinding
+import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.sdk.SdkManager
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
+import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
-import kotlinx.android.synthetic.main.activity_trip_recording.*
-import kotlinx.android.synthetic.main.component_trip_recording_buttons.*
-import kotlinx.android.synthetic.main.component_trip_recording_stats.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 import java.lang.ref.WeakReference
 
 class TripRecordingActivity : BaseTripRecordingActivity() {
+
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
 
     private lateinit var viewModel: TripRecordingViewModel
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
     private val mapViewLoadingFailListener = MapLoadingFailListener(this)
+
+    private lateinit var binding: ActivityTripRecordingBinding
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
@@ -53,7 +61,8 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_trip_recording)
+        binding = ActivityTripRecordingBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this).get(TripRecordingViewModel::class.java)
 
@@ -77,7 +86,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
         when(item.itemId) {
             R.id.trip_record_menu_item_display_raw -> {
                 SdkManager.debugConfig.tripConfiguration.displayRawLocations = !item.isChecked
-                lifecycleScope.launchWhenCreated {
+                lifecycleScope.launchWhenResumed {
                     getAccuTerraMapView().tripLayersManager.reloadTripRecorderData()
                 }
             }
@@ -107,7 +116,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     /* IMPLEMENTATION OF ABSTRACT METHODS */
 
     override fun getAccuTerraMapView(): AccuTerraMapView {
-        return activity_trip_recording_accuterra_map_view
+        return binding.activityTripRecordingAccuterraMapView
     }
 
     override fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
@@ -119,11 +128,11 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     }
 
     override fun getDrivingModeButton(): FloatingActionButton {
-        return activity_trip_recording_driving_mode_button
+        return binding.activityTripRecordingDrivingModeButton
     }
 
-    override fun getMapLayerButton(): FloatingActionButton? {
-        return activity_trip_recording_layer_button
+    override fun getMapLayerButton(): FloatingActionButton {
+        return binding.activityTripRecordingLayerButton
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -187,38 +196,50 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
         return viewModel.tripUUID
     }
 
+    override fun getExtProperties(): List<ExtProperties>? {
+        return null
+    }
+
     override fun onNewTripUuid(tripUuid: String?) {
         viewModel.tripUUID = tripUuid
     }
 
     override fun getAddPoiButton(): View {
-        return activity_trip_recording_add_poi_button
+        return binding.activityTripRecordingAddPoiButton
+    }
+
+    override fun getRecButtonBinding(): ComponentTripRecordingButtonsBinding {
+        return binding.activityTripRecordingButtons
     }
 
     override fun getSnackbarView(): View {
-        return activity_trip_recording_recording_panel
+        return binding.activityTripRecordingRecordingPanel
     }
 
     /* PRIVATE */
 
     private fun initRecordingPanel() {
 
-        buttonsPanel = TripRecordingButtonsPanel(component_trip_recording_stat_duration,
-            component_trip_recording_stat_distance, component_trip_recording_start_button,
-            component_trip_recording_stop_button, component_trip_recording_resume_button,
-            component_trip_recording_finish_button, activity_trip_recording_add_poi_button, this)
+        val stats = binding.activityTripRecordingStats
+        val buttons = binding.activityTripRecordingButtons
+
+        buttonsPanel = TripRecordingButtonsPanel(buttons.componentTripRecordingStatDuration,
+            buttons.componentTripRecordingStatDistance, buttons.componentTripRecordingStartButton,
+            buttons.componentTripRecordingStopButton, buttons.componentTripRecordingResumeButton,
+            buttons.componentTripRecordingFinishButton, binding.activityTripRecordingAddPoiButton, this)
 
         statsPanel = TripRecordingStatsPanel(
-            component_trip_recording_stats_speed, component_trip_recording_stats_heading,
-            component_trip_recording_stats_elevation, component_trip_recording_stats_lat,
-            component_trip_recording_stats_lon, this
+            stats.componentTripRecordingStatsSpeed, stats.componentTripRecordingStatsHeading,
+            stats.componentTripRecordingStatsElevation, stats.componentTripRecordingStatsLat,
+            stats.componentTripRecordingStatsLon, this
         )
 
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.activity_new_free_roam_trip_title)
+        val toolbar = binding.activityTripRecordingToolbar
+        setSupportActionBar(toolbar.generalToolbar)
+        toolbar.generalToolbarTitle.text = getString(R.string.activity_new_free_roam_trip_title)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -233,7 +254,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
         // Init recording buttons
         super.setupButtons()
 
-        activity_trip_recording_layer_button.setOnClickListener {
+        binding.activityTripRecordingLayerButton.setOnClickListener {
             onToggleMapStyle()
         }
     }
@@ -247,7 +268,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
         // Try to register location observers to obtain device location
         tryRegisteringLocationObservers()
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             setupRecordingAfterOnAccuTerraMapViewReady()
             updateBackButton()
             switchToLocationMode()
@@ -262,7 +283,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
                 }
             })
             // Display recording button
-            activity_trip_recording_layer_button.show()
+            binding.activityTripRecordingLayerButton.show()
         }
     }
 
@@ -281,7 +302,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     }
 
     private fun registerLocationObservers() {
-        getLastLocationLiveData().observe(this, Observer { lastLocation ->
+        getLastLocationLiveData().observe(this, { lastLocation ->
             updateLocationOnMap(lastLocation)
         })
     }
@@ -302,10 +323,10 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
 
         override fun onStyleChanged(mapboxMap: MapboxMap) {
             weakActivity.get()?.let { activity ->
-                activity.getMapLayerButton()?.isEnabled = true
+                activity.getMapLayerButton().isEnabled = true
                 activity.getDrivingModeButton().isEnabled = true
                 // Reload recorded trip path after the style has changed
-                activity.lifecycleScope.launchWhenCreated {
+                activity.lifecycleScope.launchWhenResumed {
                     activity.getAccuTerraMapView().tripLayersManager.reloadTripRecorderData()
                 }
             }

@@ -11,13 +11,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailInfoBinding
 import com.neotreks.accuterra.mobile.demo.extensions.getFavoriteIconResource
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.demo.util.visibility
@@ -29,7 +30,6 @@ import com.neotreks.accuterra.mobile.sdk.trail.service.ITrailMediaService
 import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTrailCommentRequest
 import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTrailCommentRequestBuilder
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TrailComment
-import kotlinx.android.synthetic.main.activity_trail_info.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -64,6 +64,8 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
 
     private lateinit var viewModel: TrailInfoViewModel
 
+    private lateinit var binding: ActivityTrailInfoBinding
+
     private var dialogHolder = ProgressDialogHolder()
 
     private lateinit var imageAdapter: TrailMediaAdapter
@@ -80,19 +82,21 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         override fun onConnected(service: OfflineMapService) {
             offlineMapService = service
             lifecycleScope.launchWhenCreated {
-                configureDownloadButton(service.offlineMapManager.getOfflineMapStatus(OfflineMapType.TRAIL, viewModel.trailId))
+                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                configureDownloadButton(service.offlineMapManager.getTrailOfflineMap(
+                    viewModel.trailId)?.status ?: OfflineMapStatus.NOT_CACHED)
             }
         }
 
         override fun onDisconnected() {
+            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
             offlineMapService = null
-            Log.e(TAG, "offlineMapService disconnected")
+            Log.d(TAG, "offlineMapService disconnected")
         }
     }
 
     private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
-        connectionListener,
-        cacheProgressListener
+        connectionListener
     )
 
     /* * * * * * * * * * * * */
@@ -108,15 +112,17 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
     }
 
     override fun onStop() {
-        super.onStop()
+        Log.i(TAG, "onStop()")
         // this doesn't stop the service, because we called "startService" explicitly
         unbindService(offlineMapServiceConnection)
+        super.onStop()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startService(Intent(this, OfflineMapService::class.java))
-        setContentView(R.layout.activity_trail_info)
+        binding = ActivityTrailInfoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         //setSupportActionBar(activity_trail_info_toolbar)
 
         viewModel = ViewModelProvider(this).get(TrailInfoViewModel::class.java)
@@ -156,7 +162,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
     /* * * * * * * * * * * * */
 
     private fun setupToolbar() {
-        activity_trail_info_back_button.setOnClickListener {
+        binding.activityTrailInfoBackButton.setOnClickListener {
             onBackPressed()
         }
 
@@ -173,7 +179,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
     }
 
     private fun setupTabs() {
-        activity_trail_discovery_tabs_content_view_pager.adapter =
+        binding.activityTrailDiscoveryTabsContentViewPager.adapter =
             TrailInfoPagerAdapter(supportFragmentManager, this, viewModel.trailId, discussionListener)
     }
 
@@ -185,20 +191,21 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             this,
             this
         )
-        activity_trail_info_image_carousel.adapter = imageAdapter
+        binding.activityTrailInfoImageCarousel.adapter = imageAdapter
     }
 
     private fun setupButtons() {
-        activity_trail_info_get_start_icon.setOnClickListener {
+        binding.activityTrailInfoGetStartIcon.setOnClickListener {
             startActivity(DrivingActivity.createNavigateToIntent(this, viewModel.trailId))
         }
 
-        activity_trail_info_get_download_button.setOnClickListener {
+        binding.activityTrailInfoGetDownloadButton.setOnClickListener {
             lifecycleScope.launchWhenCreated {
 
                 offlineMapService?.offlineMapManager?.let { offlineMapManager ->
-                    when (offlineMapManager.getOfflineMapStatus(OfflineMapType.TRAIL, viewModel.trailId)) {
-                        OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED -> {
+                    val trailOfflineMap = offlineMapManager.getTrailOfflineMap(viewModel.trailId)
+                    when (trailOfflineMap?.status ?: OfflineMapStatus.NOT_CACHED) {
+                        OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED, OfflineMapStatus.PAUSED -> {
                             // Please note the estimate is often very inaccurate!
                             val estimateBytes = offlineMapManager.estimateTrailCacheSize(viewModel.trailId)
                             val estimateText = android.text.format.Formatter.formatShortFileSize(
@@ -222,7 +229,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                                     code = {
                                         lifecycleScope.launchWhenCreated {
                                             configureDownloadButton(OfflineMapStatus.WAITING)
-                                            offlineMapManager.downloadOfflineMap(OfflineMapType.TRAIL, viewModel.trailId)
+                                            offlineMapManager.downloadTrailOfflineMap(viewModel.trailId)
                                         }
                                     }
                                 ).show()
@@ -230,9 +237,10 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                         }
                         OfflineMapStatus.COMPLETE ->
                         {
+                            requireNotNull(trailOfflineMap) { "OfflineMap not found" }
                             val cacheSize =
                                 android.text.format.Formatter.formatShortFileSize(this@TrailInfoActivity,
-                                    offlineMapManager.getOfflineMapStorageSize(OfflineMapType.TRAIL, viewModel.trailId))
+                                    offlineMapManager.getOfflineMapStorageSize(trailOfflineMap.offlineMapId))
 
                             DialogUtil.buildYesNoDialog(this@TrailInfoActivity,
                                 getString(R.string.offline_cache), getString(R.string.trail_already_cached, cacheSize),
@@ -258,11 +266,11 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             }
         }
 
-        activity_trail_info_favorite_wrapper.setOnClickListener {
+        binding.activityTrailInfoFavoriteWrapper.setOnClickListener {
             onFavoriteClicked()
         }
 
-        activity_trail_info_get_there_icon.setOnClickListener {
+        binding.activityTrailInfoGetThereIcon.setOnClickListener {
             toast("TODO: Navigate to trail")
         }
     }
@@ -272,13 +280,15 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         GlobalScope.launch {
             // Disable the UI
             lifecycleScope.launchWhenResumed {
-                activity_trail_discovery_progress_dialog.visibility = View.VISIBLE
+                binding.activityTrailDiscoveryProgressDialog.visibility = View.VISIBLE
             }
-            offlineMapManager.deleteOfflineMap(OfflineMapType.TRAIL, viewModel.trailId)
+            val offlineMap = offlineMapManager.getTrailOfflineMap(viewModel.trailId) ?: return@launch
+
+            offlineMapManager.deleteOfflineMap(offlineMap.offlineMapId)
             // Enable the UI back and refresh the button
             lifecycleScope.launchWhenResumed {
                 configureDownloadButton(OfflineMapStatus.NOT_CACHED)
-                activity_trail_discovery_progress_dialog.visibility = View.GONE
+                binding.activityTrailDiscoveryProgressDialog.visibility = View.GONE
             }
         }
     }
@@ -302,7 +312,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
     }
 
     private fun setupObservers() {
-        viewModel.trail.observe(this@TrailInfoActivity, Observer { trail ->
+        viewModel.trail.observe(this@TrailInfoActivity, { trail ->
             lifecycleScope.launchWhenResumed {
                 if (trail != null) {
                     showTrail(trail)
@@ -310,14 +320,14 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             }
             checkDataLoaded()
         })
-        viewModel.imageUrls.observe(this@TrailInfoActivity, Observer {
+        viewModel.imageUrls.observe(this@TrailInfoActivity, {
             showImages()
             checkDataLoaded()
         })
-        viewModel.userData.observe(this@TrailInfoActivity, Observer { userData ->
+        viewModel.userData.observe(this@TrailInfoActivity, { userData ->
             // Favorite
             val favoriteIconResource = getFavoriteIconResource(userData?.userFavorite ?: false)
-            activity_trail_info_favorite_icon.setImageResource(favoriteIconResource)
+            binding.activityTrailInfoFavoriteIcon.setImageResource(favoriteIconResource)
             checkDataLoaded()
         })
     }
@@ -330,29 +340,29 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
     @UiThread
     private suspend fun showTrail(trail: Trail) {
         withContext(Dispatchers.Main) {
-            activity_trail_info_title.text = trail.info.name
-            activity_trail_info_length.text = Formatter.getDistanceFormatter()
+            binding.activityTrailInfoTitle.text = trail.info.name
+            binding.activityTrailInfoLength.text = Formatter.getDistanceFormatter()
                 .formatDistance(this@TrailInfoActivity, trail.statistics.length)
 
             if (trail.userRating == null) {
-                activity_trail_info_rating_value.visibility = View.GONE
-                activity_trail_info_rating_stars.visibility = View.GONE
-                activity_trail_info_ratings_count.visibility = View.GONE
+                binding.activityTrailInfoRatingValue.visibility = View.GONE
+                binding.activityTrailInfoRatingStars.visibility = View.GONE
+                binding.activityTrailInfoRatingsCount.visibility = View.GONE
             } else {
                 val userRating = trail.userRating!!
                 val rating = round(userRating.rating * 10) / 10.0
 
-                activity_trail_info_rating_value.text = rating.toString()
-                activity_trail_info_rating_stars.rating = rating.toFloat()
-                activity_trail_info_ratings_count.text =
+                binding.activityTrailInfoRatingValue.text = rating.toString()
+                binding.activityTrailInfoRatingStars.rating = rating.toFloat()
+                binding.activityTrailInfoRatingsCount.text =
                     getString(R.string.rating_count_number, userRating.ratingCount)
 
-                activity_trail_info_no_ratings.visibility = View.GONE
+                binding.activityTrailInfoNoRatings.visibility = View.GONE
             }
 
             val techCode = trail.technicalRating.high.code
             val techRating = EnumUtil.getTechRatingForCode(techCode, this@TrailInfoActivity)
-            activity_trail_info_difficulty.text = techRating!!.name
+            binding.activityTrailInfoDifficulty.text = techRating!!.name
         }
     }
 
@@ -360,27 +370,33 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         when (mapStatus) {
             OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED ->
             {
-                activity_trail_info_get_download_button.visibility = View.VISIBLE
-                activity_trail_info_get_download_icon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
-                activity_trail_info_get_download_text.text = getString(R.string.download)
+                binding.activityTrailInfoGetDownloadButton.visibility = View.VISIBLE
+                binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
+                binding.activityTrailInfoGetDownloadText.text = getString(R.string.download)
             }
             OfflineMapStatus.WAITING ->
             {
-                activity_trail_info_get_download_button.visibility = View.VISIBLE
-                activity_trail_info_get_download_icon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
-                activity_trail_info_get_download_text.text = getString(R.string.queued)
+                binding.activityTrailInfoGetDownloadButton.visibility = View.VISIBLE
+                binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
+                binding.activityTrailInfoGetDownloadText.text = getString(R.string.queued)
             }
             OfflineMapStatus.IN_PROGRESS ->
             {
-                activity_trail_info_get_download_button.visibility = View.VISIBLE
-                activity_trail_info_get_download_icon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
-                activity_trail_info_get_download_text.text = getString(R.string.download_percents, progressPercents)
+                binding.activityTrailInfoGetDownloadButton.visibility = View.VISIBLE
+                binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
+                binding.activityTrailInfoGetDownloadText.text = getString(R.string.download_percents, progressPercents)
             }
             OfflineMapStatus.COMPLETE ->
             {
-                activity_trail_info_get_download_button.visibility = View.VISIBLE
-                activity_trail_info_get_download_icon.setImageDrawable(loadDrawable(R.drawable.ic_cacheinfo_24px))
-                activity_trail_info_get_download_text.text = getString(R.string.cached)
+                binding.activityTrailInfoGetDownloadButton.visibility = View.VISIBLE
+                binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cacheinfo_24px))
+                binding.activityTrailInfoGetDownloadText.text = getString(R.string.cached)
+            }
+            OfflineMapStatus.PAUSED ->
+            {
+                binding.activityTrailInfoGetDownloadButton.visibility = View.VISIBLE
+                binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
+                binding.activityTrailInfoGetDownloadText.text = getString(R.string.download)
             }
         }
     }
@@ -401,9 +417,11 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                     viewModel.loadTrailComments(this@TrailInfoActivity, trailId)
                 } else {
                     longToast("Cannot post a comment because of: ${result.errorMessage}")
+                    CrashSupport.reportError(result, commentRequest.toString())
                 }
             } catch (e: Exception) {
                 longToast("Cannot post a comment because of: ${e.localizedMessage}")
+                CrashSupport.reportError(e)
             } finally {
                 dialogHolder.hideProgressDialog()
             }
@@ -427,9 +445,11 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                     viewModel.loadTrailComments(this@TrailInfoActivity, comment.trailId)
                 } else {
                     longToast("Cannot delete a comment $commentUuid because of: ${result.errorMessage}")
+                    CrashSupport.reportError(result, comment.toString())
                 }
             } catch (e: Exception) {
                 longToast("Cannot delete a comment $commentUuid because of: ${e.localizedMessage}")
+                CrashSupport.reportError(e, comment.toString())
             } finally {
                 dialogHolder.hideProgressDialog()
             }
@@ -454,6 +474,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                 viewModel.userData.value = viewModel.userData.value?.copyWithFavorite(result.value?.favorite ?: false)
             } else {
                 longToast(getString(R.string.trails_trail_update_failed, result.errorMessage ?: "Unknown error"))
+                CrashSupport.reportError(result)
             }
             // Hide progress
             showProgressBar(false)
@@ -477,9 +498,11 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                     viewModel.userData.value = viewModel.userData.value?.copyWithRating(rating)
                 } else {
                     longToast(getString(R.string.trails_trail_update_failed, result.errorMessage ?: "Unknown error"))
+                    CrashSupport.reportError(result, "Trail ID: $trailId, rating: $rating")
                 }
             } catch (e: Exception) {
                 longToast(getString(R.string.trails_trail_update_failed, e.localizedMessage ?: e.toString()))
+                CrashSupport.reportError(e, "Trail ID: $trailId, rating: $rating")
             }
             // Hide progress
             showProgressBar(false)
@@ -491,25 +514,25 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
     /* * * * * * * * * * * * */
 
     private fun showProgressBar(visible: Boolean) {
-        activity_trail_info_progress_bar.visibility = visible.visibility
+        binding.activityTrailInfoProgressBar.visibility = visible.visibility
     }
 
     private class CacheProgressListener(activity: TrailInfoActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.CacheProgressListener {
+        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
-        override fun onComplete(mapType: OfflineMapType, trailId: Long) {
+        override fun onComplete(offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
-                if (trailId == it.viewModel.trailId) {
+                if (offlineMap is ITrailOfflineMap && offlineMap.trailId == it.viewModel.trailId) {
                     it.configureDownloadButton(OfflineMapStatus.COMPLETE)
                 }
             }
         }
 
-        override fun onError(error: HashMap<IOfflineResource, String>, mapType: OfflineMapType, trailId: Long) {
+        override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
-                if (trailId == it.viewModel.trailId) {
+                if (offlineMap is ITrailOfflineMap && offlineMap.trailId == it.viewModel.trailId) {
                     it.configureDownloadButton(OfflineMapStatus.FAILED)
                     val errorMessage = error.map { e ->
                         "${e.key.getResourceTypeName()}: ${e.value}"
@@ -520,13 +543,12 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             }
         }
 
-        override fun onProgressChanged(progress: Double, mapType: OfflineMapType, trailId: Long) {
+        override fun onProgressChanged(offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
-                if (trailId == it.viewModel.trailId) {
-
+                if (offlineMap is ITrailOfflineMap && offlineMap.trailId == it.viewModel.trailId) {
 
                     // Show what is downloading and progress
-                    val progressPercents = (100.0 * progress).toInt()
+                    val progressPercents = (100.0 * offlineMap.progress).toInt()
 
                     it.configureDownloadButton(OfflineMapStatus.IN_PROGRESS, progressPercents)
                 }
@@ -650,7 +672,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             return tabNames.size
         }
 
-        override fun getPageTitle(position: Int): CharSequence? {
+        override fun getPageTitle(position: Int): CharSequence {
             return context.getString(tabNames[position])
         }
     }

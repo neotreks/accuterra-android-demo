@@ -11,6 +11,8 @@ import com.neotreks.accuterra.mobile.sdk.trip.model.TripMedia
 
 /**
  * Utility class to manage the media list component
+ *
+ * @see [setupPhotoGrid]
  */
 class OnlineTripMediaListManager(
     private val context: Context,
@@ -26,6 +28,9 @@ class OnlineTripMediaListManager(
         private const val TAG = "MediaListManager"
     }
 
+    /**
+     * PLEASE NOTE - this method must be called to make this component WORK!
+     */
     fun setupPhotoGrid() {
         // Setup the component
         view.layoutManager = GridLayoutManager(context, 1, GridLayoutManager.HORIZONTAL, false)

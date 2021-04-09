@@ -16,6 +16,7 @@
         android:layout_height="wrap_content"
         android:text="@android:string/ok"
         android:layout_gravity="end"
-        style="@style/Widget.AppCompat.Button.Borderless" />
+        android:layout_marginEnd="@dimen/default_margin"
+        style="@style/DemoApp.Button.Grayed" />
 
 </LinearLayout>

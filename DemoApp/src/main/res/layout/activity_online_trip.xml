@@ -13,7 +13,7 @@
 
     <!-- USER AVATAR -->
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/activity_online_trip_user_avatar_card"
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -33,7 +33,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/user_avatar" />
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- User Wrapper -->
 
@@ -136,28 +136,24 @@
 
             <!-- MAP TAB -->
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_online_trip_tab_map"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:text="@string/general_map" />
 
             <!-- PHOTO TAB -->
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_online_trip_tab_photos"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:text="@string/general_photos" />
 
             <!-- STATISTICS TAB -->
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_online_trip_tab_statistics"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:text="@string/general_statistics" />
 
             <!-- STATISTICS POI -->
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_online_trip_tab_pois"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:text="@string/general_pois" />
@@ -207,7 +203,7 @@
             app:layout_constraintTop_toBottomOf="@id/activity_online_trip_description">
 
             <!-- COMMENTS ICON -->
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/activity_online_trip_comments_icon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -234,7 +230,7 @@
 
         <!-- Add Comment -->
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/activity_online_trip_comments_add_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -260,7 +256,7 @@
             app:layout_constraintTop_toBottomOf="@id/activity_online_trip_description">
 
             <!-- LIKES ICON -->
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/activity_online_trip_likes_icon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

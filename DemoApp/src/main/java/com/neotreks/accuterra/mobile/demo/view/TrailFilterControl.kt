@@ -7,9 +7,9 @@ import android.widget.CompoundButton
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.TrailFilterBinding
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.trail.model.TechnicalRating
-import kotlinx.android.synthetic.main.trail_filter.view.*
 import kotlinx.coroutines.runBlocking
 
 class TrailFilterControl(context: Context, attrs: AttributeSet):
@@ -23,10 +23,12 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
 
     private var listener: OnTrailFilterChangeListener? = null
 
-    private lateinit var difficultyLevels: List<TechnicalRating>
+    private var difficultyLevels: List<TechnicalRating>
 
     private val tripDistances = arrayOf(5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 100,
         120, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000)
+
+    private val binding: TrailFilterBinding by lazy { TrailFilterBinding.bind(this) }
 
     init {
         runBlocking {
@@ -36,37 +38,37 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
 
     var maxDifficultyLevel: TechnicalRating?
         get() {
-            return getDifficultyLevelFromProgress(trail_filter_difficulty.progress)
+            return getDifficultyLevelFromProgress(binding.trailFilterDifficulty.progress)
         }
         set(value) {
-            trail_filter_difficulty.progress = getProgressFromDifficulty(value)
+            binding.trailFilterDifficulty.progress = getProgressFromDifficulty(value)
             refreshDifficultyLabel(value)
         }
 
     var minUserRating: Int?
         get() {
-            return getStarsFromProgress(trail_filter_user_rating.progress)
+            return getStarsFromProgress(binding.trailFilterUserRating.progress)
         }
         set(value) {
-            trail_filter_user_rating.progress = getProgressFromStars(value)
+            binding.trailFilterUserRating.progress = getProgressFromStars(value)
             refreshUserRatingLabel(value)
         }
 
     var maxTripDistance: Int?
         get() {
-            return getTripDistanceFromProgress(trail_filter_trip_distance.progress)
+            return getTripDistanceFromProgress(binding.trailFilterTripDistance.progress)
         }
         set(value) {
-            trail_filter_trip_distance.progress = getProgressFromTripDistance(value)
+            binding.trailFilterTripDistance.progress = getProgressFromTripDistance(value)
             refreshTripDistanceLabel(value)
         }
 
     var favoriteOnly: Boolean
         get() {
-            return trail_filter_trip_favorite.isChecked
+            return binding.trailFilterTripFavorite.isChecked
         }
         set(value) {
-            trail_filter_trip_favorite.isChecked = value
+            binding.trailFilterTripFavorite.isChecked = value
         }
 
     init {
@@ -80,24 +82,24 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        trail_filter_difficulty.setOnSeekBarChangeListener(this)
-        trail_filter_user_rating.setOnSeekBarChangeListener(this)
-        trail_filter_trip_distance.setOnSeekBarChangeListener(this)
-        trail_filter_trip_favorite.setOnCheckedChangeListener(this)
+        binding.trailFilterDifficulty.setOnSeekBarChangeListener(this)
+        binding.trailFilterUserRating.setOnSeekBarChangeListener(this)
+        binding.trailFilterTripDistance.setOnSeekBarChangeListener(this)
+        binding.trailFilterTripFavorite.setOnCheckedChangeListener(this)
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        trail_filter_difficulty.setOnSeekBarChangeListener(null)
-        trail_filter_user_rating.setOnSeekBarChangeListener(null)
-        trail_filter_trip_distance.setOnSeekBarChangeListener(null)
-        trail_filter_trip_favorite.setOnCheckedChangeListener(null)
+        binding.trailFilterDifficulty.setOnSeekBarChangeListener(null)
+        binding.trailFilterUserRating.setOnSeekBarChangeListener(null)
+        binding.trailFilterTripDistance.setOnSeekBarChangeListener(null)
+        binding.trailFilterTripFavorite.setOnCheckedChangeListener(null)
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         when (seekBar) {
-            trail_filter_difficulty -> {
+            binding.trailFilterDifficulty -> {
                 val newDifficulty = getDifficultyLevelFromProgress(progress)
                 refreshDifficultyLabel(newDifficulty)
 
@@ -105,7 +107,7 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
                     listener?.onMaxDifficultyLevelChanged(this, newDifficulty)
                 }
             }
-            trail_filter_user_rating -> {
+            binding.trailFilterUserRating -> {
                 val newRating = getStarsFromProgress(progress)
                 refreshUserRatingLabel(newRating)
 
@@ -113,7 +115,7 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
                     listener?.onMinUserRatingChanged(this, getStarsFromProgress(progress))
                 }
             }
-            trail_filter_trip_distance -> {
+            binding.trailFilterTripDistance -> {
                 val newTripDistance = getTripDistanceFromProgress(progress)
                 refreshTripDistanceLabel(newTripDistance)
 
@@ -126,7 +128,7 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
 
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
         when(buttonView) {
-            trail_filter_trip_favorite -> {
+            binding.trailFilterTripFavorite -> {
                 listener?.onFavoriteChanged(this, isChecked)
             }
         }
@@ -197,24 +199,24 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
 
     private fun initDifficultySeekBar() {
         // trail_filter_difficulty.min = 0
-        trail_filter_difficulty.max = difficultyLevels.size
-        trail_filter_difficulty.progress = getProgressFromDifficulty(null)
+        binding.trailFilterDifficulty.max = difficultyLevels.size
+        binding.trailFilterDifficulty.progress = getProgressFromDifficulty(null)
 
         refreshDifficultyLabel()
     }
 
     private fun initUserRatingSeekBar() {
         // trail_filter_difficulty.min = 0
-        trail_filter_user_rating.max = MAX_STARS
-        trail_filter_user_rating.progress = getProgressFromStars(null)
+        binding.trailFilterUserRating.max = MAX_STARS
+        binding.trailFilterUserRating.progress = getProgressFromStars(null)
 
         refreshUserRatingLabel()
     }
 
     private fun initTripDistanceSeekBar() {
         // trail_filter_trip_distance.min = 0
-        trail_filter_trip_distance.max = tripDistances.size
-        trail_filter_trip_distance.progress = getProgressFromTripDistance(null)
+        binding.trailFilterTripDistance.max = tripDistances.size
+        binding.trailFilterTripDistance.progress = getProgressFromTripDistance(null)
 
         refreshTripDistanceLabel()
     }
@@ -224,7 +226,7 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
     }
 
     private fun refreshDifficultyLabel(difficultyLevel: TechnicalRating?) {
-        trail_filter_difficulty_value_label.text = difficultyLevel?.name
+        binding.trailFilterDifficultyValueLabel.text = difficultyLevel?.name
             ?: context.getString(R.string.any)
     }
 
@@ -233,7 +235,7 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
     }
 
     private fun refreshUserRatingLabel(starsCount: Int?) {
-        trail_filter_user_rating_value_label.text =  if (starsCount != null) {
+        binding.trailFilterUserRatingValueLabel.text =  if (starsCount != null) {
             context.resources.getQuantityString(R.plurals.star, starsCount, starsCount)
         } else {
             context.getString(R.string.any)
@@ -245,7 +247,7 @@ class TrailFilterControl(context: Context, attrs: AttributeSet):
     }
 
     private fun refreshTripDistanceLabel(tripDistance: Int?) {
-        trail_filter_trip_distance_value_label.text = if (tripDistance != null) {
+        binding.trailFilterTripDistanceValueLabel.text = if (tripDistance != null) {
             context.getString(
                 R.string.distance_integer_with_unit,
                 tripDistance,

@@ -8,31 +8,40 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripEditPoiBinding
 import com.neotreks.accuterra.mobile.demo.longToast
+import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
-import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
+import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
-import com.neotreks.accuterra.mobile.sdk.trail.model.PointSubtype
+import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import kotlinx.android.synthetic.main.activity_trip_edit_poi.*
-import kotlinx.android.synthetic.main.general_action_toolbar.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 
 class TripEditPoiActivity : AppCompatActivity() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private lateinit var viewModel: TripEditPoiViewModel
 
     private lateinit var mediaListManager: TripRecordingMediaListManager
 
-    private lateinit var adapter: PointSubtypeAdapter
+    private lateinit var adapter: PointTypeAdapter
+
+    private lateinit var binding: ActivityTripEditPoiBinding
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
@@ -42,6 +51,8 @@ class TripEditPoiActivity : AppCompatActivity() {
 
         private const val REQUEST_CAPTURE_PICTURE = 12
         private const val REQUEST_SELECT_PHOTO = 13
+        private const val REQUEST_SELECT_PHOTO_PERMISSION = 14
+        private const val REQUEST_TAKE_PHOTO_PERMISSIONS = 15
 
         fun createNavigateToIntent(poiUuid: String?, context: Context): Intent {
             return Intent(context, TripEditPoiActivity::class.java)
@@ -58,10 +69,11 @@ class TripEditPoiActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_trip_edit_poi)
+        binding = ActivityTripEditPoiBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         viewModel = ViewModelProvider(this@TripEditPoiActivity).get(TripEditPoiViewModel::class.java)
         mediaListManager = TripRecordingMediaListManager(this,
-            activity_trip_edit_poi_photos,
+            binding.activityTripEditPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
                     val intent = MediaDetailActivity.createNavigateToIntent(
@@ -104,6 +116,26 @@ class TripEditPoiActivity : AppCompatActivity() {
                     return
                 }
                 viewModel.addMedia(uri, this@TripEditPoiActivity)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_SELECT_PHOTO_PERMISSION) {
+            PermissionSupport.logSelectPhotoPermissionRequested(this)
+            if (PermissionSupport.isSelectPhotoPermissionGranted(this)) {
+                onSelectImage()
+            } else {
+                longToast(getString(R.string.general_permission_not_granted))
+            }
+        }
+        if (requestCode == REQUEST_TAKE_PHOTO_PERMISSIONS) {
+            PermissionSupport.logCameraPermissionRequested(this)
+            if (PermissionSupport.isCameraPermissionGranted(this)) {
+                onAddImage()
+            } else {
+                longToast(getString(R.string.general_permission_not_granted))
             }
         }
     }
@@ -153,10 +185,11 @@ class TripEditPoiActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(action_toolbar)
-        action_toolbar_title.text = getString(R.string.activity_trip_edit_poi_title)
-        action_toolbar_action.text = getString(R.string.general_save)
-        action_toolbar_action.setOnClickListener {
+        val toolbar = binding.activityTripEditPoiToolbar
+        setSupportActionBar(toolbar.actionToolbar)
+        toolbar.actionToolbarTitle.text = getString(R.string.activity_trip_edit_poi_title)
+        toolbar.actionToolbarAction.text = getString(R.string.general_save)
+        toolbar.actionToolbarAction.setOnClickListener {
             onSaveClicked()
         }
 
@@ -172,46 +205,50 @@ class TripEditPoiActivity : AppCompatActivity() {
         val context = this
         lifecycleScope.launchWhenCreated {
             val service = ServiceFactory.getEnumService(context)
-            val subtypes = service.getPointSubtypes().sortedBy { it.name }
-            adapter = PointSubtypeAdapter(context, subtypes)
-            activity_trip_edit_poi_poi_type.adapter = adapter
+            val types = service.getPointTypes().sortedBy { it.name }
+            adapter = PointTypeAdapter(context, types)
+            binding.activityTripEditPoiPoiType.adapter = adapter
         }
     }
 
     private fun setupButtons() {
-        activity_trip_edit_poi_select_photo.setOnClickListener {
+        binding.activityTripEditPoiSelectPhoto.setOnClickListener {
             onSelectImage()
         }
-        activity_trip_edit_poi_take_photo.setOnClickListener {
+        binding.activityTripEditPoiTakePhoto.setOnClickListener {
             onAddImage()
         }
-        activity_trip_edit_poi_shuffle_photo.setOnClickListener {
+        binding.activityTripEditPoiShufflePhoto.setOnClickListener {
             onShuffleImage()
         }
     }
 
     private fun setupObservers() {
-        viewModel.poi.observe(this, Observer { poi ->
-            activity_trip_edit_poi_trip_name.setText(poi.name)
-            activity_trip_edit_poi_trip_description.setText(poi.description)
-            activity_trip_edit_poi_is_wp.isChecked = poi.isWaypoint
-            activity_trip_edit_poi_poi_type.setSelection(adapter.getPosition(poi.pointSubtype))
+        viewModel.poi.observe(this, { poi ->
+            binding.activityTripEditPoiTripName.setText(poi.name)
+            binding.activityTripEditPoiTripDescription.setText(poi.description)
+            binding.activityTripEditPoiPoiType.setSelection(adapter.getPosition(poi.pointType))
         })
-        viewModel.media.observe(this, Observer { mediaList ->
+        viewModel.media.observe(this, { mediaList ->
             mediaListManager.refreshPhotoGridAdapter(mediaList)
         })
     }
 
     private fun onAddImage() {
+        if (!PermissionSupport.isCameraPermissionGranted(this)) {
+            PermissionSupport.requestCameraPermissions(this, REQUEST_TAKE_PHOTO_PERMISSIONS)
+            return
+        }
         val intent = CaptureImageActivity.createNavigateToIntent(this)
         startActivityForResult(intent, REQUEST_CAPTURE_PICTURE)
     }
 
     private fun onSelectImage() {
-        val photoPickerIntent = Intent(Intent.ACTION_PICK)
-        photoPickerIntent.type = "image/*"
-        val mimeTypes = arrayOf("image/jpeg", "image/png")
-        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        if (!PermissionSupport.isSelectPhotoPermissionGranted(this)) {
+            PermissionSupport.requestSelectPhotoPermission(this, REQUEST_SELECT_PHOTO_PERMISSION)
+            return
+        }
+        val photoPickerIntent = ApkMediaUtil.buildSelectImageIntent()
         startActivityForResult(photoPickerIntent, REQUEST_SELECT_PHOTO)
     }
 
@@ -227,13 +264,10 @@ class TripEditPoiActivity : AppCompatActivity() {
         GlobalScope.launch {
 
             // Gather POI data
-            val name = activity_trip_edit_poi_trip_name.text.toString()
-            val description = activity_trip_edit_poi_trip_description.text.toString()
-            val isWaypoint = activity_trip_edit_poi_is_wp.isChecked
+            val name = binding.activityTripEditPoiTripName.text.toString()
+            val description = binding.activityTripEditPoiTripDescription.text.toString()
             // Point types
-            val enumService = ServiceFactory.getEnumService(applicationContext)
-            val pointSubtype = activity_trip_edit_poi_poi_type.selectedItem as PointSubtype
-            val pointType = enumService.getPointTypeByCode(pointSubtype.parentTypeCode)
+            val pointType = binding.activityTripEditPoiPoiType.selectedItem as PointType
             // Media
             var media = viewModel.media.value!!
             media = ApkMediaUtil.updatePositions(media)
@@ -241,12 +275,10 @@ class TripEditPoiActivity : AppCompatActivity() {
             // Build the new POI
             val poi = viewModel.poi.value!!.copy(
                 name = name,
-                isWaypoint = isWaypoint,
                 description = description,
                 descriptionShort = null,
                 media = media, // Just default value
                 pointType = pointType,
-                pointSubtype = pointSubtype
             )
 
             // Add the newly created POI to the trip recording

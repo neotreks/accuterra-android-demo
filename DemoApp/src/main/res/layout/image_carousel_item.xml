@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:padding="2dp">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/image_carousel_item_image"
         android:layout_width="160dp"
         android:layout_height="160dp"

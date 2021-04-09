@@ -16,60 +16,48 @@
         android:orientation="vertical">
 
         <include
+            android:id="@+id/new_trip_activity_toolbar"
             layout="@layout/accuterra_toolbar"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <include layout="@layout/component_basic_tabs" />
+        <include
+            android:id="@+id/activity_profile_tabs"
+            layout="@layout/component_basic_tabs" />
 
     </LinearLayout>
 
     <!-- SETTINGS -->
 
-    <TableLayout
-        android:id="@+id/activity_profile_settings_row"
+    <Button
+        android:id="@+id/activity_profile_settings_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activity_profile_toolbar_envelope"
-        android:layout_margin="@dimen/default_margin"
-        android:stretchColumns="1">
+        style="@style/ActivityProfile_Button"
+        tools:text="Settings"
+        android:text="@string/general_settings" />
 
-        <!-- SETTINGS -->
-        <TableRow>
+    <Button
+        android:id="@+id/activity_profile_reset_token_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_profile_settings_button"
+        style="@style/ActivityProfile_Button"
+        tools:text="Reset Access Token"
+        android:text="@string/upload_reset_access_token" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/general_settings" />
-
-            <ImageButton
-                android:id="@+id/activity_profile_settings_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_settings_black_24dp"
-                android:layout_gravity="end"/>
-
-        </TableRow>
-
-        <!-- RESET TOKEN -->
-        <TableRow>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/upload_reset_access_token" />
-
-            <ImageButton
-                android:id="@+id/activity_profile_reset_token_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:src="@drawable/ic_offline_bolt_black_24dp" />
-
-        </TableRow>
-
-    </TableLayout>
+    <Button
+        android:id="@+id/activity_profile_download_offline_maps_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_profile_reset_token_button"
+        style="@style/ActivityProfile_Button"
+        tools:text="Download Offline Maps"
+        android:text="@string/download_offline_maps" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

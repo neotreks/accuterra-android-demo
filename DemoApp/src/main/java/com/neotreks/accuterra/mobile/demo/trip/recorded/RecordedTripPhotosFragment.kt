@@ -5,25 +5,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentRecordedTripPhotosBinding
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import kotlinx.android.synthetic.main.fragment_recorded_trip_photos.view.*
 
 /**
  * Recorded trip Map fragment
  */
 class RecordedTripPhotosFragment : RecordedTripFragment() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private lateinit var mediaListManager: TripRecordingMediaListManager
+
+    private lateinit var binding: FragmentRecordedTripPhotosBinding
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
 
     /** Provide view layout */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_recorded_trip_photos, container, false)
+    ): View {
+        binding = FragmentRecordedTripPhotosBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /** Load trip data into the UI */
@@ -33,7 +43,7 @@ class RecordedTripPhotosFragment : RecordedTripFragment() {
         // Setup the photo manager
         mediaListManager = TripRecordingMediaListManager(
             requireContext(),
-            view.fragment_recorded_trip_photos,
+            binding.fragmentRecordedTripPhotos,
             object : TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
                     val intent = MediaDetailActivity.createNavigateToIntent(

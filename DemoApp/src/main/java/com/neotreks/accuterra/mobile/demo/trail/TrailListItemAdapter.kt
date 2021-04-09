@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.annotation.UiThread
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.TrailListItemBinding
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
-import kotlinx.android.synthetic.main.trail_list_item.view.*
 import kotlin.math.round
 
 class TrailListItemAdapter(context: Context,
@@ -47,33 +47,34 @@ class TrailListItemAdapter(context: Context,
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView
             ?: inflater.inflate(R.layout.trail_list_item, parent, false)
+        val binding = TrailListItemBinding.bind(view)
 
         val trail = getItem(position)!!
 
         val colorId = TechRatingColorMapper.getTechRatingColor(trail.difficulty.code)
-        view.trail_list_item_difficulty_level.setImageResource(colorId)
+        binding.trailListItemDifficultyLevel.setImageResource(colorId)
 
-        view.trail_list_item_title.text = trail.title
+        binding.trailListItemTitle.text = trail.title
 
-        view.trail_list_item_bookmark_unchecked.visibility = if (trail.isBookmarked) View.GONE else View.VISIBLE
-        view.trail_list_item_bookmark_checked.visibility = if (trail.isBookmarked) View.VISIBLE else View.GONE
+        binding.trailListItemBookmarkUnchecked.visibility = if (trail.isBookmarked) View.GONE else View.VISIBLE
+        binding.trailListItemBookmarkChecked.visibility = if (trail.isBookmarked) View.VISIBLE else View.GONE
 
         if (trail.rating == null) {
-            view.trail_list_item_rating_stars.visibility = View.GONE
-            view.trail_list_item_rating_stars.progress = 0
-            view.trail_list_item_rating_count.text = null
-            view.trail_list_item_no_rating.visibility = View.VISIBLE
+            binding.trailListItemRatingStars.visibility = View.GONE
+            binding.trailListItemRatingStars.progress = 0
+            binding.trailListItemRatingCount.text = null
+            binding.trailListItemNoRating.visibility = View.VISIBLE
         } else {
-            view.trail_list_item_rating_stars.visibility = View.VISIBLE
-            view.trail_list_item_rating_stars.rating = (round(trail.rating.rating * 10) / 10).toFloat()
-            view.trail_list_item_rating_count.text = view.context.getString(R.string.rating_count_number, trail.rating.ratingCount)
-            view.trail_list_item_no_rating.visibility = View.GONE
+            binding.trailListItemRatingStars.visibility = View.VISIBLE
+            binding.trailListItemRatingStars.rating = (round(trail.rating.rating * 10) / 10)
+            binding.trailListItemRatingCount.text = view.context.getString(R.string.rating_count_number, trail.rating.ratingCount)
+            binding.trailListItemNoRating.visibility = View.GONE
         }
 
-        view.trail_list_item_length.text = Formatter.getDistanceFormatter()
+        binding.trailListItemLength.text = Formatter.getDistanceFormatter()
             .formatDistance(view.context, trail.length)
 
-        view.trail_list_item_short_description.text = trail.shortDescription
+        binding.trailListItemShortDescription.text = trail.shortDescription
 
         attachClickHandlers(view, trail)
 
@@ -84,7 +85,7 @@ class TrailListItemAdapter(context: Context,
                 0
         )
 
-        view.trail_list_item_icons_wrapper.visibility = if (showActionIcons) View.VISIBLE else View.GONE
+        binding.trailListItemIconsWrapper.visibility = if (showActionIcons) View.VISIBLE else View.GONE
 
         return view
     }
@@ -94,11 +95,12 @@ class TrailListItemAdapter(context: Context,
     }
 
     private fun attachClickHandlers(view: View, trail: TrailListItem) {
-        view.trail_list_item_zoom_to_trail.setOnClickListener {
+        val binding = TrailListItemBinding.bind(view)
+        binding.trailListItemZoomToTrail.setOnClickListener {
             listener?.onZoomToTrailIconClicked(trail)
         }
 
-        view.trail_list_item_show_trail_info_screen.setOnClickListener {
+        binding.trailListItemShowTrailInfoScreen.setOnClickListener {
             listener?.onShowTrailInfoIconClicked(trail)
         }
     }

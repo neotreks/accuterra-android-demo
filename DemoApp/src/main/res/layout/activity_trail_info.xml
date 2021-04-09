@@ -33,7 +33,7 @@
             android:id="@+id/activity_trail_info_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:popupTheme="@style/AppTheme.ToolbarPopup"
             android:background="@null"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -73,7 +73,7 @@
         android:layout_marginTop="16dp"
         android:gravity="center_vertical">
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/activity_trail_info_rating_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
             android:textColor="@android:color/holo_blue_light"
             tools:text="4.6" />
 
-        <androidx.appcompat.widget.AppCompatRatingBar
+        <RatingBar
             android:id="@+id/activity_trail_info_rating_stars"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -92,14 +92,14 @@
             android:isIndicator="true"
             style="@style/UserRatingBar" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/activity_trail_info_ratings_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             tools:text="(289)" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <TextView
             android:id="@+id/activity_trail_info_no_ratings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -108,7 +108,7 @@
 
     </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/activity_trail_info_difficulty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -136,11 +136,11 @@
             app:layout_constraintStart_toStartOf="parent"
             style="@style/RibbonAction">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:src="@drawable/ic_directions_24px"
                 style="@style/RibbonActionIcon" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <TextView
                 style="@style/RibbonActionLabel"
                 android:text="@string/get_there" />
 
@@ -154,12 +154,12 @@
             app:layout_constraintEnd_toStartOf="@id/activity_trail_info_get_download_button"
             style="@style/RibbonAction">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/activity_trail_info_favorite_icon"
                 android:src="@drawable/ic_bookmark_border_24px"
                 style="@style/RibbonActionIcon" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <TextView
                 style="@style/RibbonActionLabel"
                 android:text="@string/general_favorite" />
 
@@ -174,12 +174,12 @@
             android:visibility="visible"
             style="@style/RibbonAction">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:id="@+id/activity_trail_info_get_download_icon"
                 android:src="@drawable/ic_cloud_download_24px"
                 style="@style/RibbonActionIcon" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/activity_trail_info_get_download_text"
                 style="@style/RibbonActionLabel"
                 android:text="@string/download" />
@@ -194,11 +194,11 @@
             app:layout_constraintEnd_toEndOf="parent"
             style="@style/RibbonAction">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
                 android:src="@drawable/ic_navigation_24px"
                 style="@style/RibbonActionIcon" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <TextView
                 style="@style/RibbonActionLabel"
                 android:text="@string/start" />
 
@@ -255,7 +255,7 @@
 
     </androidx.viewpager.widget.ViewPager>
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <ImageButton
         android:id="@+id/activity_trail_info_back_button"
         android:layout_width="36dp"
         android:layout_height="36dp"

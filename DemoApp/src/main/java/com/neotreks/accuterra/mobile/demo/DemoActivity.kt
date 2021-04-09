@@ -6,38 +6,63 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
 import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailConfiguration
-import com.neotreks.accuterra.mobile.sdk.trail.model.TripConfiguration
-import kotlinx.android.synthetic.main.activity_demo.*
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripConfiguration
 import kotlinx.coroutines.*
 
 class DemoActivity : AppCompatActivity() {
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
         private const val TAG = "DemoActivity"
     }
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private lateinit var binding: ActivityDemoBinding
+
     private val coroutineExceptionHandler: CoroutineExceptionHandler =
       CoroutineExceptionHandler { _, throwable ->
         lifecycleScope.launch(Dispatchers.Main) {
-            DialogUtil.buildOkDialog(this@DemoActivity, getString(R.string.general_error),
-            "Error has occurred: ${throwable.localizedMessage}").show()
+            val dialog = DialogUtil.buildOkDialog(this@DemoActivity, getString(R.string.general_error),
+            "Error has occurred: ${throwable.localizedMessage}")
+            dialog.show()
+            try {
+                val textView = dialog.window!!.decorView.findViewById<View>(android.R.id.message) as TextView
+                textView.setTextIsSelectable(true)
+            } catch (e: Exception) {
+                Log.e("Dialog", "Cannot get text view")
+            }
         }
         GlobalScope.launch { Log.e(TAG, "Caught $throwable", throwable)}
+        CrashSupport.reportError(throwable)
       }
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_demo)
-        setSupportActionBar(toolbar)
+        binding = ActivityDemoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
         // Test the reference to the SDK
         Log.i(TAG, "AccuTerra SDK Version: ${SdkInfo().versionName}")
@@ -75,6 +100,26 @@ class DemoActivity : AppCompatActivity() {
 
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_demo, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /* * * * * * * * * * * * */
+    /*        PRIVATE        */
+    /* * * * * * * * * * * * */
+
     private fun onSdkInitSuccess() {
         // Cache some enumerations and go to the trail discovery activity
         lifecycleScope.launch(coroutineExceptionHandler) {
@@ -86,6 +131,8 @@ class DemoActivity : AppCompatActivity() {
                 val service = ServiceFactory.getSynchronizationService(applicationContext)
                 service.resumeUploadQueue()
             }
+            // Log SDK status
+            CrashSupport.logSdkInfo()
         }
     }
 
@@ -112,7 +159,7 @@ class DemoActivity : AppCompatActivity() {
             override fun onProgressChanged(progress: Float) {
                 Log.d(TAG, "Progress changed: $progress")
                 lifecycleScope.launch(Dispatchers.Main + coroutineExceptionHandler) {
-                    activity_demo_progress_bar.progress = (progress * 100F).toInt()
+                    binding.activityDemoProgressBar.progress = (progress * 100F).toInt()
                 }
             }
 
@@ -150,6 +197,7 @@ class DemoActivity : AppCompatActivity() {
                 } else {
                     Log.e(TAG, "AccuTerra SDK initialization has failed because of: ${result.errorMessage}",
                         result.error)
+                    CrashSupport.reportError(result)
                     onSdkInitFailure(result.error)
                 }
             }
@@ -160,40 +208,40 @@ class DemoActivity : AppCompatActivity() {
      * Displays progress barr and progress text for SDK initialization
      */
     private fun showProgressBar(detail: SdkInitStateDetail?) {
-        activity_demo_progress_bar.visibility = View.VISIBLE
-        activity_demo_progress_bar_text.visibility = View.VISIBLE
+        binding.activityDemoProgressBar.visibility = View.VISIBLE
+        binding.activityDemoProgressBarText.visibility = View.VISIBLE
         when (detail) {
             // Download
             SdkInitStateDetail.TRAIL_DB_DOWNLOAD -> {
-                activity_demo_progress_bar_text.text =
+                binding.activityDemoProgressBarText.text =
                     getString(R.string.demo_activity_downloading_trail_db)
             }
             // Unpack
             SdkInitStateDetail.TRAIL_DB_UNPACK -> {
-                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_unpacking_trail_db)
+                binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_unpacking_trail_db)
             }
             // TRAIL DB Update
             SdkInitStateDetail.TRAIL_DB_UPDATE -> {
-                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_updating_trail_db)
+                binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_updating_trail_db)
             }
             // TRAIL USER DATA Update
             SdkInitStateDetail.TRAIL_USER_DATA_UPDATE -> {
-                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_updating_trail_user_data)
+                binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_updating_trail_user_data)
             }
             // Init Trail Paths
             SdkInitStateDetail.TRAIL_PATHS_CACHE_INIT -> {
-                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_init_trail_paths_cache)
+                binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_init_trail_paths_cache)
             }
             // Init Trail Markers
             SdkInitStateDetail.TRAIL_MARKERS_CACHE_INIT -> {
-                activity_demo_progress_bar_text.text = getString(R.string.demo_activity_init_trail_markers_cache)
+                binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_init_trail_markers_cache)
             }
         }
     }
 
     private fun hideProgressBar() {
-        activity_demo_progress_bar.visibility = View.GONE
-        activity_demo_progress_bar_text.visibility = View.GONE
+        binding.activityDemoProgressBar.visibility = View.GONE
+        binding.activityDemoProgressBarText.visibility = View.GONE
     }
 
     private fun displaySdkInitError(e: Throwable?) {
@@ -216,19 +264,4 @@ class DemoActivity : AppCompatActivity() {
         finish()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_demo, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
 }

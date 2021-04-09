@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/default_margin"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/offline_map_list_item_name"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:gravity="left|top"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/offline_map_list_item_action_button"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:paddingTop="10dp"
+        tools:text="Boulder"/>
+
+    <TextView
+        android:id="@+id/offline_map_list_item_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/offline_map_list_item_name"
+        app:layout_constraintEnd_toStartOf="@id/offline_map_list_item_action_button"
+        app:layout_constraintTop_toBottomOf="@id/offline_map_list_item_name"
+        app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/TextAppearance.AppCompat.Small"
+        tools:text="154 MB - AccuTerra Outdoors - Imagery"/>
+
+    <ImageButton
+        android:id="@+id/offline_map_list_item_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/default_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_more_24px"
+        tools:text="Trip to the Mountain view"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,4 +22,14 @@
         android:src="@drawable/ic_delete_forever_24px"
         android:contentDescription="@string/general_delete" />
 
+    <ImageButton
+        android:id="@+id/image_view_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/ic_favorite_yellow_24dp"
+        android:contentDescription="@string/general_favorite"
+        android:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

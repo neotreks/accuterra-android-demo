@@ -7,14 +7,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.*
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityProfileBinding
+import com.neotreks.accuterra.mobile.demo.offlinemap.OfflineMapsActivity
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
-import kotlinx.android.synthetic.main.accuterra_toolbar.*
-import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.android.synthetic.main.component_basic_tabs.*
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -34,17 +33,20 @@ class ProfileActivity : AppCompatActivity() {
 
     private var dialogHolder = ProgressDialogHolder()
 
+    private lateinit var binding: ActivityProfileBinding
+
     /* * * * * * * * * * * * */
     /*       OVERRIDE        */
     /* * * * * * * * * * * * */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
+        binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setupListeners()
         setupTabListener()
         selectCurrentTab()
-        UiUtils.setApkVersionText(general_toolbar_sdk_version)
+        UiUtils.setApkVersionText(binding.newTripActivityToolbar.generalToolbarSdkVersion)
     }
 
     /* * * * * * * * * * * * */
@@ -52,14 +54,19 @@ class ProfileActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private fun setupListeners() {
+
         // Settings
-        activity_profile_settings_button.setOnClickListener {
+        binding.activityProfileSettingsButton.setOnClickListener {
             val intent = UserSettingsActivity.createNavigateToIntent(this)
             startActivity(intent)
         }
         // Reset access Token
-        activity_profile_reset_token_button.setOnClickListener {
+        binding.activityProfileResetTokenButton.setOnClickListener {
             resetAccessToken()
+        }
+        // Download Offline Maps
+        binding.activityProfileDownloadOfflineMapsButton.setOnClickListener {
+            downloadOfflineMaps()
         }
     }
 
@@ -77,8 +84,16 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun downloadOfflineMaps() {
+        lifecycleScope.launchWhenCreated {
+            val intent = OfflineMapsActivity.createNavigateToIntent(this@ProfileActivity)
+            startActivity(intent)
+            finish()
+        }
+    }
+
     private fun setupTabListener() {
-        component_basic_tabs.addOnTabSelectedListener(
+        binding.activityProfileTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object : MainTabListener.MainTabListenerHelper {
                 override val context: Activity
                     get() = this@ProfileActivity
@@ -100,7 +115,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun selectCurrentTab() {
-        component_basic_tabs.getTabAt(getCurrentTabPosition())!!.select()
+        binding.activityProfileTabs.componentBasicTabs.getTabAt(getCurrentTabPosition())!!.select()
     }
 
 }

@@ -4,16 +4,16 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.neotreks.accuterra.mobile.demo.databinding.ImageCarouselItemBinding
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariant
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariantUtil
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 import com.neotreks.accuterra.mobile.sdk.trail.service.ITrailMediaService
-import kotlinx.android.synthetic.main.image_carousel_item.view.*
 import java.net.URL
 
 /**
@@ -35,7 +35,8 @@ class TrailMediaAdapter(private val mediaList: List<TrailMedia>,
         : RecyclerView.ViewHolder(frameLayout) {
 
         var url: URL? = null
-        val imageView: AppCompatImageView = frameLayout.image_carousel_item_image
+        val binding = ImageCarouselItemBinding.bind(frameLayout)
+        val imageView: ImageView = binding.imageCarouselItemImage
     }
 
 

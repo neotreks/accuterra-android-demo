@@ -2,14 +2,13 @@ package com.neotreks.accuterra.mobile.demo.trip.recorded
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.TrailDiscoveryActivity
-import kotlinx.android.synthetic.main.activity_new_trip.*
-import kotlinx.android.synthetic.main.general_toolbar.*
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityNewTripBinding
+import com.neotreks.accuterra.mobile.demo.trip.trailcollection.TrailCollectionActivity
 
 class NewTripActivity : AppCompatActivity() {
 
@@ -20,12 +19,19 @@ class NewTripActivity : AppCompatActivity() {
     }
 
     /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private lateinit var binding: ActivityNewTripBinding
+
+    /* * * * * * * * * * * * */
     /*       OVERRIDE        */
     /* * * * * * * * * * * * */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_new_trip)
+        binding = ActivityNewTripBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setupToolbar()
         setupButtons()
@@ -53,8 +59,8 @@ class NewTripActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.activity_new_trip_title)
+        setSupportActionBar(binding.newTripActivityToolbar.generalToolbar)
+        binding.newTripActivityToolbar.generalToolbarTitle.text = getString(R.string.activity_new_trip_title)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -64,17 +70,20 @@ class NewTripActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        new_trip_activity_chose_route.paintFlags = Paint.UNDERLINE_TEXT_FLAG
-        new_trip_activity_free_roam.paintFlags = Paint.UNDERLINE_TEXT_FLAG
 
-        new_trip_activity_chose_route.setOnClickListener {
+        binding.newTripActivityChoseRouteList.setOnClickListener {
             setButtonsEnable(false)
             onChooseRoute()
         }
 
-        new_trip_activity_free_roam.setOnClickListener {
+        binding.newTripActivityFreeRoamList.setOnClickListener {
             setButtonsEnable(false)
             onFreeRoam()
+        }
+
+        binding.newTripActivityTrailCollectionList.setOnClickListener {
+            setButtonsEnable(false)
+            onTrailCollection()
         }
 
     }
@@ -91,9 +100,16 @@ class NewTripActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun onTrailCollection() {
+        val intent = TrailCollectionActivity.createNavigateToIntent(this)
+        startActivity(intent)
+        finish()
+    }
+
     private fun setButtonsEnable(enabled: Boolean) {
-        new_trip_activity_chose_route.isClickable = enabled
-        new_trip_activity_free_roam.isClickable = enabled
+        binding.newTripActivityChoseRouteList.isClickable = enabled
+        binding.newTripActivityFreeRoamList.isClickable = enabled
+        binding.newTripActivityTrailCollectionList.isClickable = enabled
     }
 
 }

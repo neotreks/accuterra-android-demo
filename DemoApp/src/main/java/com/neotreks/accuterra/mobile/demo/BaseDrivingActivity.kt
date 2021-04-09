@@ -41,7 +41,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
     private var networkStateReceiver: NetworkStateReceiver? = null
 
-    private val networkStateReceiverListener = CurrentNetworkStateListener(this)
+    private val networkStateReceiverListener by lazy { CurrentNetworkStateListener(this) }
 
     private var offlineMapService: OfflineMapService? = null
 
@@ -72,16 +72,20 @@ abstract class BaseDrivingActivity : LocationActivity() {
     private val connectionListener = object: OfflineMapServiceConnectionListener {
         override fun onConnected(service: OfflineMapService) {
             offlineMapService = service
+            lifecycleScope.launchWhenCreated {
+                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+            }
         }
         override fun onDisconnected() {
+            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
             offlineMapService = null
         }
     }
 
-    private val cacheProgressListener = CacheProgressListener(this)
+    private val cacheProgressListener by lazy { CacheProgressListener(this) }
 
     private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
-        connectionListener, cacheProgressListener
+        connectionListener
     )
 
     /* * * * * * * * * * * * */
@@ -134,9 +138,9 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
     override fun onStop() {
         Log.i(TAG, "onStop()")
+        unbindService(offlineMapServiceConnection)
         super.onStop()
         accuTerraMapView.onStop()
-        unbindService(offlineMapServiceConnection)
     }
 
     override fun onLowMemory() {
@@ -230,8 +234,9 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
     protected open fun updateLocationOnMap(location: Location?) {
         Log.v(TAG, "updateLocationOnMap(location=$location)")
-
-        accuTerraMapView.updateLocation(location)
+        if (accuTerraMapView.isStyleLoaded()) {
+            accuTerraMapView.updateLocation(location)
+        }
     }
 
     protected fun initializeGpsLocationUpdates() {
@@ -300,7 +305,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
             weakActivity.get()?.let { activity ->
                 val offlineCacheManager = activity.offlineMapService?.offlineMapManager ?: return
                 activity.lifecycleScope.launchWhenCreated {
-                    if (offlineCacheManager.getOfflineMapStatus(OfflineMapType.OVERLAY) == OfflineMapStatus.COMPLETE) {
+                    if (offlineCacheManager.getOverlayOfflineMap()?.status == OfflineMapStatus.COMPLETE) {
                         if (activity.accuTerraMapView.isStyleLoaded()) {
                             val currentStyle = activity.currentStyle
                             if (!activity.offlineStyles.contains(currentStyle)) {
@@ -316,15 +321,15 @@ abstract class BaseDrivingActivity : LocationActivity() {
     }
 
     private class CacheProgressListener(activity: BaseDrivingActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.CacheProgressListener {
+        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
-        override fun onComplete(mapType: OfflineMapType, trailId: Long) {
+        override fun onComplete(offlineMap: IOfflineMap) {
             // We do not wan to do anything
         }
 
-        override fun onError(error: HashMap<IOfflineResource, String>, mapType: OfflineMapType, trailId: Long) {
+        override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
             weakActivity.get()?.let {
                 val errorMessage = error.map { e ->
                     "${e.key.getResourceTypeName()}: ${e.value}"
@@ -333,7 +338,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
             }
         }
 
-        override fun onProgressChanged(progress: Double, mapType: OfflineMapType, trailId: Long) {
+        override fun onProgressChanged(offlineMap: IOfflineMap) {
             // We do not wan to show anything
         }
     }

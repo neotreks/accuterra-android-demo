@@ -9,13 +9,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentOnlineTripMapBinding
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
 import com.neotreks.accuterra.mobile.sdk.trip.model.Trip
-import kotlinx.android.synthetic.main.fragment_online_trip_map.*
 import java.lang.ref.WeakReference
 
 /**
@@ -26,6 +25,8 @@ class OnlineTripMapFragment : OnlineTripFragment() {
     /* * * * * * * * * * * * */
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
+
+    private lateinit var binding: FragmentOnlineTripMapBinding
 
     private lateinit var accuTerraMapView: AccuTerraMapView
 
@@ -52,8 +53,9 @@ class OnlineTripMapFragment : OnlineTripFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_online_trip_map, container, false)
+    ): View {
+        binding = FragmentOnlineTripMapBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -107,7 +109,7 @@ class OnlineTripMapFragment : OnlineTripFragment() {
     /* * * * * * * * * * * * */
 
     private fun getAccuTerraMapView(): AccuTerraMapView {
-        return fragment_online_trip_map_map
+        return binding.fragmentOnlineTripMapMap
     }
 
     private fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
@@ -138,7 +140,7 @@ class OnlineTripMapFragment : OnlineTripFragment() {
         getAccuTerraMapView().getMapboxMap().uiSettings.isCompassEnabled = false
         // Try to register location observers to obtain device location
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             // Add trip layers to the map
             getAccuTerraMapView().tripLayersManager.addStandardTripLayers()
             // Load trip data into the UI
@@ -157,7 +159,7 @@ class OnlineTripMapFragment : OnlineTripFragment() {
     }
 
     private fun addTripToMap(trip: Trip) {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             val tripLayersManager = getAccuTerraMapView().tripLayersManager
             val tripUuid = trip.info.uuid
             val path = trip.navigation.path.geometryGeoJSON
@@ -187,7 +189,7 @@ class OnlineTripMapFragment : OnlineTripFragment() {
         override fun onStyleChanged(mapboxMap: MapboxMap) {
             weakFragment.get()?.let { fragment ->
                 // Reload online trip path after the style has changed
-                fragment.lifecycleScope.launchWhenCreated {
+                fragment.lifecycleScope.launchWhenResumed {
                     fragment.getAccuTerraMapView().tripLayersManager.setVisibleTripId(fragment.viewModel.tripUuid)
                 }
             }

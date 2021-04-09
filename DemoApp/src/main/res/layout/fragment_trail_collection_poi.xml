@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- POI PANEL -->
+<!-- MAKE IT VISIBLE WHEN EDITING -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/fragment_trail_collection_poi_panel"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    android:background="@color/trailCollectionPrimaryBackground"
+    android:visibility="visible"
+    tools:context=".trip.trailcollection.TrailCollectionPoiFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_trail_collection_poi_panel_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/fragment_trail_collection_poi_scroll">
+
+        <!-- BACK ARROW -->
+        <ImageView
+            android:id="@+id/fragment_trail_collection_poi_panel_back_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_margin_internal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_arrow_back_white_24px"
+            android:contentDescription="@string/general_back"/>
+
+        <!-- ADD/EDIT POI TITLE -->
+        <TextView
+            android:id="@+id/fragment_trail_collection_poi_header_text"
+            style="@style/TrailCollection_POI_Header_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_trail_collection_poi_panel_add_new_poi"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- SAVE BUTTON -->
+        <TextView
+            android:id="@+id/fragment_trail_collection_poi_panel_save_button"
+            style="@style/TrailCollection_POI_Header_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_margin_internal"
+            android:text="@string/general_save"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- POI ADD/EDIT scroll -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/fragment_trail_collection_poi_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@android:color/white"
+        android:clickable="false"
+        android:visibility="visible"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_trail_collection_poi_panel_header">
+
+        <!-- POI FORM -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- POI TYPE LABEL -->
+            <TextView
+                style="@style/TrailCollection_POI_Form_Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:text="@string/activity_trail_collection_poi_form_poi_type_tags" />
+
+            <!-- POI TYPE DROPDOWN -->
+            <Spinner
+                android:id="@+id/fragment_trail_collection_poi_form_poi_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                tools:listitem="@android:layout/simple_spinner_item" />
+
+            <!-- TAGS -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/fragment_trail_collection_poi_form_tags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin" />
+
+            <!-- PHOTOS LABEL -->
+            <TextView
+                style="@style/TrailCollection_POI_Form_Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:text="@string/activity_trail_collection_poi_form_photos" />
+
+            <!-- PHOTOS: Container -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fragment_trail_collection_poi_photo_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- PHOTOS: Buttons -->
+                <LinearLayout
+                    android:id="@+id/fragment_trail_collection_poi_photo_button_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:orientation="vertical"
+                    tools:ignore="UseCompoundDrawables">
+
+                    <!-- Add Photo From Gallery Icon -->
+                    <ImageView
+                        android:id="@+id/fragment_trail_collection_poi_form_select_photo"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="@dimen/default_margin_internal"
+                        android:contentDescription="@string/activity_trail_collection_poi_panel_add_photos"
+                        android:src="@drawable/ic_add_photo_from_gallery_24px" />
+
+                    <!-- Take Photo Icon -->
+                    <ImageView
+                        android:id="@+id/fragment_trail_collection_poi_form_take_photo"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="@dimen/default_margin_internal"
+                        android:contentDescription="@string/activity_trail_collection_poi_panel_add_photos"
+                        android:src="@drawable/ic_add_photo_24px" />
+
+                </LinearLayout>
+
+                <!-- PHOTOS: GRID -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/fragment_trail_collection_poi_photos"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@id/fragment_trail_collection_poi_photo_button_container"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_margin="@dimen/default_margin_internal"
+                    android:layout_marginStart="@dimen/default_margin"
+                    android:minHeight="80dp" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- POI NAME -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trail_collection_poi_form_trail_name"
+                android:text="@string/activity_trail_collection_poi_form_name" />
+
+            <EditText
+                android:id="@+id/fragment_trail_collection_poi_form_trail_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                tools:text="Trip #3" />
+
+            <!-- POI DESCRIPTION -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/fragment_trail_collection_poi_form_trail_description"
+                android:text="@string/activity_trail_collection_poi_panel_description" />
+
+            <EditText
+                android:id="@+id/fragment_trail_collection_poi_form_trail_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:maxLines="4"
+                tools:text="Very long description that is possible not that long as it could be..." />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

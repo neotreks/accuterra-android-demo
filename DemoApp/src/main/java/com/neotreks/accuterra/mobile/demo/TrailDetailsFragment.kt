@@ -5,8 +5,8 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentTrailDescriptionContentBinding
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
-import kotlinx.android.synthetic.main.fragment_trail_description_content.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,7 +20,8 @@ class TrailDetailsFragment: TrailInfoFragment() {
 
         viewModel.trail.observe(this.viewLifecycleOwner, Observer { trail ->
             viewLifecycleOwner.lifecycleScope.launch {
-                view.fragment_trail_info_description.text = getTrailDetails(trail)
+                val binding = FragmentTrailDescriptionContentBinding.bind(view)
+                binding.fragmentTrailInfoDescription.text = getTrailDetails(trail)
             }
         })
 
@@ -29,7 +30,10 @@ class TrailDetailsFragment: TrailInfoFragment() {
     /**
      * Make as suspend since this can take a while
      */
-    private suspend fun getTrailDetails(trail: Trail): String {
+    private suspend fun getTrailDetails(trail: Trail?): String {
+        if (trail == null) {
+            return getString(R.string.general_na)
+        }
         return withContext(Dispatchers.Main) {
             val builder = StringBuilder()
             appendInfo("Info", trail.info, builder)

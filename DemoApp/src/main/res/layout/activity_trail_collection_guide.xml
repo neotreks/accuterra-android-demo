@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".trip.trailcollection.TrailCollectionGuideActivity">
+
+    <include
+        android:id="@+id/activity_trail_collection_guide_toolbar"
+        layout="@layout/trail_collection_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/activity_trail_collection_guide_description"
+        app:layout_constraintTop_toBottomOf="@id/activity_trail_collection_guide_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/default_margin"
+        tools:text="Some description of the trail collection stuff..." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

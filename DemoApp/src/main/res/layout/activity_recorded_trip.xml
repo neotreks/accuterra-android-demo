@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.RecordedTripActivity">
 
+    <!-- TOOLBAR -->
+    <include
+        android:id="@+id/activity_recorded_trip_toolbar"
+        layout="@layout/general_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/activity_recorded_trip_name"
         style="@style/DemoAppTitle"
@@ -13,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_margin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_recorded_trip_toolbar"
         tools:text="Red Cone Pass first trip of the year" />
 
     <TextView
@@ -39,31 +49,26 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_recorded_trip_tab_map"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="@string/general_map" />
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_recorded_trip_tab_photos"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="@string/general_photos" />
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_recorded_trip_tab_pois"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="@string/general_pois" />
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_recorded_trip_tab_info"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="@string/general_info" />
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/activity_recorded_trip_tab_stats"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:text="@string/general_statistics" />

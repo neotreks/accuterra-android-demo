@@ -8,7 +8,7 @@
 
     <!-- MAP -->
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/activity_feed_online_trip_thumbnail_map"
         android:layout_width="match_parent"
         android:layout_height="270dp"

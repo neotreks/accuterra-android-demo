@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TrailComment
@@ -33,7 +34,7 @@ class TrailInfoViewModel: ViewModel() {
 
     var trailId: Long = Long.MIN_VALUE
 
-    var trail = MutableLiveData<Trail>()
+    var trail = MutableLiveData<Trail?>()
         private set
 
     var imageUrls = MutableLiveData<List<TrailMedia>>()
@@ -92,6 +93,7 @@ class TrailInfoViewModel: ViewModel() {
                 imageUrls.value = mediaList
             } catch (e: Exception) {
                 Log.e(TAG, "Error while loading trail: ${e.localizedMessage}", e)
+                CrashSupport.reportError(e, "Trail ID: $trailId")
                 Toast.makeText(context, context.getString(R.string.trail_errors_load_trail_failed_because_of,
                     e.localizedMessage), Toast.LENGTH_LONG).show()
                 // Exit the activity - we cannot continue and use it
@@ -115,6 +117,7 @@ class TrailInfoViewModel: ViewModel() {
             } else {
                 val errorMessage = "Error while loading trail comments: $trailId, ${result.buildErrorMessage()}"
                 Log.e(TAG, errorMessage, result.error ?: Exception())
+                CrashSupport.reportError(result, errorMessage)
                 context.toast(errorMessage)
             }
             comments.value = null
@@ -140,6 +143,7 @@ class TrailInfoViewModel: ViewModel() {
             } else {
                 val errorMessage = "Error while loading trail user data: $trailId, ${result.buildErrorMessage()}"
                 Log.e(TAG, errorMessage, result.error ?: Exception())
+                CrashSupport.reportError(result, errorMessage)
                 context.longToast(errorMessage)
             }
             userData.value = null

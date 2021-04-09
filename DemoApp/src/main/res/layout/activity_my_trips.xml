@@ -16,12 +16,15 @@
         android:orientation="vertical">
 
         <include
+            android:id="@+id/activity_my_trips_toolbar"
             layout="@layout/accuterra_toolbar"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <include layout="@layout/component_basic_tabs" />
+        <include
+            android:id="@+id/activity_my_trips_tabs"
+            layout="@layout/component_basic_tabs" />
 
     </LinearLayout>
 
@@ -72,6 +75,8 @@
         app:backgroundTint="@color/colorPrimary"
         android:src="@drawable/ic_plus_24px"
         android:scaleType="center"
+        app:tint="@null"
+        android:contentDescription="@string/general_content_desc_button_plus"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

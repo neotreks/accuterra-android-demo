@@ -12,19 +12,51 @@
         android:id="@+id/activity_object_upload_toolbar"
         layout="@layout/general_toolbar" />
 
-    <!-- UUID -->
+    <!-- Upload Worker Status -->
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/activity_object_upload_title_label"
+    <TextView
+        android:id="@+id/activity_object_upload_worker_status_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/activity_object_upload_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/activity_upload_object_worker_status"
+        style="@style/DemoAppTitle"
+        android:layout_margin="@dimen/default_margin"/>
+
+    <TextView
+        android:id="@+id/activity_object_upload_worker_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/activity_object_upload_worker_status_label"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Workder status is...."
+        style="@style/DemoAppTitle"
+        android:singleLine="false"
+        android:maxLines="10"
+        android:layout_margin="@dimen/default_margin"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintTop_toBottomOf="@id/activity_object_upload_worker_status"
+        android:layout_marginHorizontal="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin_internal"
+        android:background="@android:color/black"/>
+
+    <!-- UUID -->
+
+    <TextView
+        android:id="@+id/activity_object_upload_title_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/activity_object_upload_worker_status"
         app:layout_constraintStart_toStartOf="parent"
         android:text="@string/general_uuid"
         style="@style/DemoAppTitle"
         android:layout_margin="@dimen/default_margin"/>
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/activity_object_upload_title_value"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

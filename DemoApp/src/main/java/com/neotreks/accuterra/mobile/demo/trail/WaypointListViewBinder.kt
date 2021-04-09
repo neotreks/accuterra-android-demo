@@ -5,11 +5,11 @@ import android.text.method.LinkMovementMethod
 import android.view.View
 import androidx.core.text.HtmlCompat
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.PoiListItemBinding
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
 import com.neotreks.accuterra.mobile.demo.ui.ListItemAdapterViewBinder
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDriveWaypoint
-import kotlinx.android.synthetic.main.poi_list_item.view.*
 
 /**
  * View Binder for the [WaypointListAdapter]
@@ -26,7 +26,8 @@ class WaypointListViewBinder(private val context: Context,
 
     private var subSelectedItemId: Long? = null
 
-    override fun bindView(view: View, item: TrailDriveWaypoint, isSelected: Boolean) {
+    override fun bindView(view: View, item: TrailDriveWaypoint, isSelected: Boolean, isFavorite: Boolean) {
+        val binding = PoiListItemBinding.bind(view)
         // Mileage
         val distanceInMeters = item.distanceMarker
         val mileage = if (distanceInMeters == null) {
@@ -34,19 +35,20 @@ class WaypointListViewBinder(private val context: Context,
         } else {
             formatter.formatDistance(context, distanceInMeters)
         }
-        view.poi_list_item_millage.text = mileage
+        binding.poiListItemMillage.text = mileage
         // Name + description
-        view.poi_list_item_name.text = item.point.name
-        view.poi_list_item_description.text = HtmlCompat.fromHtml(item.descriptionShort?:"", HtmlCompat.FROM_HTML_MODE_LEGACY)
-        view.poi_list_item_description.movementMethod = LinkMovementMethod.getInstance()
+        binding.poiListItemName.text = item.point.name
+        binding.poiListItemDescription.text = HtmlCompat.fromHtml(item.descriptionShort?:"", HtmlCompat.FROM_HTML_MODE_LEGACY)
+        binding.poiListItemDescription.movementMethod = LinkMovementMethod.getInstance()
 
         val isSubSelected = item.id == subSelectedItemId
         val textColor = if (isSelected) selectedTextColor else if (isSubSelected) subSelectedTextColor else  standardTextColor
 
-        view.poi_list_item_millage.setTextColor(textColor)
-        view.poi_list_item_name.setTextColor(textColor)
+        // Colors
+        binding.poiListItemMillage.setTextColor(textColor)
+        binding.poiListItemName.setTextColor(textColor)
 
-        val descView = view.poi_list_item_description
+        val descView = binding.poiListItemDescription
         if (displayDescription) {
             descView.visibility = View.VISIBLE
             descView.text =
@@ -57,7 +59,7 @@ class WaypointListViewBinder(private val context: Context,
             descView.visibility = View.GONE
         }
 
-        view.poi_list_item_action.visibility = displayAction.visibility
+        binding.poiListItemAction.visibility = displayAction.visibility
     }
 
     override fun getViewResourceId(): Int {

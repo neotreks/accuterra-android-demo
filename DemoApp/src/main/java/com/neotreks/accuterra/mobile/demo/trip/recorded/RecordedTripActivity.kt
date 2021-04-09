@@ -3,14 +3,15 @@ package com.neotreks.accuterra.mobile.demo.trip.recorded
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityRecordedTripBinding
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateString
 import com.neotreks.accuterra.mobile.demo.longToast
-import kotlinx.android.synthetic.main.activity_recorded_trip.*
 
 /**
  * Recorded trip detail view
@@ -22,6 +23,8 @@ class RecordedTripActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private lateinit var viewModel: RecordedTripViewModel
+
+    private lateinit var binding: ActivityRecordedTripBinding
 
     /* * * * * * * * * * * * */
     /*       COMPANION       */
@@ -47,9 +50,11 @@ class RecordedTripActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recorded_trip)
+        binding = ActivityRecordedTripBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         // Init view model
         viewModel = ViewModelProvider(this).get(RecordedTripViewModel::class.java)
+        setupToolbar()
 
         registerViewModelObserver()
         setupFragments()
@@ -57,12 +62,35 @@ class RecordedTripActivity : AppCompatActivity() {
         parseIntent()
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     /* * * * * * * * * * * * */
     /*        PRIVATE        */
     /* * * * * * * * * * * * */
 
+    private fun setupToolbar() {
+
+        setSupportActionBar(binding.activityRecordedTripToolbar.generalToolbar)
+        binding.activityRecordedTripToolbar.generalToolbarTitle.text = getString(R.string.general_trip)
+
+        supportActionBar?.apply {
+            setDisplayShowTitleEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(true)
+        }
+
+    }
+
     private fun setupFragments() {
-        activity_recorded_trip_view_pager.adapter = RecordedTripViewPageAdapter(
+        binding.activityRecordedTripViewPager.adapter = RecordedTripViewPageAdapter(
             supportFragmentManager,
             this
         )
@@ -86,8 +114,8 @@ class RecordedTripActivity : AppCompatActivity() {
                 finish()
                 return@Observer
             }
-            activity_recorded_trip_name.text = trip.tripInfo.name
-            activity_recorded_trip_date.text = trip.recordingInfo.start.toLocalDateString()
+            binding.activityRecordedTripName.text = trip.tripInfo.name
+            binding.activityRecordedTripDate.text = trip.recordingInfo.start.toLocalDateString()
         })
     }
 

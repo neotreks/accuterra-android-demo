@@ -13,8 +13,10 @@
     <string name="general_image">Image</string>
     <string name="general_media">Media</string>
     <string name="general_settings">Settings</string>
+    <string name="general_user_settings">User Settings</string>
     <string name="general_info">Info</string>
     <string name="general_statistics">Statistics</string>
+    <string name="general_status">Status</string>
     <string name="general_map">Map</string>
     <string name="general_photos">Photos</string>
     <string name="general_poi">POI</string>
@@ -32,11 +34,21 @@
     <string name="general_exit">Exit</string>
     <string name="general_refresh">Refresh</string>
     <string name="general_promote">Promote</string>
+    <string name="general_back">Back</string>
     <string name="general_copy_to_clipboard">Copy to clipboard</string>
     <string name="general_copied_to_clipboard">"Copied to clipboard"</string>
     <string name="general_reset">Reset</string>
     <string name="general_close_no_save">Close without saving</string>
     <string name="general_no_records">No records</string>
+    <string name="general_show_more">Show more</string>
+    <string name="general_show_less">Show less</string>
+
+    <!-- DIALOGS -->
+
+    <string name="general_close_without_saving_title">Close without saving?</string>
+    <string name="general_close_without_saving_message">Do you want to close without saving? Unsaved data will be lost.</string>
+    <string name="general_close_without_saving_no_stay">No</string>
+    <string name="general_close_without_saving_yes_exit">Exit without save</string>
 
     <!-- Sharing Types -->
     <string name="general_sharing_private">No-one (keep private)</string>
@@ -79,6 +91,12 @@
     <string name="general_comment_delete">Delete Comment</string>
     <string name="general_comment_delete_dialog_message">Do you really want to delete this comment?</string>
 
+    <!-- PERMISSIONS -->
+
+    <string name="general_permission_not_granted">Permissions not granted by the user.</string>
+    <string name="general_provide_read_media_permission">Please provide read media permission for the app. You have disabled it permanently.</string>
+    <string name="general_provide_camera_permission">Please provide CAMERA permission for the app. You have disabled it permanently.</string>
+
     <!-- ERRORS -->
 
     <string name="general_error_something_went_wrong">Something went wrong</string>
@@ -87,5 +105,10 @@
     <!-- Constraints -->
 
     <string name="general_constraint_min_x_chars">Min %1$d characters.</string>
+
+
+    <!-- CONTENT DESCRIPTIONS -->
+    <string name="general_content_desc_button_plus">Plus Button</string>
+
 
 </resources>

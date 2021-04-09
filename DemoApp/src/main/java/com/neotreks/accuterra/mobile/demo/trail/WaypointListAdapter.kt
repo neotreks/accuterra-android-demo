@@ -2,9 +2,9 @@ package com.neotreks.accuterra.mobile.demo.trail
 
 import android.content.Context
 import android.view.View
+import com.neotreks.accuterra.mobile.demo.databinding.PoiListItemBinding
 import com.neotreks.accuterra.mobile.demo.ui.ListItemAdapter
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDriveWaypoint
-import kotlinx.android.synthetic.main.poi_list_item.view.*
 
 /**
  * Adapter for list of POIs
@@ -14,8 +14,7 @@ class WaypointListAdapter(
     items: MutableList<TrailDriveWaypoint>,
     displayDescription: Boolean,
     displayAction: Boolean
-)
-    : ListItemAdapter<TrailDriveWaypoint>(context, items, WaypointListViewBinder(context, displayDescription, displayAction)) {
+) : ListItemAdapter<TrailDriveWaypoint>(context, items, WaypointListViewBinder(context, displayDescription, displayAction)) {
 
     var subSelectedItemId: Long? = null
         private set
@@ -39,7 +38,8 @@ class WaypointListAdapter(
         binder.setSubSelectedId(subSelectedItemId)
     }
 
-    override fun getActionView(view: View): View? {
-        return view.poi_list_item_action
+    override fun getActionView(view: View): View {
+        val binding = PoiListItemBinding.bind(view)
+        return binding.poiListItemAction
     }
 }

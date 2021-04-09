@@ -8,22 +8,22 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripAddPoiBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.longToast
+import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
+import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocationBuilder
-import com.neotreks.accuterra.mobile.sdk.trail.model.PointSubtype
+import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoiBuilder
-import kotlinx.android.synthetic.main.activity_trip_add_poi.*
-import kotlinx.android.synthetic.main.general_action_toolbar.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -31,9 +31,19 @@ import java.io.File
 
 class TripAddPoiActivity : AppCompatActivity() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private lateinit var viewModel: TripAddPoiViewModel
 
     private lateinit var mediaListManager: TripRecordingMediaListManager
+
+    private lateinit var binding: ActivityTripAddPoiBinding
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
@@ -44,6 +54,8 @@ class TripAddPoiActivity : AppCompatActivity() {
 
         private const val REQUEST_CAPTURE_PICTURE = 12
         private const val REQUEST_SELECT_PHOTO = 13
+        private const val REQUEST_SELECT_PHOTO_PERMISSION = 14
+        private const val REQUEST_TAKE_PHOTO_PERMISSIONS = 15
 
         fun createNavigateToIntent(context: Context, tripUuid: String, location: Location?): Intent {
             return Intent(context, TripAddPoiActivity::class.java)
@@ -55,12 +67,17 @@ class TripAddPoiActivity : AppCompatActivity() {
 
     }
 
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_trip_add_poi)
+        binding = ActivityTripAddPoiBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         viewModel = ViewModelProvider(this@TripAddPoiActivity).get(TripAddPoiViewModel::class.java)
         mediaListManager = TripRecordingMediaListManager(this,
-            activity_trip_add_poi_photos,
+            binding.activityTripAddPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
                     val intent = MediaDetailActivity.createNavigateToIntent(
@@ -106,6 +123,26 @@ class TripAddPoiActivity : AppCompatActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_SELECT_PHOTO_PERMISSION) {
+            PermissionSupport.logSelectPhotoPermissionRequested(this)
+            if (PermissionSupport.isSelectPhotoPermissionGranted(this)) {
+                onSelectImage()
+            } else {
+                longToast(getString(R.string.general_permission_not_granted))
+            }
+        }
+        if (requestCode == REQUEST_TAKE_PHOTO_PERMISSIONS) {
+            PermissionSupport.logCameraPermissionRequested(this)
+            if (PermissionSupport.isCameraPermissionGranted(this)) {
+                onAddImage()
+            } else {
+                longToast(getString(R.string.general_permission_not_granted))
+            }
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             android.R.id.home -> {
@@ -137,10 +174,10 @@ class TripAddPoiActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(action_toolbar)
-        action_toolbar_title.text = getString(R.string.activity_trip_add_poi_title)
-        action_toolbar_action.text = getString(R.string.general_save)
-        action_toolbar_action.setOnClickListener {
+        setSupportActionBar(binding.activityTripAddPoiToolbar.actionToolbar)
+        binding.activityTripAddPoiToolbar.actionToolbarTitle.text = getString(R.string.activity_trip_add_poi_title)
+        binding.activityTripAddPoiToolbar.actionToolbarAction.text = getString(R.string.general_save)
+        binding.activityTripAddPoiToolbar.actionToolbarAction.setOnClickListener {
             onSaveClicked()
         }
 
@@ -156,37 +193,42 @@ class TripAddPoiActivity : AppCompatActivity() {
         val context = this
         lifecycleScope.launchWhenCreated {
             val service = ServiceFactory.getEnumService(context)
-            val subtypes = service.getPointSubtypes().sortedBy { it.name }
-            val adapter = PointSubtypeAdapter(context, subtypes)
-            activity_trip_add_poi_poi_type.adapter = adapter
+            val types = service.getPointTypes().sortedBy { it.name }
+            val adapter = PointTypeAdapter(context, types)
+            binding.activityTripAddPoiPoiType.adapter = adapter
         }
     }
 
     private fun setupButtons() {
-        activity_trip_add_poi_take_photo.setOnClickListener {
+        binding.activityTripAddPoiTakePhoto.setOnClickListener {
             onAddImage()
         }
-        activity_trip_add_poi_select_photo.setOnClickListener {
+        binding.activityTripAddPoiSelectPhoto.setOnClickListener {
             onSelectImage()
         }
     }
 
     private fun setupObservers() {
-        viewModel.media.observe(this, Observer { mediaList ->
+        viewModel.media.observe(this, { mediaList ->
             mediaListManager.refreshPhotoGridAdapter(mediaList)
         })
     }
 
     private fun onAddImage() {
+        if (!PermissionSupport.isCameraPermissionGranted(this)) {
+            PermissionSupport.requestCameraPermissions(this, REQUEST_TAKE_PHOTO_PERMISSIONS)
+            return
+        }
         val intent = CaptureImageActivity.createNavigateToIntent(this)
         startActivityForResult(intent, REQUEST_CAPTURE_PICTURE)
     }
 
     private fun onSelectImage() {
-        val photoPickerIntent = Intent(Intent.ACTION_PICK)
-        photoPickerIntent.type = "image/*"
-        val mimeTypes = arrayOf("image/jpeg", "image/png")
-        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        if (!PermissionSupport.isSelectPhotoPermissionGranted(this)) {
+            PermissionSupport.requestSelectPhotoPermission(this, REQUEST_SELECT_PHOTO_PERMISSION)
+            return
+        }
+        val photoPickerIntent = ApkMediaUtil.buildSelectImageIntent()
         startActivityForResult(photoPickerIntent, REQUEST_SELECT_PHOTO)
     }
 
@@ -201,23 +243,21 @@ class TripAddPoiActivity : AppCompatActivity() {
         GlobalScope.launch {
 
             // Gather POI data
-            val name = activity_trip_add_poi_trip_name.text.toString()
-            val description = activity_trip_add_poi_trip_description.text.toString()
-            val isWaypoint = activity_trip_add_poi_is_wp.isChecked
+            val name = binding.activityTripAddPoiTripName.text.toString()
+            val description = binding.activityTripAddPoiTripDescription.text.toString()
             val mapLocation = MapLocationBuilder.buildFrom(location)
-            val pointSubtype = activity_trip_add_poi_poi_type.selectedItem as PointSubtype
+            val pointType = binding.activityTripAddPoiPoiType.selectedItem as PointType
             val media = viewModel.media.value!!
             val enumService = ServiceFactory.getEnumService(applicationContext)
 
             // Build the new POI
             val poi = TripRecordingPoiBuilder.buildNewPoi(
                 name = name,
-                isWaypoint = isWaypoint,
                 description = description,
                 mapLocation = mapLocation,
                 descriptionShort = null,
                 media = media, // Just default value
-                pointSubtypeCode = pointSubtype.code,
+                pointTypeCode = pointType.code,
                 enumService = enumService
             )
 

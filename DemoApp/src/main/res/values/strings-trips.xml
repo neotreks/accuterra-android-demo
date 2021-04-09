@@ -50,7 +50,7 @@
     <string name="activity_save_trip_add_share">Share with:</string>
     <string name="activity_save_trip_promote_to_trail">Promote to trail:</string>
     <string name="activity_save_trip_my_rating">My Rating:️</string>
-    <string name="activity_save_trip_personal_note">Personal note</string>
+    <string name="activity_save_trip_personal_note">Private note</string>
 
     <string name="activity_save_trip_delete_trip_title">Delete Trip</string>
     <string name="activity_save_trip_delete_trip_message">Do you really want to delete this trip?</string>
@@ -77,11 +77,17 @@
     <string name="activity_capture_image_torch">Torch</string>
 
     <!-- Trip Choose Activity -->
-    <string name="activity_new_trip_chose_route_title">Follow an existing Curated or Community trail</string>
-    <string name="activity_new_trip_chose_route">Choose Route</string>
+
+    <string name="activity_new_trip_chose_route_title">Choose Recording Mode</string>
+
+    <string name="activity_new_trip_trail_guidance">Trail Guidance</string>
+    <string name="activity_new_trip_trail_guidance_description">Follow an existing curated or community trail to receive guidance on upcoming obstacles and points of interest, and record your trip.</string>
 
     <string name="activity_new_trip_free_roam">Free Roam</string>
-    <string name="activity_new_trip_free_roam_title">Begin recording a new track for wherever the journey takes you</string>
+    <string name="activity_new_trip_free_roam_description">Begin recording a new track for wherever the journey takes you</string>
+
+    <string name="activity_new_trip_trail_collection">Trail Collection</string>
+    <string name="activity_new_trip_trail_collection_description">Trail collection mode is for content curators who are collecting new trail content.</string>
 
     <!-- Trip Recording Activity -->
 
@@ -127,5 +133,100 @@
 
     <string name="location_update_service_permission_rationale">Location permission is needed for core functionality</string>
     <string name="location_update_service_permission_denied_explanation">Permission was denied, but is needed for core functionality.</string>
+
+    <!-- TRAIL COLLECTION -->
+
+    <string name="activity_trail_collection_toolbar_title">Trail Collection Mode</string>
+
+    <!-- TRAIL COLLECTION DESCRIPTION -->
+
+    <string name="activity_trail_collection_description_toolbar_title">Trail Collection Mode</string>
+
+    <string name="trail_collection_menu_item_display_guide">Show Guide</string>
+
+    <string name="trail_collection_content_description_crosshair">Crosshair</string>
+    <string name="trail_collection_content_description_driving_mode_button">Driving mode</string>
+    <string name="trail_collection_content_description_add_poi_button">Add POI</string>
+    <string name="trail_collection_content_description_map_layers_button">Switch map layers</string>
+    <string name="trail_collection_content_description_show_guide_button">Show guide</string>
+
+    <string name="activity_trail_collection_poi_panel_add_new_poi">Add New POI</string>
+    <string name="activity_trail_collection_poi_panel_edit_poi">Edit POI</string>
+    <string name="activity_trail_collection_poi_form_poi_type_tags">POI Type and Tags</string>
+    <string name="activity_trail_collection_poi_form_is_wp_label">Is Waypoint:</string>
+    <string name="activity_trail_collection_poi_form_photos">Photos (3 minimum)</string>
+    <string name="activity_trail_collection_poi_panel_add_photos">Add Photos</string>
+    <string name="activity_trail_collection_poi_form_name">Name</string>
+    <string name="activity_trail_collection_poi_panel_description">Description</string>
+
+    <string name="activity_trail_collection_status_recording">Recording Track</string>
+    <string name="activity_trail_collection_status_paused">Recording Paused</string>
+
+    <string name="activity_trail_collection_close_form_title">Close PIO editing?</string>
+    <string name="activity_trail_collection_close_form_message">There are unsaved changes. Do you want to close the form anyway?</string>
+
+    <string name="activity_trail_collection_validation_name">Please provide a POI name of at least 3 character long.</string>
+    <string name="activity_trail_collection_validation_description">Please provide a description text of at least 10 characters long.</string>
+    <string name="activity_trail_collection_validation_photos">Please provide at least 3 photos.</string>
+    <string name="activity_trail_collection_validation_tags">Please select at least 1 tag.</string>
+
+    <string name="activity_trail_collection_recording_status_recording">Recording Track</string>
+    <string name="activity_trail_collection_recording_status_paused">Recording Paused</string>
+
+    <string name="activity_trail_collection_guide_description"><![CDATA[
+        <p>Trail collection mode is for content curators who are collecting new trail content.</p>
+        <p>High data standards:</p>
+        <ul type="circle">
+            <li> no empty attributes</li>
+            <li> photos for each poi</li>
+            <li> etc.</li>
+        </ul>
+        ]]>
+    </string>
+
+    <!-- TRAIL SAVE -->
+
+    <string name="activity_save_trail_title">Save Trail</string>
+    <string name="activity_save_trail_name">Trail Name</string>
+    <string name="activity_save_trail_description">Description (provide an overview of the trail and the experience)</string>
+    <string name="activity_save_trail_difficulty_rating">Difficulty Rating</string>
+    <string name="activity_save_trail_difficulty_description">Difficulty Description (explain why you gave it this difficulty rating)</string>
+    <string name="activity_save_trail_tags">Trip Tags (automatically added from waypoints)</string>
+    <string name="activity_save_trail_highlights">Highlights</string>
+    <string name="activity_save_trail_history">History</string>
+    <string name="activity_save_trail_camping_options">Camping Options</string>
+    <string name="activity_save_trail_permit_header">Other</string>
+    <string name="activity_save_trail_permit_required">Permit Required</string>
+    <string name="activity_save_trail_permit_info">Permit Information</string>
+    <string name="activity_save_trail_permit_info_link">Permit Information Link</string>
+    <string name="activity_save_trail_access_issue">Access Issue</string>
+    <string name="activity_save_trail_access_issue_link">Access Issue Link</string>
+    <string name="activity_save_trail_season_header">Season</string>
+    <string name="activity_save_trail_season_recommendation">Season Recommendation (12 months recommendation in format \'000111000111000\' where 1 = recommended)</string>
+    <string name="activity_save_trail_season_recommendation_reason">Season Recommendation Reason</string>
+    <string name="activity_save_trail_season_spring">Season Spring</string>
+    <string name="activity_save_trail_season_summer">Season Summer</string>
+    <string name="activity_save_trail_season_fall">Season Fall</string>
+    <string name="activity_save_trail_season_winter">Season Winter</string>
+    <string name="activity_save_trail_access_concern">Access Concern</string>
+    <string name="activity_save_trail_recommended_clearance">Recommended Clearance (inches)</string>
+    <string name="activity_save_trail_best_direction">Best Direction</string>
+    <string name="activity_save_trail_other_header">Other</string>
+    <string name="activity_save_trail_add_photos">Add Photos</string>
+    <string name="activity_save_trail_shuffle_photos">Shuffle Photos</string>
+    <string name="activity_save_trail_add_share">Share with:</string>
+    <string name="activity_save_trail_promote_to_trail">Promote to trail:</string>
+    <string name="activity_save_trail_my_rating">My Rating:️</string>
+    <string name="activity_save_trail_personal_note">Private note</string>
+
+    <string name="activity_save_trail_delete_trail_title">Delete Trail</string>
+    <string name="activity_save_trail_delete_trail_message">Do you really want to delete this trail?</string>
+
+    <string name="activity_save_trail_trail_saved">Trail Saved</string>
+
+    <string name="activity_save_trail_validation_name">Please provide a POI name of at least 3 character long.</string>
+    <string name="activity_save_trail_validation_description">Please provide a description text of at least 10 characters long.</string>
+    <string name="activity_save_trail_validation_trail_collection_data">Error: cannot load trail collection data</string>
+    <string name="activity_save_trail_validation_difficulty_description">Please provide a difficulty description text of at least 10 characters long.</string>
 
 </resources>

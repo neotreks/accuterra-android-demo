@@ -12,11 +12,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.neotreks.accuterra.mobile.demo.DemoApplication
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityOnlineTripPoiBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripPoint
-import kotlinx.android.synthetic.main.activity_online_trip_poi.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 
 class OnlineTripPoiActivity : AppCompatActivity() {
 
@@ -25,6 +24,8 @@ class OnlineTripPoiActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private lateinit var viewModel: OnlineTripViewModel
+
+    private lateinit var binding: ActivityOnlineTripPoiBinding
 
     private lateinit var mediaListManager: OnlineTripMediaListManager
 
@@ -53,7 +54,8 @@ class OnlineTripPoiActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_online_trip_poi)
+        binding = ActivityOnlineTripPoiBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setupToolbar()
         setupMediaList()
@@ -97,19 +99,18 @@ class OnlineTripPoiActivity : AppCompatActivity() {
     }
 
     private fun loadPoi(poi: TripPoint) {
-        activity_online_trip_poi_trip_name.text = poi.name
-        activity_online_trip_poi_trip_description.text = poi.description
-        activity_online_trip_poi_is_wp.isChecked = poi.isWaypoint
-        activity_online_trip_poi_poi_type.text = poi.pointSubtype.name
+        binding.activityOnlineTripPoiTripName.text = poi.name
+        binding.activityOnlineTripPoiTripDescription.text = poi.description
+        binding.activityOnlineTripPoiPoiType.text = poi.pointType.name
         // Load photos
         viewModel.selectedPoiUuid = poi.uuid
         mediaListManager.refreshPhotoGridAdapter(poi.media)
     }
 
     private fun setupMediaList() {
-        activity_online_trip_poi_photos.layoutManager = GridLayoutManager(this, 4)
+        binding.activityOnlineTripPoiPhotos.layoutManager = GridLayoutManager(this, 4)
         mediaListManager = OnlineTripMediaListManager(this, lifecycleScope,
-            activity_online_trip_poi_photos,
+            binding.activityOnlineTripPoiPhotos,
             object: OnlineTripMediaListManager.TripMediaListClickListener {
                 override fun onItemClicked(media: TripMedia) {
                     viewModel.selectedMediaUrl = media.url
@@ -147,8 +148,8 @@ class OnlineTripPoiActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.general_poi)
+        setSupportActionBar(binding.activityOnlineTripPoiToolbar.generalToolbar)
+        binding.activityOnlineTripPoiToolbar.generalToolbarTitle.text = getString(R.string.general_poi)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)

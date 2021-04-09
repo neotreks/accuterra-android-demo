@@ -8,7 +8,7 @@
     android:layout_marginBottom="@dimen/default_margin">
 
     <!-- NAME -->
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/activity_feed_trip_header_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
         android:ellipsize="end" />
 
     <!-- Location -->
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/activity_feed_trip_header_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
         tools:text="Related trip name......"/>
 
     <!-- DESCRIPTION -->
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/activity_feed_trip_header_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

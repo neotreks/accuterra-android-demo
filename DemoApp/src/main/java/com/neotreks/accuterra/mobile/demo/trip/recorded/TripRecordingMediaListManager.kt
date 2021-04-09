@@ -9,6 +9,8 @@ import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 
 /**
  * Utility class to manage the media list component
+ *
+ * @see [setupPhotoGrid]
  */
 class TripRecordingMediaListManager(
     private val context: Context,
@@ -23,9 +25,12 @@ class TripRecordingMediaListManager(
         private const val TAG = "MediaListManager"
     }
 
-    fun setupPhotoGrid() {
+    /**
+     * PLEASE NOTE - this method must be called to make this component WORK!
+     */
+    fun setupPhotoGrid(columnsCount: Int = 3) {
         // Setup the component
-        view.layoutManager = GridLayoutManager(context, 4)
+        view.layoutManager = GridLayoutManager(context, columnsCount)
     }
 
     fun refreshPhotoGridAdapter(mediaList: List<TripRecordingMedia>) {

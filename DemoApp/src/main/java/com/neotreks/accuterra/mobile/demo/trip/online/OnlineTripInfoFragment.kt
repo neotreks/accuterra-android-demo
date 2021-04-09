@@ -5,13 +5,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import com.neotreks.accuterra.mobile.demo.R
-import kotlinx.android.synthetic.main.fragment_online_trip_info.view.*
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentOnlineTripInfoBinding
 
 /**
  * Trip Info fragment
  */
 class OnlineTripInfoFragment : OnlineTripFragment() {
+
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
+    private lateinit var binding: FragmentOnlineTripInfoBinding
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
 
     /** Provide view layout */
     override fun onCreateView(
@@ -19,7 +28,8 @@ class OnlineTripInfoFragment : OnlineTripFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_online_trip_info, container, false)
+        binding = FragmentOnlineTripInfoBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /** Load trip data into the UI */
@@ -30,12 +40,12 @@ class OnlineTripInfoFragment : OnlineTripFragment() {
             if (trip == null) {
                 return@Observer
             }
-            view.fragment_trip_info_share.text = trip.userInfo.sharingType.getName()
+            binding.fragmentTripInfoShare.text = trip.userInfo.sharingType.getName()
             trip.userInfo.userRating?.let { rating ->
-                view.fragment_trip_info_my_rating.rating = rating.toFloat()
-                }
-            view.fragment_trip_info_promote.isChecked = trip.userInfo.promoteToTrail
-            view.fragment_trip_info_trip_personal_note.text = trip.userInfo.personalNote
+                binding.fragmentTripInfoMyRating.rating = rating
+            }
+            binding.fragmentTripInfoPromote.isChecked = trip.userInfo.promoteToTrail
+            binding.fragmentTripInfoTripPersonalNote.text = trip.userInfo.personalNote
         })
     }
 

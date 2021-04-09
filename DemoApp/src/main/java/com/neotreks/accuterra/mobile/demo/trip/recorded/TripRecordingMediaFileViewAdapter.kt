@@ -29,6 +29,8 @@ class TripRecordingMediaFileViewAdapter internal constructor(
 
     private val selectedItem: TripRecordingMedia? = null
 
+    private var favoritePosition: Int? = null
+
     // View holder creation
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View = inflater.inflate(R.layout.component_image_view, parent, false)
@@ -38,7 +40,7 @@ class TripRecordingMediaFileViewAdapter internal constructor(
     // View binding
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
-        viewBinder.bindView(holder.itemView, item, isSelected(item))
+        viewBinder.bindView(holder.itemView, item, isSelected(item), favoritePosition == position)
     }
 
     // Total number of items
@@ -71,8 +73,20 @@ class TripRecordingMediaFileViewAdapter internal constructor(
     }
 
     // convenience method for getting data at click position
-    fun getItem(id: Int): TripRecordingMedia {
-        return data[id]
+    fun getItem(position: Int): TripRecordingMedia {
+        return data[position]
+    }
+
+    /**
+     * Returns all items
+     */
+    fun getPositionByUuid(uuid: String): Int? {
+        data.forEachIndexed { position, item ->
+            if (item.uuid == uuid) {
+                return position
+            }
+        }
+        return null
     }
 
     // allows clicks events to be caught
@@ -82,6 +96,17 @@ class TripRecordingMediaFileViewAdapter internal constructor(
 
     private fun isSelected(item: TripRecordingMedia): Boolean {
         return item.uri.path == selectedItem?.uri?.path
+    }
+
+    fun setFavoritePosition(position: Int?) {
+        val positionOld = this.favoritePosition
+        this.favoritePosition = position
+        if (positionOld != null) {
+            notifyItemChanged(positionOld)
+        }
+        if (position != null) {
+            notifyItemChanged(position)
+        }
     }
 
     // Click listener interface

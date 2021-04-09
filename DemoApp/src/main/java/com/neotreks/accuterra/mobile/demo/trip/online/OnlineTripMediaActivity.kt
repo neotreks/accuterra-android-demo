@@ -11,13 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.neotreks.accuterra.mobile.demo.DemoApplication
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityOnlineTripMediaBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariant
 import com.neotreks.accuterra.mobile.demo.ui.RecycleViewBottomDotDecorator
 import com.neotreks.accuterra.mobile.sdk.trip.model.Trip
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripMedia
-import kotlinx.android.synthetic.main.activity_online_trip_media.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 
 class OnlineTripMediaActivity : AppCompatActivity() {
 
@@ -26,6 +25,8 @@ class OnlineTripMediaActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private lateinit var viewModel: OnlineTripViewModel
+
+    private lateinit var binding: ActivityOnlineTripMediaBinding
 
     private lateinit var mediaAdapter: OnlineTripMediaFileViewAdapter
 
@@ -60,7 +61,8 @@ class OnlineTripMediaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_online_trip_media)
+        binding = ActivityOnlineTripMediaBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initViewModel()
         setupToolbar()
@@ -92,8 +94,8 @@ class OnlineTripMediaActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.general_photos)
+        setSupportActionBar(binding.activityOnlineTripMediaToolbar.generalToolbar)
+        binding.activityOnlineTripMediaToolbar.generalToolbarTitle.text = getString(R.string.general_photos)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -112,20 +114,21 @@ class OnlineTripMediaActivity : AppCompatActivity() {
             true,
             R.layout.component_image_view_full_screen
         )
-        activity_online_trip_media_recycle_view.layoutManager = LinearLayoutManager(
+        val activityOnlineTripMediaRecycleView = binding.activityOnlineTripMediaRecycleView
+        activityOnlineTripMediaRecycleView.layoutManager = LinearLayoutManager(
             this,
             LinearLayoutManager.HORIZONTAL,
             false
         )
         // Attach the adapter
-        activity_online_trip_media_recycle_view.adapter = mediaAdapter
+        activityOnlineTripMediaRecycleView.adapter = mediaAdapter
         // add pager behavior
         val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(activity_online_trip_media_recycle_view)
+        snapHelper.attachToRecyclerView(activityOnlineTripMediaRecycleView)
         // pager indicator
-        activity_online_trip_media_recycle_view.addItemDecoration(bottomDotIndicator)
+        activityOnlineTripMediaRecycleView.addItemDecoration(bottomDotIndicator)
         // Set listener for clicking decorator's `bottom dots`
-        activity_online_trip_media_recycle_view.addOnItemTouchListener(bottomDotIndicator.indicatorTouchListener)
+        activityOnlineTripMediaRecycleView.addOnItemTouchListener(bottomDotIndicator.indicatorTouchListener)
     }
 
     private fun setupObservers() {
@@ -136,7 +139,7 @@ class OnlineTripMediaActivity : AppCompatActivity() {
             val media = buildMediaList(trip, viewModel.selectedPoiUuid)
             mediaAdapter = buildMediaAdapter(media)
             bottomDotIndicator.reset()
-            activity_online_trip_media_recycle_view.adapter = mediaAdapter
+            binding.activityOnlineTripMediaRecycleView.adapter = mediaAdapter
             // Scroll to selected position if exists
             val url = viewModel.selectedMediaUrl
             if (url.isNotNullNorBlank()) {
@@ -198,7 +201,7 @@ class OnlineTripMediaActivity : AppCompatActivity() {
             Log.w(TAG, "Item position not found for url: $url")
             return
         }
-        activity_online_trip_media_recycle_view.layoutManager?.scrollToPosition(position)
+        binding.activityOnlineTripMediaRecycleView.layoutManager?.scrollToPosition(position)
     }
 
 }

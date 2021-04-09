@@ -23,3 +23,13 @@ fun String?.isNotNullNorBlank(): Boolean {
 fun String.uuidToLong(): Long {
     return UUID.fromString(this).mostSignificantBits and Long.MAX_VALUE
 }
+
+/**
+ * Returns trimmed value or null if given string is null or blank
+ */
+fun String?.trimOrNull(): String? {
+    if (this.isNullOrBlank()) {
+        return null
+    }
+    return this.trim()
+}

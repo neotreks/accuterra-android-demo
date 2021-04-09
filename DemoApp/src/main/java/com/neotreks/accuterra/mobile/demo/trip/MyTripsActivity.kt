@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.*
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityMyTripsBinding
 import com.neotreks.accuterra.mobile.demo.feed.*
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripTabDefinition
@@ -18,10 +19,15 @@ import com.neotreks.accuterra.mobile.demo.trip.recorded.NewTripActivity
 import com.neotreks.accuterra.mobile.demo.trip.recorded.RecordedTripActivity
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingActivity
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripSaveActivity
+import com.neotreks.accuterra.mobile.demo.trip.trailcollection.TrailCollectionActivity
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailCollectionData
+import com.neotreks.accuterra.mobile.demo.trip.trailcollection.TrailSaveActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.upload.ObjectUploadActivity
+import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.NetworkStateReceiver
+import com.neotreks.accuterra.mobile.demo.util.jsonToClass
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
@@ -32,9 +38,6 @@ import com.neotreks.accuterra.mobile.sdk.ugc.model.ActivityFeedEntry
 import com.neotreks.accuterra.mobile.sdk.ugc.model.GetMyActivityFeedCriteria
 import com.neotreks.accuterra.mobile.sdk.ugc.model.SetTripLikedResult
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TripProcessingStatus
-import kotlinx.android.synthetic.main.accuterra_toolbar.*
-import kotlinx.android.synthetic.main.activity_my_trips.*
-import kotlinx.android.synthetic.main.component_basic_tabs.*
 import java.lang.ref.WeakReference
 
 class MyTripsActivity : AppCompatActivity() {
@@ -44,6 +47,7 @@ class MyTripsActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private val viewModel: MyTripsViewModel by viewModels()
+    private lateinit var binding: ActivityMyTripsBinding
     private var dialogHolder = ProgressDialogHolder()
 
     private lateinit var activityFeedAdapter: ActivityFeedRecycleViewAdapter
@@ -70,7 +74,8 @@ class MyTripsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_my_trips)
+        binding = ActivityMyTripsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         networkStateReceiver = NetworkStateReceiver(this)
 
@@ -78,7 +83,7 @@ class MyTripsActivity : AppCompatActivity() {
         selectCurrentTab()
         setupTabListener()
         setupButtons()
-        UiUtils.setApkVersionText(general_toolbar_sdk_version)
+        UiUtils.setApkVersionText(binding.activityMyTripsToolbar.generalToolbarSdkVersion)
 
         setupListView()
         registerViewModelObservers()
@@ -117,16 +122,16 @@ class MyTripsActivity : AppCompatActivity() {
         viewModel.listItems.observe(this, { trips ->
             hideProgressBar()
             activityFeedAdapter.setItems(trips)
-            activity_my_trips_no_trips_label.visibility = trips.isEmpty().visibility
+            binding.activityMyTripsNoTripsLabel.visibility = trips.isEmpty().visibility
         })
     }
 
     private fun hideProgressBar() {
-        activity_my_trips_list_swipe_refresh.isRefreshing = false
+        binding.activityMyTripsListSwipeRefresh.isRefreshing = false
     }
 
     private fun displayProgressBar() {
-        activity_my_trips_list_swipe_refresh.isRefreshing = true
+        binding.activityMyTripsListSwipeRefresh.isRefreshing = true
     }
 
     private fun loadTrips(forceReload: Boolean) {
@@ -150,22 +155,22 @@ class MyTripsActivity : AppCompatActivity() {
     }
 
     private fun isOnline(): Boolean {
-        return activity_my_trips_source_switch.isChecked
+        return binding.activityMyTripsSourceSwitch.isChecked
     }
 
     private fun setupListView() {
         activityFeedAdapter = ActivityFeedRecycleViewAdapter(context = this,
             items = viewModel.listItems.value ?: listOf(), listener = activityFeedListener,
             lifecycleScope = lifecycleScope)
-        activity_my_trips_list.layoutManager = LinearLayoutManager(this)
-        activity_my_trips_list.adapter = activityFeedAdapter
-        activity_my_trips_list_swipe_refresh.setOnRefreshListener {
+        binding.activityMyTripsList.layoutManager = LinearLayoutManager(this)
+        binding.activityMyTripsList.adapter = activityFeedAdapter
+        binding.activityMyTripsListSwipeRefresh.setOnRefreshListener {
             loadTrips(forceReload = true)
         }
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(accuterra_toolbar)
+        setSupportActionBar(binding.activityMyTripsToolbar.accuterraToolbar)
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
             setDisplayHomeAsUpEnabled(false)
@@ -174,11 +179,11 @@ class MyTripsActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        activity_my_trips_add_trip_button.setOnClickListener {
+        binding.activityMyTripsAddTripButton.setOnClickListener {
             val intent = NewTripActivity.createNavigateToIntent(this@MyTripsActivity)
             startActivity(intent)
         }
-        activity_my_trips_source_switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.activityMyTripsSourceSwitch.setOnCheckedChangeListener { _, isChecked ->
             onSourceChanged(isChecked)
         }
     }
@@ -188,28 +193,28 @@ class MyTripsActivity : AppCompatActivity() {
         if (isOnlineSource) {
             if (networkStateReceiver.isConnected()) {
                 // Online
-                activity_my_trips_source_switch.text = getString(R.string.activity_my_trips_source_online)
-                activity_my_trips_add_trip_button.visibility = false.visibility
+                binding.activityMyTripsSourceSwitch.text = getString(R.string.activity_my_trips_source_online)
+                binding.activityMyTripsAddTripButton.visibility = false.visibility
             } else {
                 // we need to switch back to offline
-                activity_my_trips_source_switch.isChecked = false
+                binding.activityMyTripsSourceSwitch.isChecked = false
                 longToast(getString(R.string.general_error_no_internet_connection))
             }
         } else {
             // Local
-            activity_my_trips_source_switch.text = getString(R.string.activity_my_trips_source_local)
-            activity_my_trips_add_trip_button.visibility = true.visibility
+            binding.activityMyTripsSourceSwitch.text = getString(R.string.activity_my_trips_source_local)
+            binding.activityMyTripsAddTripButton.visibility = true.visibility
         }
         // Refresh data
         loadTrips(forceReload = true)
     }
 
     private fun selectCurrentTab() {
-        component_basic_tabs.getTabAt(AppBasicTabs.TAB_MY_TRIPS_INDEX)!!.select()
+        binding.activityMyTripsTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_MY_TRIPS_INDEX)!!.select()
     }
 
     private fun setupTabListener() {
-        component_basic_tabs.addOnTabSelectedListener(
+        binding.activityMyTripsTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object: MainTabListener.MainTabListenerHelper {
                 override val context: Activity
                     get() = this@MyTripsActivity
@@ -231,13 +236,13 @@ class MyTripsActivity : AppCompatActivity() {
             val recorder = ServiceFactory.getTripRecorder(applicationContext)
             val hasActiveTrip = recorder.hasActiveTripRecording()
             // We cannot allow new recording if there is an active recording already
-            activity_my_trips_add_trip_button.isEnabled = !hasActiveTrip
+            binding.activityMyTripsAddTripButton.isEnabled = !hasActiveTrip
             val color = if (hasActiveTrip) {
                 ColorStateList.valueOf(getColor(R.color.colorDisabled))
             } else {
                 ColorStateList.valueOf(getColor(R.color.colorPrimary))
             }
-            activity_my_trips_add_trip_button.backgroundTintList = color
+            binding.activityMyTripsAddTripButton.backgroundTintList = color
         }
     }
 
@@ -270,14 +275,36 @@ class MyTripsActivity : AppCompatActivity() {
                     when(trip.status) {
                         TripRecordingStatus.RECORDING,
                         TripRecordingStatus.PAUSED -> {
-                            // Navigate to recording activity in case of active recording
-                            val intent = TripRecordingActivity.createNavigateToIntent(activity)
-                            activity.startActivity(intent)
+                            activity.lifecycleScope.launchWhenCreated {
+                                // We need to load full trip and the `custom data` to distinguish
+                                // between free roam and trail collection recordings
+                                val trailCollectionData = getTrailCollectionData(activity, trip.uuid)
+                                if (trailCollectionData == null) {
+                                    // Navigate to Free Roam recording activity
+                                    val intent = TripRecordingActivity.createNavigateToIntent(activity)
+                                    activity.startActivity(intent)
+                                } else {
+                                    // Navigate to Trail Collection recording activity
+                                    val intent = TrailCollectionActivity.createNavigateToIntent(activity)
+                                    activity.startActivityForResult(intent, REQUEST_RECORDED)
+                                }
+                            }
                         }
                         TripRecordingStatus.FINISHED -> {
-                            // Navigate to the SAVE activity in case of finished recording
-                            val intent = TripSaveActivity.createNavigateToIntent(activity, trip.uuid)
-                            activity.startActivity(intent)
+                            activity.lifecycleScope.launchWhenCreated {
+                                // We need to load full trip and the `custom data` to distinguish
+                                // between free roam and trail collection recordings
+                                val trailCollectionData = getTrailCollectionData(activity, trip.uuid)
+                                if (trailCollectionData == null) {
+                                    // Navigate to the SAVE activity in case of finished recording
+                                    val intent = TripSaveActivity.createNavigateToIntent(activity, trip.uuid)
+                                    activity.startActivity(intent)
+                                } else {
+                                    // Navigate to the SAVE activity in case of finished recording
+                                    val intent = TrailSaveActivity.createNavigateToIntent(activity, trip.uuid)
+                                    activity.startActivity(intent)
+                                }
+                            }
                         }
                         TripRecordingStatus.QUEUED,
                         TripRecordingStatus.UPLOADED -> {
@@ -333,9 +360,12 @@ class MyTripsActivity : AppCompatActivity() {
                                     response.errorMessage ?: "Unknown error"
                                 )
                                 activity.longToast(text)
+                                CrashSupport.reportError(response)
                             }
                         } catch (e: Exception) {
-                            Log.e(TAG, "Error while liking the trip: ${item.tripUUID}", e)
+                            val message = "Error while liking the trip: ${item.tripUUID}"
+                            Log.e(TAG, message, e)
+                            CrashSupport.reportError(e, message)
                         } finally {
                             activity.dialogHolder.hideProgressDialog()
                         }
@@ -356,6 +386,20 @@ class MyTripsActivity : AppCompatActivity() {
             val intent = OnlineTripActivity.createNavigateToIntent(activity, item.tripUUID, OnlineTripTabDefinition.PHOTO)
             activity.startActivity(intent)
         }
+
+        /* * * * * * * * * * * * */
+        /*        PRIVATE        */
+        /* * * * * * * * * * * * */
+
+        private suspend fun getTrailCollectionData(
+            context: Context,
+            uuid: String
+        ): TrailCollectionData? {
+            val service = ServiceFactory.getTripRecordingService(context)
+            val tripRecording = service.getTripRecordingByUUID(uuid)
+            return tripRecording?.extProperties?.firstOrNull()?.data?.jsonToClass(TrailCollectionData::class.java)
+        }
+
     }
 
 }

@@ -4,10 +4,8 @@ import android.Manifest
 import android.content.*
 import android.content.pm.PackageManager
 import android.location.Location
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -17,10 +15,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
-import com.neotreks.accuterra.mobile.demo.BuildConfig
 import com.neotreks.accuterra.mobile.demo.R
-import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
+import com.neotreks.accuterra.mobile.demo.extensions.addSettingsAction
 import com.neotreks.accuterra.mobile.sdk.location.LocationUpdatesService
+import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 
 
 /**
@@ -150,6 +148,9 @@ abstract class LocationActivity : AppCompatActivity(),
         grantResults: IntArray
     ) {
         Log.i(TAG, "onRequestPermissionResult")
+        // We need to call also the `super` so results are propagated to fragments if needed
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // Location permission
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             when {
                 grantResults.isEmpty() -> {
@@ -169,18 +170,7 @@ abstract class LocationActivity : AppCompatActivity(),
                         R.string.location_update_service_permission_denied_explanation,
                         Snackbar.LENGTH_INDEFINITE
                     )
-                        .setAction(R.string.general_settings) {
-                            // Build intent that displays the App settings screen.
-                            val intent = Intent()
-                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            val uri: Uri = Uri.fromParts(
-                                "package",
-                                BuildConfig.APPLICATION_ID, null
-                            )
-                            intent.data = uri
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            startActivity(intent)
-                        }
+                        .addSettingsAction(this)
                         .show()
                 }
             }

@@ -10,6 +10,8 @@ import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 
 /**
  * Utility class to manage the media list component
+ *
+ * @see [setupPhotoGrid]
  */
 class TrailMediaListManager(
     private val context: Context,
@@ -25,6 +27,9 @@ class TrailMediaListManager(
         private const val TAG = "MediaListManager"
     }
 
+    /**
+     * PLEASE NOTE - this method must be called to make this component WORK!
+     */
     fun setupPhotoGrid() {
         // Setup the component
         view.layoutManager = GridLayoutManager(context, 4)

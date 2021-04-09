@@ -40,7 +40,7 @@ class TrailMediaFileViewAdapter internal constructor(
     // View binding
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
-        viewBinder.bindView(holder.itemView, item, isSelected(item))
+        viewBinder.bindView(holder.itemView, item, isSelected(item), false)
     }
 
     // Total number of items

@@ -11,14 +11,23 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityMediaDetailBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.util.visibility
-import kotlinx.android.synthetic.main.activity_media_detail.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 
 class MediaDetailActivity : AppCompatActivity() {
 
+    /* * * * * * * * * * * * */
+    /*      PROPERTIES       */
+    /* * * * * * * * * * * * */
+
     private lateinit var viewModel: MediaDetailViewModel
+
+    private lateinit var binding: ActivityMediaDetailBinding
+
+    /* * * * * * * * * * * * */
+    /*       COMPANION       */
+    /* * * * * * * * * * * * */
 
     companion object {
 
@@ -50,7 +59,8 @@ class MediaDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_media_detail)
+        binding = ActivityMediaDetailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         // Init view model
         viewModel = ViewModelProvider(this).get(MediaDetailViewModel::class.java)
 
@@ -76,8 +86,8 @@ class MediaDetailActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.general_media)
+        setSupportActionBar(binding.activityMediaDetailToolbar.generalToolbar)
+        binding.activityMediaDetailToolbar.generalToolbarTitle.text = getString(R.string.general_media)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -92,7 +102,7 @@ class MediaDetailActivity : AppCompatActivity() {
             if (uri == null) {
                 return@Observer
             }
-            val image = activity_media_detail_image
+            val image = binding.activityMediaDetailImage
             // Load
             val options = UiUtils.getDefaultImageOptions()
             Glide.with(this@MediaDetailActivity)
@@ -100,7 +110,7 @@ class MediaDetailActivity : AppCompatActivity() {
                 .load(uri)
                 .into(image)
             // Hide the progress bar
-            activity_media_detail_spinner.visibility = false.visibility
+            binding.activityMediaDetailSpinner.visibility = false.visibility
         })
 
     }

@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.neotreks.accuterra.mobile.demo.trip.recorded.TripSaveActivity">
+
+    <!-- TOOLBAR -->
+    <include
+        android:id="@+id/activity_trail_save_toolbar"
+        layout="@layout/trail_collection_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!-- SCROLL -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_trail_save_toolbar"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- LIST OF ATTRIBUTES -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- PHOTOS FROM POIs -->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activity_trail_save_image_carousel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="30dp"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/image_carousel_item"/>
+
+            <!-- PHOTOS -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:orientation="horizontal"
+                tools:ignore="UseCompoundDrawables">
+
+                <!-- Add Photo From Gallery Icon -->
+                <ImageView
+                    android:id="@+id/activity_trail_save_select_photo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="@dimen/default_margin_internal"
+                    android:src="@drawable/ic_add_photo_from_gallery_24px"
+                    android:contentDescription="@string/activity_trip_add_poi_add_photos"/>
+
+                <!-- Photo List -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/activity_trail_save_photos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_margin_internal"
+                    android:layout_marginStart="@dimen/default_margin"/>
+
+            </LinearLayout>
+
+            <!-- NAME -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:labelFor="@id/activity_trail_save_trail_name"
+                android:text="@string/activity_save_trail_name" />
+
+            <EditText
+                android:id="@+id/activity_trail_save_trail_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                tools:text="Trip #3" />
+
+            <!-- DESCRIPTION -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:labelFor="@id/activity_trail_save_trail_description"
+                android:text="@string/activity_save_trail_description" />
+
+            <EditText
+                android:id="@+id/activity_trail_save_trail_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:maxLines="4"
+                tools:text="Very long description that is possible not that long as it could be..." />
+
+            <!-- Difficulty Rating -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:labelFor="@id/activity_trail_save_tech_rating"
+                android:text="@string/activity_save_trail_difficulty_rating" />
+
+            <!-- For Trail collection we gather just one value and not low/high values -->
+
+            <TextView
+                android:id="@+id/activity_trail_save_tech_rating_text"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                tools:text="R1" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/activity_trail_save_tech_rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="1.0"
+                android:valueTo="5.0"
+                android:stepSize="1.0"
+                app:values="@array/initial_tech_range_slider_values"
+                android:layout_marginHorizontal="@dimen/default_margin" />
+
+            <!-- Difficulty Description -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:labelFor="@id/activity_trail_save_trail_difficulty_description"
+                android:text="@string/activity_save_trail_difficulty_description" />
+
+            <EditText
+                android:id="@+id/activity_trail_save_trail_difficulty_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:maxLines="4"
+                tools:text="Difficulty text..." />
+
+            <!-- TAGS -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:labelFor="@id/activity_trail_save_tags"
+                android:text="@string/activity_save_trail_tags" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/activity_trail_save_tags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin" />
+
+            <!-- Show Optional -->
+
+            <TextView
+                android:id="@+id/activity_trail_save_show_more_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:padding="@dimen/default_margin_internal"
+                android:gravity="center"
+                android:textColor="@color/trailCollectionPrimaryBackground"
+                android:text="@string/general_show_more" />
+
+            <LinearLayout
+                android:id="@+id/activity_trail_save_optional_fields_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- HIGHLIGHTS -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_highlights"
+                    android:text="@string/activity_save_trail_highlights" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_highlights"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Highlights text..." />
+
+                <!-- HIGHLIGHTS -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_history"
+                    android:text="@string/activity_save_trail_history" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_history"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="History text..." />
+
+                <!-- CAMPING OPTIONS -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_camping_options"
+                    android:text="@string/activity_save_trail_camping_options" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_camping_options"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Camping options text..." />
+
+                <!-- HEADER: PERMIT -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_margin"
+                    android:textAlignment="center"
+                    android:textColor="@color/trailCollectionPrimaryBackground"
+                    android:text="@string/activity_save_trail_permit_header" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_internal"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:labelFor="@id/activity_trail_save_permit_required"
+                        android:text="@string/activity_save_trail_permit_required"
+                        android:layout_gravity="center_vertical"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/activity_trail_save_permit_required"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/default_margin" />
+
+                </LinearLayout>
+
+
+                <!-- Container related to PERMIT related fields -->
+                <LinearLayout
+                    android:id="@+id/activity_trail_save_permit_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- PERMIT INFORMATION -->
+                    <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_permit_info"
+                    android:text="@string/activity_save_trail_permit_info" />
+
+                    <EditText
+                        android:id="@+id/activity_trail_save_permit_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:maxLines="4"
+                        tools:text="Permint information text..." />
+
+                    <!-- PERMIT INFORMATION LINK -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_internal"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:labelFor="@id/activity_trail_save_permit_info_link"
+                        android:text="@string/activity_save_trail_permit_info_link" />
+
+                    <EditText
+                        android:id="@+id/activity_trail_save_permit_info_link"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:maxLines="4"
+                        tools:text="Permint information text..." />
+
+                    <!-- Access Issue -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_internal"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:labelFor="@id/activity_trail_save_access_issue"
+                        android:text="@string/activity_save_trail_access_issue" />
+
+                    <EditText
+                        android:id="@+id/activity_trail_save_access_issue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:maxLines="4"
+                        tools:text="Access Issue text..." />
+
+                    <!-- Access Issue Link -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_internal"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:labelFor="@id/activity_trail_save_access_issue_link"
+                        android:text="@string/activity_save_trail_access_issue_link" />
+
+                    <EditText
+                        android:id="@+id/activity_trail_save_access_issue_link"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:maxLines="4"
+                        tools:text="Access Issue text..." />
+
+                </LinearLayout>
+
+                <!-- HEADER: SEASONS -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_margin"
+                    android:textAlignment="center"
+                    android:textColor="@color/trailCollectionPrimaryBackground"
+                    android:text="@string/activity_save_trail_season_header" />
+
+                <!-- Season Recommendation -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_season_recommendation"
+                    android:text="@string/activity_save_trail_season_recommendation" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_season_recommendation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    tools:text="111000011111" />
+
+                <!-- Season Recommendation Reason -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_season_recommendation_reason"
+                    android:text="@string/activity_save_trail_season_recommendation_reason" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_season_recommendation_reason"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Season Spring text..." />
+
+                <!-- Season Spring -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_season_spring"
+                    android:text="@string/activity_save_trail_season_spring" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_season_spring"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Season Spring text..." />
+
+                <!-- Season Summer -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_season_summer"
+                    android:text="@string/activity_save_trail_season_summer" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_season_summer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Season Summer text..." />
+
+                <!-- Season Fall -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_season_fall"
+                    android:text="@string/activity_save_trail_season_fall" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_season_fall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Season Fall text..." />
+
+                <!-- Season Winter -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_season_winter"
+                    android:text="@string/activity_save_trail_season_winter" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_season_winter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Season Winter text..." />
+
+                <!-- HEADER: OTHER -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_margin"
+                    android:textAlignment="center"
+                    android:textColor="@color/trailCollectionPrimaryBackground"
+                    android:text="@string/activity_save_trail_permit_header" />
+
+                <!-- ACCESS CONCERN -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_trail_access_concerns"
+                    android:text="@string/activity_save_trail_access_concern" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/activity_trail_save_trail_access_concerns"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"/>
+
+                <!-- RECOMMENDED CLEARANCE -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_trail_recommended_clearance"
+                    android:text="@string/activity_save_trail_recommended_clearance" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_trail_recommended_clearance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    tools:text="Recommended clearance text" />
+
+                <!-- BEST DIRECTION -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_trail_best_direction"
+                    android:text="@string/activity_save_trail_best_direction" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_trail_best_direction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="Best Direction text" />
+
+                <!-- PERSONAL NOTE -->
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_margin_internal"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:labelFor="@id/activity_trail_save_trail_personal_note"
+                    android:text="@string/activity_save_trail_personal_note" />
+
+                <EditText
+                    android:id="@+id/activity_trail_save_trail_personal_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/default_margin"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:maxLines="4"
+                    tools:text="I should take more gasoline next time." />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

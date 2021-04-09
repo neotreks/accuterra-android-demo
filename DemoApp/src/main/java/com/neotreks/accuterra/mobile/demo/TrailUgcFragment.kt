@@ -8,10 +8,10 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.neotreks.accuterra.mobile.demo.databinding.FragmentTrailUgcBinding
 import com.neotreks.accuterra.mobile.demo.trail.TrailCommentAdapter
 import com.neotreks.accuterra.mobile.demo.ui.OnListItemLongClickListener
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TrailComment
-import kotlinx.android.synthetic.main.fragment_trail_ugc.*
 
 class TrailUgcFragment(private val listener: Listener): TrailInfoFragment() {
 
@@ -20,6 +20,8 @@ class TrailUgcFragment(private val listener: Listener): TrailInfoFragment() {
     /* * * * * * * * * * * * */
 
     private val viewModel: TrailInfoViewModel by activityViewModels()
+
+    private lateinit var binding: FragmentTrailUgcBinding
 
     private lateinit var commentAdapter: TrailCommentAdapter
 
@@ -32,8 +34,9 @@ class TrailUgcFragment(private val listener: Listener): TrailInfoFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_trail_ugc, container, false)
+    ): View {
+        binding = FragmentTrailUgcBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,21 +49,21 @@ class TrailUgcFragment(private val listener: Listener): TrailInfoFragment() {
     }
 
     private fun setupObservers() {
-        viewModel.comments.observe(this.viewLifecycleOwner, Observer { comments ->
+        viewModel.comments.observe(this.viewLifecycleOwner, { comments ->
             commentAdapter.setItems(comments ?: listOf())
         })
-        viewModel.commentsCount.observe(this.viewLifecycleOwner, Observer { commentsCount ->
-            fragment_trail_ugc_comments.text = this.getString(R.string.general_comments_number, commentsCount)
+        viewModel.commentsCount.observe(this.viewLifecycleOwner, { commentsCount ->
+            binding.fragmentTrailUgcComments.text = this.getString(R.string.general_comments_number, commentsCount)
         })
         viewModel.userData.observe(this.viewLifecycleOwner, Observer { userData ->
             if (userData == null) return@Observer
             val rating = userData.userRating
             if (rating == null) {
-                fragment_trail_ugc_rating_value.text = getString(R.string.no_rating)
-                fragment_trail_ugc_rating_stars.rating = 0F
+                binding.fragmentTrailUgcRatingValue.text = getString(R.string.no_rating)
+                binding.fragmentTrailUgcRatingStars.rating = 0F
             } else {
-                fragment_trail_ugc_rating_value.text = rating.toString()
-                fragment_trail_ugc_rating_stars.rating = rating
+                binding.fragmentTrailUgcRatingValue.text = rating.toString()
+                binding.fragmentTrailUgcRatingStars.rating = rating
             }
         })
     }
@@ -73,9 +76,9 @@ class TrailUgcFragment(private val listener: Listener): TrailInfoFragment() {
                 showCommentItemMenu(item, view)
             }
         })
-        fragment_trail_comments_list.adapter = commentAdapter
+        binding.fragmentTrailCommentsList.adapter = commentAdapter
         // Comments sending
-        fragment_trail_ugc_add_icon.setOnClickListener {
+        binding.fragmentTrailUgcAddIcon.setOnClickListener {
             listener.onAddTrailComment()
         }
     }
@@ -99,7 +102,7 @@ class TrailUgcFragment(private val listener: Listener): TrailInfoFragment() {
     }
 
     private fun setupRating() {
-        fragment_trail_ugc_rating_stars.setOnRatingBarChangeListener { _, rating, fromUser ->
+        binding.fragmentTrailUgcRatingStars.setOnRatingBarChangeListener { _, rating, fromUser ->
             if (!fromUser) return@setOnRatingBarChangeListener
             lifecycleScope.launchWhenCreated {
                 listener.onUserRatingSet(rating)

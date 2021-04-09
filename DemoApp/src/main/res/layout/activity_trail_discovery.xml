@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            app:popupTheme="@style/AppTheme.ToolbarPopupTheme">
 
             <EditText
                 android:id="@+id/activity_trail_discovery_toolbar_search_field"
@@ -100,7 +100,7 @@
             android:background="@android:color/white"
             app:layout_constraintTop_toBottomOf="@id/activity_trail_discovery_list_top_guideline">
 
-            <androidx.appcompat.widget.AppCompatButton
+            <Button
                 android:id="@+id/activity_trail_discovery_show_list_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
 
-                <androidx.appcompat.widget.AppCompatTextView
+                <TextView
                     android:id="@+id/activity_trail_discovery_empty_list_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -1,31 +1,8 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="TextAppearance.App.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">13sp</item>
     </style>
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.NoActionAndStatusBar" parent="AppTheme.NoActionBar">
-        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
-    </style>
-
-    <!-- ActionBar style -->
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.ActionBar" parent="@style/AppTheme.AppBarOverlay">
-        <!-- Customize color of navigation drawer icon and back arrow -->
-        <item name="colorControlNormal">@color/toolbarText</item>
-    </style>
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="RibbonAction">
         <item name="android:layout_width">wrap_content</item>
@@ -59,9 +36,10 @@
         <item name="android:textSize">20sp</item>
     </style>
 
-    <style name="TextLink">
+    <style name="TextTitle">
         <item name="android:textColor">@color/primaryTextLink</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textSize">17sp</item>
     </style>
 
     <style name="ColoredTextOnWhiteBackground">
@@ -89,9 +67,29 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <!-- TODO: Change background to gray and text to black -->
+    <style name="DemoApp.Button.Grayed" parent="Widget.MaterialComponents.Button">
+
+    </style>
+
     <!-- User Rating Component -->
     <style name="UserRatingBar" parent="@style/Widget.AppCompat.RatingBar.Small">
         <item name="android:progressTint">@color/colorUserRatingStarForeground</item>
+    </style>
+
+    <style name="ActivityNewOfflineMapDownloadButton">
+        <item name="android:background">@drawable/button_rounded_corners</item>
+        <item name="android:textColor">@color/colorButtonText</item>
+        <item name="android:height">20dp</item>
+        <item name="android:paddingLeft">50dp</item>
+        <item name="android:paddingRight">50dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="ActivityProfile_Button" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:textColor">@color/colorListText</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:padding">@dimen/default_margin</item>
     </style>
 
 </resources>

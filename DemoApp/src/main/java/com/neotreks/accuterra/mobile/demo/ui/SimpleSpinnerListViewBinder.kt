@@ -13,7 +13,7 @@ open class SimpleSpinnerListViewBinder<T>(private val context: Context): ListIte
         return android.R.layout.simple_spinner_item
     }
 
-    override fun bindView(view: View, item: T, isSelected: Boolean) {
+    override fun bindView(view: View, item: T, isSelected: Boolean, isFavorite: Boolean) {
         val textView = view.findViewById<TextView>(android.R.id.text1)
         textView.text = getItemLabel(item)
     }

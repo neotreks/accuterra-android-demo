@@ -6,13 +6,13 @@ import androidx.annotation.LayoutRes
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.bumptech.glide.Glide
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ComponentImageViewBinding
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariant
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariantUtil
 import com.neotreks.accuterra.mobile.demo.ui.ListItemAdapterViewBinder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripMedia
-import kotlinx.android.synthetic.main.component_image_view.view.*
 
 /**
  * View Binder for the [OnlineTripMediaFileViewAdapter]
@@ -39,11 +39,12 @@ class OnlineTripMediaFileViewBinder(
         return imageLayoutResource
     }
 
-    override fun bindView(view: View, item: TripMedia, isSelected: Boolean) {
+    override fun bindView(view: View, item: TripMedia, isSelected: Boolean, isFavorite: Boolean) {
         val options = UiUtils.getDefaultImageOptions()
 
         // Set the placeholder before getting the right image
-        val imageView = view.image_view
+        val binding = ComponentImageViewBinding.bind(view)
+        val imageView = binding.imageView
         imageView.setImageResource(options.placeholderId)
 
         // Ge the URi Async to avoid UI freezing

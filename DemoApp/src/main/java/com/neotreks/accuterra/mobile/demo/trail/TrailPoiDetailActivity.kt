@@ -9,10 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
+import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailPoiDetailBinding
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
-import kotlinx.android.synthetic.main.activity_trail_poi_detail.*
-import kotlinx.android.synthetic.main.general_toolbar.*
 
 class TrailPoiDetailActivity : AppCompatActivity() {
 
@@ -21,6 +20,8 @@ class TrailPoiDetailActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     private val viewModel: TrailPoiDetailViewModel by viewModels()
+
+    private lateinit var binding: ActivityTrailPoiDetailBinding
 
     private lateinit var mediaListManager: TrailMediaListManager
 
@@ -46,7 +47,8 @@ class TrailPoiDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_trail_poi_detail)
+        binding = ActivityTrailPoiDetailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Setup toolbar
         setupToolbar()
@@ -85,8 +87,8 @@ class TrailPoiDetailActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
 
-        setSupportActionBar(general_toolbar)
-        general_toolbar_title.text = getString(R.string.general_poi)
+        setSupportActionBar(binding.activityTrailPoiDetailToolbar.generalToolbar)
+        binding.activityTrailPoiDetailToolbar.generalToolbarTitle.text = getString(R.string.general_poi)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
@@ -102,10 +104,9 @@ class TrailPoiDetailActivity : AppCompatActivity() {
                 return@Observer
             }
             // Load data into the UI
-            activity_trail_poi_detail_name.text = poi.point.name
-            activity_trail_poi_detail_description.text = poi.description
-            activity_trail_poi_detail_poi_type.text = poi.point.subType.name
-            activity_trail_poi_detail_is_wp.isChecked = poi.point.isWaypoint ?: false
+            binding.activityTrailPoiDetailName.text = poi.point.name
+            binding.activityTrailPoiDetailDescription.text = poi.description
+            binding.activityTrailPoiDetailPoiType.text = poi.point.type.name
             // Attach medias
             mediaListManager.refreshPhotoGridAdapter(poi.point.media)
         })
@@ -115,7 +116,7 @@ class TrailPoiDetailActivity : AppCompatActivity() {
         mediaListManager = TrailMediaListManager(
             this,
             lifecycleScope,
-            activity_recorded_trip_poi_photos,
+            binding.activityRecordedTripPoiPhotos,
             object : TrailMediaListManager.MediaListClickListener {
                 override fun onItemClicked(media: TrailMedia) {
                     val intent = MediaDetailActivity.createNavigateToIntent(
