@@ -59,6 +59,13 @@ android {
         }
     }
 
+    // TODO: remove when this issue will be fixed
+    // This needed because of this bug: https://issuetracker.google.com/issues/169249668
+    // It claims it's fixed in androidx-lifecycle 2.3.1 - but it still blocks release builds
+    lintOptions {
+        disable 'NullSafeMutableLiveData'
+    }
+
 }
 
 dependencies {
@@ -102,7 +109,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:1.3.0"
     androidTestImplementation "androidx.test.ext:junit:1.1.2"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0"
-    androidTestImplementation "androidx.annotation:annotation:1.2.0"
+    androidTestImplementation "androidx.annotation:annotation:1.1.0"
 
     // Turf - MapBox library for geometry operations
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.2.1'
