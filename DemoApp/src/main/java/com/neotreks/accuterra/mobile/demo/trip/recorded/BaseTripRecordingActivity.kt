@@ -20,6 +20,7 @@ import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.map.TripLayersManager
 import com.neotreks.accuterra.mobile.sdk.map.query.TripPoisQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
+import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryModel
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.TripStartResultType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingStatus
@@ -68,6 +69,11 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
      * Provide custom trip recording data to be stored with the trip recording
      */
     protected abstract fun getExtProperties(): List<ExtProperties>?
+
+    /**
+     * Provide [TelemetryModel] only if the telemetry will be recorded
+     */
+    protected abstract fun getTelemetryModel(): TelemetryModel?
 
     protected abstract suspend fun getTripRecorder(): ITripRecorder
 
@@ -203,7 +209,9 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
                 lifecycleScope.launchWhenResumed {
                             val driverId = DemoIdentityManager().getUserId(this@BaseTripRecordingActivity)
                             val vehicleId = "test_vehicle" // TODO: Load vehicle ID
-                            val result = recorder.startTripRecording(tripName, getTrailId(), driverId, vehicleId, getExtProperties())
+                            val result = recorder.startTripRecording(tripName, getTrailId(), driverId, vehicleId,
+                                getExtProperties(), getTelemetryModel()
+                            )
                             when {
                                 result.isFailure -> {
                                     toast(getString(R.string.activity_trip_recording_trip_recording_start_error, result.errorMessage))

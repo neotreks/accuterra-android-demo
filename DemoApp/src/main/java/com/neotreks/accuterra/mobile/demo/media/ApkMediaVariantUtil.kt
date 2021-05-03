@@ -12,7 +12,7 @@ object ApkMediaVariantUtil {
      * This utility method maps media variants defined in the **DEMO APP** [ApkMediaVariant]
      * to **SDK** media variants defined by [SdkMediaCategory] and [SdkMediaVariant].
      *
-     * Each tenant should implement his own mapping of those variants.
+     * Each implementation has its own mapping of variants.
      * Also, new variants can appear during the time.
      */
     fun getUrlForVariant(baseUrl: String, mediaCategoryNumber: Int, variant: ApkMediaVariant) : String {

@@ -104,6 +104,11 @@
     <string name="activity_trip_recording_finish_dialog_message">Do you really want to finish trip recording?</string>
 
     <string name="trip_record_menu_item_display_raw">Display RAW path</string>
+    <string name="trip_record_menu_item_record_random_telemetry">Record Random Telemetry</string>
+    <string name="trip_record_menu_item_telemetry_performance_test">Run Telemetry Performance Test</string>
+
+    <string name="activity_trip_recording_telemetry_test_dialog_title">Telemetry Performance Test</string>
+    <string name="activity_trip_recording_telemetry_test_dialog_message_scope">From which scope/dispatcher do you want to run the telemetry performance?</string>
 
     <!-- TRIP RECORDING COMPONENT -->
 

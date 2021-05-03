@@ -10,4 +10,16 @@
         android:checkable="true"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/trip_record_menu_item_record_random_telemetry"
+        android:title="@string/trip_record_menu_item_record_random_telemetry"
+        android:checkable="true"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/trip_record_menu_item_telemetry_performance_test"
+        android:title="@string/trip_record_menu_item_telemetry_performance_test"
+        android:checkable="false"
+        app:showAsAction="never"/>
+
 </menu>

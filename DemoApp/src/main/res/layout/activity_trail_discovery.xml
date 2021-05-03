@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/search_trails"
                 android:imeOptions="actionSearch"
-                android:inputType="text"
+                android:inputType="textCapSentences"
                 android:autofillHints="@null"
                 android:maxLines="1" />
 

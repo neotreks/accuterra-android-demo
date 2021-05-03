@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Profile -->
+    <string name="activity_profile_trip_recording_passcode">Trip Recording Database Passcode</string>
+
+    <!-- Settings -->
     <string name="settings_user_category">User</string>
     <string name="settings_user_id">User ID</string>
+
+    <!-- DB Passcode -->
+    <string name="activity_db_passcode_title">DB Passcode</string>
+    <string name="activity_db_passcode_current_password">Current DB Passcode</string>
+    <string name="activity_profile_trip_recording_set_passcode">Set Passcode</string>
+
+    <string name="activity_db_passcode_set_passcode_dialog_title">Set Passcode</string>
+    <string name="activity_db_passcode_set_passcode_dialog_message">Set Passcode for Trip Recording Database</string>
+    <string name="activity_db_passcode_set_passcode_dialog_yes">Set Passcode</string>
+    <string name="activity_db_passcode_password_set">The DB password has been changed.</string>
+    <string name="activity_db_passcode_password_not_set">There was an error while changing the password: %1$s</string>
+
+    <string name="activity_db_passcode_restart_dialog_title">APK restart</string>
+    <string name="activity_db_passcode_restart_dialog_message">APK has to be restarted to apply DB encryption. Please restart the application now.</string>
+
+    <string name="activity_db_passcode_set_passcode_set_passcode_progress">Setting Passcode</string>
+
 </resources>

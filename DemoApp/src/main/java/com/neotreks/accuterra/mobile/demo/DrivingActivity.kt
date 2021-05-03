@@ -40,6 +40,7 @@ import com.neotreks.accuterra.mobile.sdk.map.navigation.ITrailNavigatorListener
 import com.neotreks.accuterra.mobile.sdk.map.navigation.TrailNavigator
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
 import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
+import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryModel
 import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDrive
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDriveWaypoint
@@ -214,6 +215,10 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     override fun getExtProperties(): List<ExtProperties>? {
+        return null
+    }
+
+    override fun getTelemetryModel(): TelemetryModel? {
         return null
     }
 

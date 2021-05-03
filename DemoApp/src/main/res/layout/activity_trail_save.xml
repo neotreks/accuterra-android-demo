@@ -89,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
                 android:importantForAutofill="no"
-                android:inputType="text"
+                android:inputType="textCapSentences"
                 tools:text="Trip #3" />
 
             <!-- DESCRIPTION -->
@@ -108,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
                 android:importantForAutofill="no"
-                android:inputType="textMultiLine"
+                android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="4"
                 tools:text="Very long description that is possible not that long as it could be..." />
 
@@ -158,7 +158,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
                 android:importantForAutofill="no"
-                android:inputType="textMultiLine"
+                android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="4"
                 tools:text="Difficulty text..." />
 
@@ -213,7 +213,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Highlights text..." />
 
@@ -233,7 +233,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="History text..." />
 
@@ -253,7 +253,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Camping options text..." />
 
@@ -312,7 +312,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/default_margin"
                         android:importantForAutofill="no"
-                        android:inputType="textMultiLine"
+                        android:inputType="textCapSentences|textMultiLine"
                         android:maxLines="4"
                         tools:text="Permint information text..." />
 
@@ -331,7 +331,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/default_margin"
                         android:importantForAutofill="no"
-                        android:inputType="textMultiLine"
+                        android:inputType="textCapSentences|textMultiLine"
                         android:maxLines="4"
                         tools:text="Permint information text..." />
 
@@ -350,7 +350,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/default_margin"
                         android:importantForAutofill="no"
-                        android:inputType="textMultiLine"
+                        android:inputType="textCapSentences|textMultiLine"
                         android:maxLines="4"
                         tools:text="Access Issue text..." />
 
@@ -369,7 +369,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/default_margin"
                         android:importantForAutofill="no"
-                        android:inputType="textMultiLine"
+                        android:inputType="textCapSentences|textMultiLine"
                         android:maxLines="4"
                         tools:text="Access Issue text..." />
 
@@ -419,7 +419,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Season Spring text..." />
 
@@ -438,7 +438,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Season Spring text..." />
 
@@ -457,7 +457,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Season Summer text..." />
 
@@ -476,7 +476,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Season Fall text..." />
 
@@ -495,7 +495,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Season Winter text..." />
 
@@ -557,7 +557,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="Best Direction text" />
 
@@ -577,7 +577,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/default_margin"
                     android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="4"
                     tools:text="I should take more gasoline next time." />
 

@@ -31,6 +31,7 @@ class UserSettingsActivity : AppCompatActivity() {
         private const val TAG = "UserSettingsActivity"
 
         const val KEY_USER_SETTINGS = "user_id"
+        const val KEY_TRIP_DB_PASSCODE = "db_trip_db_passcode"
 
         fun createNavigateToIntent(context: Context): Intent {
             return Intent(context, UserSettingsActivity::class.java)

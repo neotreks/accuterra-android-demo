@@ -38,6 +38,7 @@ import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
 import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
 import com.neotreks.accuterra.mobile.sdk.model.ExtPropertiesBuilder
+import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryModel
 import com.neotreks.accuterra.mobile.sdk.trail.extension.toMapLocation
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
@@ -284,6 +285,10 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
     override fun getExtProperties(): List<ExtProperties> {
         return ExtPropertiesBuilder.buildList(TrailCollectionData())
+    }
+
+    override fun getTelemetryModel(): TelemetryModel? {
+        return null
     }
 
     override fun onNewTripUuid(tripUuid: String?) {

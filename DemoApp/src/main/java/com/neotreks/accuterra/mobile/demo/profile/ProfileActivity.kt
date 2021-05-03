@@ -64,6 +64,10 @@ class ProfileActivity : AppCompatActivity() {
         binding.activityProfileResetTokenButton.setOnClickListener {
             resetAccessToken()
         }
+        // Trip Recording Database Passcode
+        binding.activityProfileDbPasscodeButton.setOnClickListener {
+            editTripRecordingDbPasscode()
+        }
         // Download Offline Maps
         binding.activityProfileDownloadOfflineMapsButton.setOnClickListener {
             downloadOfflineMaps()
@@ -89,6 +93,13 @@ class ProfileActivity : AppCompatActivity() {
             val intent = OfflineMapsActivity.createNavigateToIntent(this@ProfileActivity)
             startActivity(intent)
             finish()
+        }
+    }
+
+    private fun editTripRecordingDbPasscode() {
+        lifecycleScope.launchWhenCreated {
+            val intent = DbPasscodeActivity.createNavigateToIntent(this@ProfileActivity)
+            startActivity(intent)
         }
     }
 

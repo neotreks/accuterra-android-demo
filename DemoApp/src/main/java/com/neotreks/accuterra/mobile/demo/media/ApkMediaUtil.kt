@@ -104,7 +104,7 @@ class ApkMediaUtil {
                 try {
                     val name = file.nameWithoutExtension
 
-                    val values = ContentValues().apply {
+                    val values = ContentValues(4).apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, name)
                         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {

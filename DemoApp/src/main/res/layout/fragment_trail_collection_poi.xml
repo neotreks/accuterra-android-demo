@@ -180,7 +180,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
                 android:importantForAutofill="no"
-                android:inputType="text"
+                android:inputType="textCapSentences"
                 tools:text="Trip #3" />
 
             <!-- POI DESCRIPTION -->
@@ -198,7 +198,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
                 android:importantForAutofill="no"
-                android:inputType="textMultiLine"
+                android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="4"
                 tools:text="Very long description that is possible not that long as it could be..." />
 

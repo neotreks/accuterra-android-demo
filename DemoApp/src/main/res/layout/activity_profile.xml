@@ -37,7 +37,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activity_profile_toolbar_envelope"
         style="@style/ActivityProfile_Button"
-        tools:text="Settings"
         android:text="@string/general_settings" />
 
     <Button
@@ -47,17 +46,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activity_profile_settings_button"
         style="@style/ActivityProfile_Button"
-        tools:text="Reset Access Token"
         android:text="@string/upload_reset_access_token" />
+
+    <Button
+        android:id="@+id/activity_profile_db_passcode_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activity_profile_reset_token_button"
+        style="@style/ActivityProfile_Button"
+        android:text="@string/activity_profile_trip_recording_passcode" />
 
     <Button
         android:id="@+id/activity_profile_download_offline_maps_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_profile_reset_token_button"
+        app:layout_constraintTop_toBottomOf="@id/activity_profile_db_passcode_button"
         style="@style/ActivityProfile_Button"
-        tools:text="Download Offline Maps"
         android:text="@string/download_offline_maps" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

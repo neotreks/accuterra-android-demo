@@ -97,6 +97,11 @@
     <string name="general_provide_read_media_permission">Please provide read media permission for the app. You have disabled it permanently.</string>
     <string name="general_provide_camera_permission">Please provide CAMERA permission for the app. You have disabled it permanently.</string>
 
+    <!-- System / Programming -->
+    <string name="general_dispatcher_main">Main</string>
+    <string name="general_dispatcher_default">Default</string>
+    <string name="general_dispatcher_io">IO</string>
+
     <!-- ERRORS -->
 
     <string name="general_error_something_went_wrong">Something went wrong</string>

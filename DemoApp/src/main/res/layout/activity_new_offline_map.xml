@@ -84,7 +84,8 @@
             android:imeOptions="actionDone"
             android:padding="@dimen/default_margin"
             android:hint="@string/activity_new_offline_map_name_hint"
-            tools:hint="Map Name" />
+            tools:hint="Map Name"
+            android:inputType="textCapSentences"/>
 
         <Button
             android:id="@+id/activity_new_offline_map_download_button"

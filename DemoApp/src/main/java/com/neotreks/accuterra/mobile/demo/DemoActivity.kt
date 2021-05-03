@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
+import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
 import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
@@ -165,6 +166,8 @@ class DemoActivity : AppCompatActivity() {
 
         }
 
+        val dbEncryptProvider = DemoDbEncryptProvider()
+
         // Configuring AccuTerra SDK including download of the TRAIL DB if needed.
         lifecycleScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
             // We need to get the valid access token for AccuTerra services
@@ -190,7 +193,9 @@ class DemoActivity : AppCompatActivity() {
             // The listener is notified about progress of the initialization.
             // This initialization must be called and successfully finish at least once
             // (after APK installation) to be able to use the SDK.
-            val result = SdkManager.initSdk(applicationContext, config, DemoAccessManager(), DemoIdentityManager(), listener)
+            val result = SdkManager.initSdk(applicationContext, config, DemoAccessManager(), DemoIdentityManager(),
+                listener = listener,
+                dbEncryptConfigProvider = dbEncryptProvider)
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
                     onSdkInitSuccess()
