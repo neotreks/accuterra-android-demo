@@ -25,6 +25,7 @@
 
     <!-- ACTIONS -->
     <string name="general_delete">Delete</string>
+    <string name="general_yes_delete">Yes, Delete</string>
     <string name="general_deleting">Deleting…</string>
     <string name="general_save">Save</string>
     <string name="general_save_and_upload">Save and upload</string>

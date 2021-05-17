@@ -22,7 +22,7 @@ class TrailListItem(
                 trailBasicInfo.id,
                 trailBasicInfo.name,
                 trailBasicInfo.highlights,
-                trailBasicInfo.length,
+                trailBasicInfo.statistics.length,
                 trailBasicInfo.userRating,
                 false,
                 difficulty

@@ -2,6 +2,12 @@
 <resources>
     <!-- Profile -->
     <string name="activity_profile_trip_recording_passcode">Trip Recording Database Passcode</string>
+    <string name="activity_profile_delete_user_data">Delete User Data</string>
+    <string name="activity_profile_delete_user_data_progress">Deleting user data</string>
+    <string name="activity_profile_delete_user_data_success">User data deleted</string>
+    <string name="activity_profile_delete_user_data_failure">User data could not be deleted: %1$s</string>
+    <string name="activity_profile_delete_user_data_dialog_title">Warning! Delete All User Data?</string>
+    <string name="activity_profile_delete_user_data_dialog_message">By deleting user data you will delete all recorded trips/trails permanently. Do you really want to delete all user data?</string>
 
     <!-- Settings -->
     <string name="settings_user_category">User</string>

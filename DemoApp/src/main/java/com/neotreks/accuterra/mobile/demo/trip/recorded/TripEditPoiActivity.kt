@@ -281,7 +281,7 @@ class TripEditPoiActivity : AppCompatActivity() {
                 pointType = pointType,
             )
 
-            // Add the newly created POI to the trip recording
+            // Update the POI of the trip recording
             val recorder = ServiceFactory.getTripRecorder(applicationContext)
             recorder.updatePoi(poi)
             // Close the dialog

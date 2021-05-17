@@ -1,19 +1,18 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply from: file('../settings/demo-settings.gradle')
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "29.0.3"
+    buildToolsVersion "30.0.3"
     ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 800
-        versionName "0.8.0"
+        versionCode 900
+        versionName "0.9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -50,8 +49,6 @@ android {
             buildConfigField 'String', 'WS_AUTH_CLIENT_ID', ws_auth_client_id
             buildConfigField 'String', 'WS_AUTH_CLIENT_SECRET', ws_auth_client_secret
             buildConfigField 'String', 'MAPBOX_TOKEN', mapbox_token
-            buildConfigField 'String', 'ACCUTERRA_MAP_API_KEY', accuterra_map_api_key
-            buildConfigField 'String', 'ACCUTERRA_MAP_STYLE_URL', accuterra_map_style_url
             buildConfigField 'Boolean', 'USE_TRAIL_PATH_EMULATOR', 'false'
             buildConfigField 'Boolean', 'USE_TRAIL_NAVIGATOR_DEBUG_MODE', 'true'
             buildConfigField 'Boolean', 'USE_AUTH', 'true'
@@ -71,10 +68,10 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.8.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.9.0-SNAPSHOT"
     // Download also sources and javadoc for easier orientation - just for the development!
-    implementation "com.accuterra:accuterra-android-sdk:0.8.0:sources"
-    implementation "com.accuterra:accuterra-android-sdk:0.8.0:javadoc"
+    implementation "com.accuterra:accuterra-android-sdk:0.9.0:sources"
+    implementation "com.accuterra:accuterra-android-sdk:0.9.0:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -105,14 +102,6 @@ dependencies {
     // Glide
     implementation "com.github.bumptech.glide:glide:4.11.0"
     annotationProcessor "com.github.bumptech.glide:compiler:4.11.0"
-
-    // Testing
-    testImplementation "junit:junit:4.13.2"
-    androidTestImplementation "androidx.test:runner:1.3.0"
-    androidTestImplementation "androidx.test:rules:1.3.0"
-    androidTestImplementation "androidx.test.ext:junit:1.1.2"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0"
-    androidTestImplementation "androidx.annotation:annotation:1.1.0"
 
     // Turf - MapBox library for geometry operations
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.2.1'

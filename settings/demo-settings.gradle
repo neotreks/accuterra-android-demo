@@ -10,8 +10,4 @@ ext {
     ws_auth_client_secret = '"***"'
     // MapBox
     mapbox_token = '"***"'
-    // AccuTerra Map Service
-    accuterra_map_api_key = '"***"'
-    accuterra_map_style_url = '"***"'
-
 }

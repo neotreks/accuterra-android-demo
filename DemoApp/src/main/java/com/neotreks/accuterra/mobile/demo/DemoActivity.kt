@@ -17,6 +17,8 @@ import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
+import com.neotreks.accuterra.mobile.sdk.security.model.AccuTerraMapConfig
+import com.neotreks.accuterra.mobile.sdk.security.model.SdkEndpointConfig
 import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailConfiguration
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripConfiguration
@@ -172,9 +174,16 @@ class DemoActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
             // We need to get the valid access token for AccuTerra services
             // Now we create the configuration
-            val config = SdkConfig(
-                wsUrl = BuildConfig.WS_BASE_URL,
-                accuterraMapStyleUrl = BuildConfig.ACCUTERRA_MAP_STYLE_URL,
+            val config = ApkSdkConfig(
+                sdkEndpointConfig = SdkEndpointConfig(
+                    wsBaseUrl = BuildConfig.WS_BASE_URL,
+                    wsAuthUrl = BuildConfig.WS_AUTH_URL,
+                ),
+                // Custom Map Configuration - mostly for the development purpose
+                // accuTerraMapConfig = AccuTerraMapConfig(
+                //    mapUrl = "",
+                //    mapApiKey = "",
+                // ),
                 tripConfiguration = TripConfiguration(
                     // Just to demonstrate the upload network type constraint
                     uploadNetworkType = NetworkTypeConstraint.CONNECTED,

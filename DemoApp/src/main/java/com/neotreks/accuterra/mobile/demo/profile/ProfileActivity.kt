@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.*
@@ -13,6 +14,8 @@ import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
+import com.neotreks.accuterra.mobile.demo.util.DialogUtil
+import com.neotreks.accuterra.mobile.sdk.SdkManager
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
 
 class ProfileActivity : AppCompatActivity() {
@@ -22,6 +25,7 @@ class ProfileActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     companion object {
+        private const val TAG = "ProfileActivity"
         fun createNavigateToIntent(context: Context): Intent {
             return Intent(context, ProfileActivity::class.java)
         }
@@ -68,6 +72,9 @@ class ProfileActivity : AppCompatActivity() {
         binding.activityProfileDbPasscodeButton.setOnClickListener {
             editTripRecordingDbPasscode()
         }
+        binding.activityProfileDeleteUserDataButton.setOnClickListener {
+            onDeleteUserData()
+        }
         // Download Offline Maps
         binding.activityProfileDownloadOfflineMapsButton.setOnClickListener {
             downloadOfflineMaps()
@@ -82,6 +89,43 @@ class ProfileActivity : AppCompatActivity() {
                 this@ProfileActivity.toast(getString(R.string.upload_reset_access_token_done))
             } catch (e: Exception) {
                 this@ProfileActivity.toast(getString(R.string.upload_reset_access_token_failed, e.localizedMessage))
+            } finally {
+                dialogHolder.hideProgressDialog()
+            }
+        }
+    }
+
+    private fun onDeleteUserData() {
+        // Provide question dialog for user data deletion
+        DialogUtil.buildYesNoDialog(
+            context = this,
+            title = getString(R.string.activity_profile_delete_user_data_dialog_title),
+            message = getString(R.string.activity_profile_delete_user_data_dialog_message),
+            negativeCodeLabel = getString(R.string.general_yes_delete),
+            negativeCode = {
+                deleteUserData()
+            },
+            positiveCodeLabel = getString(R.string.general_cancel)
+        ).show()
+    }
+
+    private fun deleteUserData() {
+        dialogHolder.displayProgressDialog(
+            this,
+            getString(R.string.activity_profile_delete_user_data_progress)
+        )
+        lifecycleScope.launchWhenCreated {
+            try {
+                SdkManager.deleteUserData(this@ProfileActivity)
+                this@ProfileActivity.toast(getString(R.string.activity_profile_delete_user_data_success))
+            } catch (e: Exception) {
+                Log.e(TAG, "User dat not deleted because of: ${e.localizedMessage}", e)
+                this@ProfileActivity.toast(
+                    getString(
+                        R.string.activity_profile_delete_user_data_failure,
+                        e.localizedMessage
+                    )
+                )
             } finally {
                 dialogHolder.hideProgressDialog()
             }
