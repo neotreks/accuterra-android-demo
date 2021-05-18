@@ -68,7 +68,7 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.9.0-SNAPSHOT"
+    implementation "com.accuterra:accuterra-android-sdk:0.9.0"
     // Download also sources and javadoc for easier orientation - just for the development!
     implementation "com.accuterra:accuterra-android-sdk:0.9.0:sources"
     implementation "com.accuterra:accuterra-android-sdk:0.9.0:javadoc"
