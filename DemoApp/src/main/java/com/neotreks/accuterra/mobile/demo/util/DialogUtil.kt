@@ -63,6 +63,29 @@ object DialogUtil {
             .create()
     }
 
+    fun buildYesNoCancelDialog(context: Context, title: String, message: String,
+                         positiveCode: (() -> Unit)? = null,
+                         negativeCode: (() -> Unit)? = null,
+                         neutralCode: (() -> Unit)? = null,
+                         positiveCodeLabel: String? = "Yes",
+                         negativeCodeLabel: String? = "No",
+                         neutralCodeLabel: String? = "Cancel",
+    ): AlertDialog {
+        return AlertDialog.Builder(context)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(positiveCodeLabel) { _, _ ->
+                positiveCode?.invoke()
+            }
+            .setNegativeButton(negativeCodeLabel) {_, _ ->
+                negativeCode?.invoke()
+            }
+            .setNeutralButton(neutralCodeLabel)  {_, _ ->
+                neutralCode?.invoke()
+            }
+            .create()
+    }
+
     @SuppressLint("InflateParams")
     fun buildInputDialog(context: Activity, title: String, message: String = "",
                          hint: String? = null,

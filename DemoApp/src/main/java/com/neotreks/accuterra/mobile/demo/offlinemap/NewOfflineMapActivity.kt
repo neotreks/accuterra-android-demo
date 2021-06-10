@@ -21,8 +21,10 @@ import com.neotreks.accuterra.mobile.demo.DemoAppPreferences
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityNewOfflineMapBinding
 import com.neotreks.accuterra.mobile.demo.extensions.bytesToHumanReadable
+import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.*
+import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.map.*
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.trail.extension.toLatLngBounds
@@ -86,26 +88,26 @@ class NewOfflineMapActivity : AppCompatActivity() {
     // Current style id
     private var styleId: Int = 0
 
-    private var offlineMapService: OfflineMapService? = null
+    private var offlineCacheBgService: OfflineCacheBackgroundService? = null
 
-    private val connectionListener = object: OfflineMapServiceConnectionListener {
-        override fun onConnected(service: OfflineMapService) {
-            offlineMapService = service
+    private val connectionListener = object: OfflineCacheServiceConnectionListener {
+        override fun onConnected(service: OfflineCacheBackgroundService) {
+            offlineCacheBgService = service
             lifecycleScope.launchWhenCreated {
-                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                offlineCacheBgService?.offlineMapManager?.addProgressListener(cacheProgressListener)
             }
         }
 
         override fun onDisconnected() {
-            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
-            offlineMapService = null
-            Log.d(TAG, "offlineMapService disconnected")
+            offlineCacheBgService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
+            offlineCacheBgService = null
+            Log.d(TAG, "offlineCacheService disconnected")
         }
     }
 
     private val cacheProgressListener = CacheProgressListener(this)
 
-    private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
+    private val offlineCacheServiceConnection = OfflineCacheBackgroundService.createServiceConnection(
         connectionListener
     )
 
@@ -132,7 +134,6 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
         parseIntent()
 
-        startService(Intent(this, OfflineMapService::class.java))
         networkStateReceiver = NetworkStateReceiver(this)
 
         binding = ActivityNewOfflineMapBinding.inflate(layoutInflater)
@@ -169,17 +170,15 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        ApkOfflineCacheBackgroundService.bindService(this@NewOfflineMapActivity, lifecycleScope, offlineCacheServiceConnection)
         setButtonsEnable(false)
         accuTerraMapView.onStart()
-        Intent(this, OfflineMapService::class.java).also { intent ->
-            bindService(intent, offlineMapServiceConnection, Context.BIND_AUTO_CREATE)
-        }
     }
 
     override fun onStop() {
         Log.i(TAG, "onStop()")
         // this doesn't stop the service, because we called "startService" explicitly
-        unbindService(offlineMapServiceConnection)
+        ApkOfflineCacheBackgroundService.unbindService(this, offlineCacheServiceConnection)
         super.onStop()
         accuTerraMapView.onStop()
     }
@@ -296,11 +295,12 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
     private fun refreshEstimate() {
         lifecycleScope.launchWhenCreated {
-            offlineMapService?.offlineMapManager?.let {
+            offlineCacheBgService?.offlineMapManager?.let {
                 val latLngBounds = mapboxMap.projection.visibleRegion.latLngBounds
                 val mapBounds = MapBounds(latLngBounds.latSouth, latLngBounds.lonWest, latLngBounds.latNorth, latLngBounds.lonEast)
-                val size = it.estimateAreaCacheSize(mapBounds, binding.activityNewOfflineMapImageryToggle.isChecked)
-                binding.activityNewOfflineMapEstimateText.text = getString(R.string.estimated_download_size, size.bytesToHumanReadable())
+                val includeImagery = binding.activityNewOfflineMapImageryToggle.isChecked
+                val size = it.estimateAreaCacheSize(mapBounds, includeImagery)
+                binding.activityNewOfflineMapEstimateText.text = getString(R.string.estimated_download_size, size.totalSize.bytesToHumanReadable())
             }
         }
     }
@@ -316,7 +316,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
         lifecycleScope.launchWhenResumed {
             // Edit mode, set text and zoom
             editOfflineMapId?.let { offlineMapId ->
-                offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+                offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                     (offlineMapManager.getOfflineMap(offlineMapId) as? IAreaOfflineMap)?.let {
                         binding.activityNewOfflineMapNameEditText.setText(it.areaName)
 
@@ -377,7 +377,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
         binding.activityNewOfflineMapDownloadButton.setOnClickListener {
             setButtonsEnable(false)
             lifecycleScope.launchWhenCreated {
-                offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+                offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                     val latLngBounds = mapboxMap.projection.visibleRegion.latLngBounds
                     val mapBounds = MapBounds(latLngBounds.latSouth, latLngBounds.lonWest,
                         latLngBounds.latNorth, latLngBounds.lonEast)
@@ -385,7 +385,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
                     val size = offlineMapManager.estimateAreaCacheSize(mapBounds, includeImagery)
 
                     // Check max size
-                    if (size > MAX_DOWNLOAD_SIZE_BYTES) {
+                    if (size.totalSize > MAX_DOWNLOAD_SIZE_BYTES) {
                         DialogUtil.buildOkDialog(this@NewOfflineMapActivity,
                             getString(R.string.activity_new_offline_map_map_too_big),
                             getString(R.string.activity_new_offline_map_max_map_size, MAX_DOWNLOAD_SIZE_BYTES.bytesToHumanReadable())).show()
@@ -562,20 +562,25 @@ class NewOfflineMapActivity : AppCompatActivity() {
     /*     INNER CLASS       */
     /* * * * * * * * * * * * */
 
-    private class CacheProgressListener(activity: NewOfflineMapActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
+    private class CacheProgressListener(activity: NewOfflineMapActivity): ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
         override fun onComplete(offlineMap: IOfflineMap) {
         }
 
+        override fun onComplete() {
+            // We do not wan to do anything
+        }
+
         override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                val errorMessage = error.map { e ->
-                    "${e.key.getResourceTypeName()}: ${e.value}"
-                }.joinToString("\n")
-                DialogUtil.buildOkDialog(it,it.getString(R.string.download_failed),errorMessage).show()
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    val errorMessage = error.map { e ->
+                        "${e.key.getResourceTypeName()}: ${e.value}"
+                    }.joinToString("\n")
+                    DialogUtil.buildOkDialog(activity, activity.getString(R.string.download_failed),errorMessage).show()
+                }
             }
         }
 
@@ -614,7 +619,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
         override fun onNetworkUnavailable() {
             weakActivity.get()?.let {
-                val offlineCacheManager = it.offlineMapService?.offlineMapManager ?: return
+                val offlineCacheManager = it.offlineCacheBgService?.offlineMapManager ?: return
                 it.lifecycleScope.launchWhenResumed {
                     if (offlineCacheManager.getOverlayOfflineMap()?.status == OfflineMapStatus.COMPLETE) {
                         if (it.accuTerraMapView.isStyleLoaded()) {

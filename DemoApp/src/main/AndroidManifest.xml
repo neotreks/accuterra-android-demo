@@ -141,11 +141,12 @@
             android:name=".upload.ObjectUploadActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <!-- Offline Cache Service -->
         <service
-            android:name="com.neotreks.accuterra.mobile.sdk.map.cache.OfflineMapService"
-            android:stopWithTask="true"
+            android:name=".offline.ApkOfflineCacheBackgroundService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <!-- Service for tracking location on the background -->
         <service
             android:name=".trip.location.LocationService"

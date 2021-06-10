@@ -1,7 +1,6 @@
 package com.neotreks.accuterra.mobile.demo.offlinemap
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.UiThread
@@ -23,10 +22,6 @@ class ActivityOfflineMapsViewAdapter(
     /*       COMPANION       */
     /* * * * * * * * * * * * */
 
-    companion object {
-        private const val TAG = "OfflineMapsAdapter"
-    }
-
     init {
         setHasStableIds(false)
     }
@@ -47,12 +42,10 @@ class ActivityOfflineMapsViewAdapter(
     }
 
     override fun getItemCount(): Int {
-        Log.d(TAG, "getItemsCount = ${items.size}")
         return items.size
     }
 
     override fun getItemId(position: Int): Long {
-        Log.d(TAG, "getItemId: $position")
         return position.toLong()
     }
 
@@ -65,7 +58,6 @@ class ActivityOfflineMapsViewAdapter(
     /* * * * * * * * * * * * */
 
     fun getItem(position: Int): IOfflineMap {
-        Log.d(TAG, "getItem: $position")
         return items.getOrNull(position)
             ?: throw IllegalArgumentException("There is no item on position: $position")
     }

@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailInfoBinding
 import com.neotreks.accuterra.mobile.demo.extensions.getFavoriteIconResource
+import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
@@ -23,9 +24,10 @@ import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
-import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 import com.neotreks.accuterra.mobile.sdk.trail.service.ITrailMediaService
 import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTrailCommentRequest
 import com.neotreks.accuterra.mobile.sdk.ugc.model.PostTrailCommentRequestBuilder
@@ -72,30 +74,30 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
 
     private lateinit var mediaService: ITrailMediaService
 
-    private var offlineMapService: OfflineMapService? = null
+    private var offlineCacheBgService: OfflineCacheBackgroundService? = null
 
     private val cacheProgressListener = CacheProgressListener(this)
 
     private val discussionListener = UgcListener(this)
 
-    private val connectionListener = object: OfflineMapServiceConnectionListener {
-        override fun onConnected(service: OfflineMapService) {
-            offlineMapService = service
+    private val connectionListener = object: OfflineCacheServiceConnectionListener {
+        override fun onConnected(service: OfflineCacheBackgroundService) {
+            offlineCacheBgService = service
             lifecycleScope.launchWhenCreated {
-                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                offlineCacheBgService?.offlineMapManager?.addProgressListener(cacheProgressListener)
                 configureDownloadButton(service.offlineMapManager.getTrailOfflineMap(
                     viewModel.trailId)?.status ?: OfflineMapStatus.NOT_CACHED)
             }
         }
 
         override fun onDisconnected() {
-            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
-            offlineMapService = null
-            Log.d(TAG, "offlineMapService disconnected")
+            offlineCacheBgService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
+            offlineCacheBgService = null
+            Log.d(TAG, "offlineCacheService disconnected")
         }
     }
 
-    private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
+    private val offlineCacheServiceConnection = OfflineCacheBackgroundService.createServiceConnection(
         connectionListener
     )
 
@@ -105,22 +107,19 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
 
     override fun onStart() {
         super.onStart()
-        Intent(this, OfflineMapService::class.java).also { intent ->
-            bindService(intent, offlineMapServiceConnection, Context.BIND_AUTO_CREATE)
-        }
+        ApkOfflineCacheBackgroundService.bindService(this, lifecycleScope, offlineCacheServiceConnection)
         checkDataLoaded()
     }
 
     override fun onStop() {
         Log.i(TAG, "onStop()")
         // this doesn't stop the service, because we called "startService" explicitly
-        unbindService(offlineMapServiceConnection)
+        ApkOfflineCacheBackgroundService.unbindService(this, offlineCacheServiceConnection)
         super.onStop()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startService(Intent(this, OfflineMapService::class.java))
         binding = ActivityTrailInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //setSupportActionBar(activity_trail_info_toolbar)
@@ -202,18 +201,25 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         binding.activityTrailInfoGetDownloadButton.setOnClickListener {
             lifecycleScope.launchWhenCreated {
 
-                offlineMapService?.offlineMapManager?.let { offlineMapManager ->
-                    val trailOfflineMap = offlineMapManager.getTrailOfflineMap(viewModel.trailId)
+                val trailId = viewModel.trailId
+
+                // Let's always include imagery
+                val includeImagery = true
+
+                offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
+                    val trailOfflineMap = offlineMapManager.getTrailOfflineMap(trailId)
                     when (trailOfflineMap?.status ?: OfflineMapStatus.NOT_CACHED) {
                         OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED, OfflineMapStatus.PAUSED -> {
                             // Please note the estimate is often very inaccurate!
-                            val estimateBytes = offlineMapManager.estimateTrailCacheSize(viewModel.trailId)
+                            // Let's estimate everything
+                            val estimateMedia = true
+                            val estimateBytes = offlineMapManager.estimateTrailCacheSize(trailId, includeImagery, estimateMedia).totalSize
                             val estimateText = android.text.format.Formatter.formatShortFileSize(
                                 this@TrailInfoActivity, estimateBytes)
 
                             // For the simplification require always 200 MB of free space
                             val mb200 = 209_715_200L
-                            val freeBytes = offlineMapService?.offlineMapManager?.getFreeDiskSpace() ?: 0
+                            val freeBytes = offlineCacheBgService?.offlineMapManager?.getFreeDiskSpace() ?: 0
                             if (freeBytes < mb200) {
                                 DialogUtil.buildOkDialog(
                                     context = this@TrailInfoActivity,
@@ -222,25 +228,39 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
                                 ).show()
                             } else {
                                 // Display DIALOG
-                                DialogUtil.buildYesNoDialog(
+                                DialogUtil.buildYesNoCancelDialog(
                                     context = this@TrailInfoActivity,
                                     title = getString(R.string.download),
                                     message = getString(R.string.download_trail_prompt, estimateText),
-                                    code = {
+                                    positiveCodeLabel = "Yes, with media",
+                                    positiveCode = {
                                         lifecycleScope.launchWhenCreated {
                                             configureDownloadButton(OfflineMapStatus.WAITING)
-                                            offlineMapManager.downloadTrailOfflineMap(viewModel.trailId)
+                                            val downloadTrailMedia = true
+                                            offlineMapManager.downloadTrailOfflineMap(trailId, includeImagery, downloadTrailMedia)
                                         }
-                                    }
+                                    },
+                                    negativeCodeLabel = "Yes, without media",
+                                    negativeCode = {
+                                        lifecycleScope.launchWhenCreated {
+                                            configureDownloadButton(OfflineMapStatus.WAITING)
+                                            val downloadTrailMedia = false
+                                            offlineMapManager.downloadTrailOfflineMap(viewModel.trailId, includeImagery, downloadTrailMedia)
+                                        }
+                                    },
+                                    neutralCodeLabel = "No",
                                 ).show()
                             }
                         }
                         OfflineMapStatus.COMPLETE ->
                         {
                             requireNotNull(trailOfflineMap) { "OfflineMap not found" }
+                            val mapSizeEstimate =
+                                offlineMapManager.getOfflineMapStorageSize(trailOfflineMap.offlineMapId)
                             val cacheSize =
                                 android.text.format.Formatter.formatShortFileSize(this@TrailInfoActivity,
-                                    offlineMapManager.getOfflineMapStorageSize(trailOfflineMap.offlineMapId))
+                                    mapSizeEstimate?.totalSize ?: 0
+                                )
 
                             DialogUtil.buildYesNoDialog(this@TrailInfoActivity,
                                 getString(R.string.offline_cache), getString(R.string.trail_already_cached, cacheSize),
@@ -517,40 +537,49 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         binding.activityTrailInfoProgressBar.visibility = visible.visibility
     }
 
-    private class CacheProgressListener(activity: TrailInfoActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
+    private class CacheProgressListener(activity: TrailInfoActivity): ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
         override fun onComplete(offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                if (offlineMap is ITrailOfflineMap && offlineMap.trailId == it.viewModel.trailId) {
-                    it.configureDownloadButton(OfflineMapStatus.COMPLETE)
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    if (offlineMap is ITrailOfflineMap && offlineMap.trailId == activity.viewModel.trailId) {
+                        activity.configureDownloadButton(OfflineMapStatus.COMPLETE)
+                    }
                 }
             }
         }
 
+        override fun onComplete() {
+            // We do not wan to do anything
+        }
+
         override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                if (offlineMap is ITrailOfflineMap && offlineMap.trailId == it.viewModel.trailId) {
-                    it.configureDownloadButton(OfflineMapStatus.FAILED)
-                    val errorMessage = error.map { e ->
-                        "${e.key.getResourceTypeName()}: ${e.value}"
-                    }.joinToString("\n")
-                    DialogUtil.buildOkDialog(it, it.getString(R.string.download_failed), errorMessage)
-                        .show()
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    if (offlineMap is ITrailOfflineMap && offlineMap.trailId == activity.viewModel.trailId) {
+                        activity.configureDownloadButton(OfflineMapStatus.FAILED)
+                        val errorMessage = error.map { e ->
+                            "${e.key.getResourceTypeName()}: ${e.value}"
+                        }.joinToString("\n")
+                        DialogUtil.buildOkDialog(activity, activity.getString(R.string.download_failed), errorMessage)
+                            .show()
+                    }
                 }
             }
         }
 
         override fun onProgressChanged(offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                if (offlineMap is ITrailOfflineMap && offlineMap.trailId == it.viewModel.trailId) {
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    if (offlineMap is ITrailOfflineMap && offlineMap.trailId == activity.viewModel.trailId) {
 
-                    // Show what is downloading and progress
-                    val progressPercents = (100.0 * offlineMap.progress).toInt()
+                        // Show what is downloading and progress
+                        val progressPercents = (100.0 * offlineMap.progress).toInt()
 
-                    it.configureDownloadButton(OfflineMapStatus.IN_PROGRESS, progressPercents)
+                        activity.configureDownloadButton(OfflineMapStatus.IN_PROGRESS, progressPercents)
+                    }
                 }
             }
         }

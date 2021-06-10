@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
  */
 class MediaDetailViewModel: ViewModel() {
 
-    val uri = MutableLiveData<Uri>()
+    val uri = MutableLiveData<Uri?>()
 
     fun loadMediaFromUuid(uuid: String, context: Context) {
         viewModelScope.launch {
@@ -29,7 +29,6 @@ class MediaDetailViewModel: ViewModel() {
             // Trail media are defined by URL and are loaded using the ITrailMediaService
             val service = ServiceFactory.getTrailMediaService(context)
             val localUri = service.getMediaFile(url)
-                ?: throw IllegalStateException("Cannot find trail media for :$url")
             uri.value = localUri
         }
     }

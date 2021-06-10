@@ -1,7 +1,5 @@
 package com.neotreks.accuterra.mobile.demo
 
-import android.content.Context
-import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -12,11 +10,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
+import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.trip.location.LocationActivity
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.ApkMapActivityUtil
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.NetworkStateReceiver
+import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
@@ -43,7 +43,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
     private val networkStateReceiverListener by lazy { CurrentNetworkStateListener(this) }
 
-    private var offlineMapService: OfflineMapService? = null
+    private var offlineCacheBgService: OfflineCacheBackgroundService? = null
 
     // Location tracking mode
     private var currentTracking = TrackingOption.LOCATION
@@ -69,22 +69,22 @@ abstract class BaseDrivingActivity : LocationActivity() {
     )
 
     // Used to map
-    private val connectionListener = object: OfflineMapServiceConnectionListener {
-        override fun onConnected(service: OfflineMapService) {
-            offlineMapService = service
+    private val connectionListener = object: OfflineCacheServiceConnectionListener {
+        override fun onConnected(service: OfflineCacheBackgroundService) {
+            offlineCacheBgService = service
             lifecycleScope.launchWhenCreated {
-                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                offlineCacheBgService?.offlineMapManager?.addProgressListener(cacheProgressListener)
             }
         }
         override fun onDisconnected() {
-            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
-            offlineMapService = null
+            offlineCacheBgService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
+            offlineCacheBgService = null
         }
     }
 
     private val cacheProgressListener by lazy { CacheProgressListener(this) }
 
-    private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
+    private val offlineCacheServiceConnection = OfflineCacheBackgroundService.createServiceConnection(
         connectionListener
     )
 
@@ -131,14 +131,12 @@ abstract class BaseDrivingActivity : LocationActivity() {
         Log.i(TAG, "onStart()")
         super.onStart()
         accuTerraMapView.onStart()
-        Intent(this, OfflineMapService::class.java).also { intent ->
-            bindService(intent, offlineMapServiceConnection, Context.BIND_AUTO_CREATE)
-        }
+        ApkOfflineCacheBackgroundService.bindService(this, lifecycleScope, offlineCacheServiceConnection)
     }
 
     override fun onStop() {
         Log.i(TAG, "onStop()")
-        unbindService(offlineMapServiceConnection)
+        ApkOfflineCacheBackgroundService.unbindService(this, offlineCacheServiceConnection)
         super.onStop()
         accuTerraMapView.onStop()
     }
@@ -303,7 +301,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
         override fun onNetworkUnavailable() {
             weakActivity.get()?.let { activity ->
-                val offlineCacheManager = activity.offlineMapService?.offlineMapManager ?: return
+                val offlineCacheManager = activity.offlineCacheBgService?.offlineMapManager ?: return
                 activity.lifecycleScope.launchWhenCreated {
                     if (offlineCacheManager.getOverlayOfflineMap()?.status == OfflineMapStatus.COMPLETE) {
                         if (activity.accuTerraMapView.isStyleLoaded()) {
@@ -320,8 +318,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
         }
     }
 
-    private class CacheProgressListener(activity: BaseDrivingActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
+    private class CacheProgressListener(activity: BaseDrivingActivity): ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
@@ -329,12 +326,19 @@ abstract class BaseDrivingActivity : LocationActivity() {
             // We do not wan to do anything
         }
 
+        override fun onComplete() {
+            // We do not wan to do anything
+        }
+
         override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                val errorMessage = error.map { e ->
-                    "${e.key.getResourceTypeName()}: ${e.value}"
-                }.joinToString("\n")
-                DialogUtil.buildOkDialog(it,it.getString(R.string.download_failed),errorMessage).show()
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    val errorMessage = error.map { e ->
+                        "${e.key.getResourceTypeName()}: ${e.value}"
+                    }.joinToString("\n")
+                    DialogUtil.buildOkDialog(activity, activity.getString(R.string.download_failed), errorMessage)
+                        .show()
+                }
             }
         }
 

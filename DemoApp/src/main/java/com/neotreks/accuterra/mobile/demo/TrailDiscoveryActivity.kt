@@ -15,6 +15,7 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -27,8 +28,8 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
-import com.neotreks.accuterra.mobile.demo.databinding.ProgressValueDialogViewBinding
 import com.neotreks.accuterra.mobile.demo.extensions.setOnSingleClickListener
+import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItemAdapter
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
@@ -36,6 +37,7 @@ import com.neotreks.accuterra.mobile.demo.util.*
 import com.neotreks.accuterra.mobile.demo.view.TrailFilterControl
 import com.neotreks.accuterra.mobile.sdk.ProgressChangedListener
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.map.*
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.map.query.TrailPoisQueryBuilder
@@ -109,14 +111,14 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     // Current style id
     private var styleId: Int = 0
 
-    private var offlineMapService: OfflineMapService? = null
+    private var offlineCacheBgService: OfflineCacheBackgroundService? = null
 
-    private val connectionListener = object: OfflineMapServiceConnectionListener {
-        override fun onConnected(service: OfflineMapService) {
-            offlineMapService = service
+    private val connectionListener = object: OfflineCacheServiceConnectionListener {
+        override fun onConnected(service: OfflineCacheBackgroundService) {
+            offlineCacheBgService = service
 
             lifecycleScope.launchWhenCreated {
-                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                offlineCacheBgService?.offlineMapManager?.addProgressListener(cacheProgressListener)
                 binding.activityTrailOfflinemapProgressLayout.visibility = View.GONE
 
                 if (networkStateReceiver.isConnected()) {
@@ -126,13 +128,13 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         }
 
         override fun onDisconnected() {
-            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
-            offlineMapService = null
-            Log.d(TAG, "offlineMapService disconnected")
+            offlineCacheBgService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
+            offlineCacheBgService = null
+            Log.d(TAG, "offlineCacheService disconnected")
         }
     }
 
-    private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
+    private val offlineCacheServiceConnection = OfflineCacheBackgroundService.createServiceConnection(
         connectionListener
     )
 
@@ -157,7 +159,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startService(Intent(this, OfflineMapService::class.java))
         networkStateReceiver = NetworkStateReceiver(this)
 
         viewModel = ViewModelProvider(this).get(TrailDiscoveryViewModel::class.java)
@@ -209,14 +210,12 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         accuTerraMapView.onStart()
-        Intent(this, OfflineMapService::class.java).also { intent ->
-            bindService(intent, offlineMapServiceConnection, Context.BIND_AUTO_CREATE)
-        }
+        ApkOfflineCacheBackgroundService.bindService(this, lifecycleScope, offlineCacheServiceConnection)
     }
 
     override fun onStop() {
         // this doesn't stop the service, because we called "startService" explicitly
-        unbindService(offlineMapServiceConnection)
+        ApkOfflineCacheBackgroundService.unbindService(this, offlineCacheServiceConnection)
         // Call standard stop functions
         super.onStop()
         try {
@@ -422,7 +421,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun checkOverlayMapCache() {
-        val offlineCacheManager = offlineMapService?.offlineMapManager ?: return
+        val offlineCacheManager = offlineCacheBgService?.offlineMapManager ?: return
         lifecycleScope.launchWhenResumed {
             val overlayOfflineMapStatus =
                 offlineCacheManager.getOverlayOfflineMap()?.status
@@ -431,7 +430,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             when(overlayOfflineMapStatus) {
                 OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED ->
                 {
-                    val estimateBytes = offlineCacheManager.estimateOverlayCacheSize()
+                    val estimateBytes = offlineCacheManager.estimateOverlayCacheSize().totalSize
                     val estimateText = Formatter.formatShortFileSize(
                         this@TrailDiscoveryActivity, estimateBytes)
 
@@ -703,8 +702,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         val listener = object: ProgressChangedListener {
             override fun onProgressChanged(progress: Float) {
                 lifecycleScope.launchWhenCreated {
-                    val binding = ProgressValueDialogViewBinding.bind(dialog.listView)
-                    binding.progressValueDialogViewProgressBar.progress = (progress * 100).toInt()
+                    val bar = dialog.findViewById<ProgressBar>(R.id.progress_value_dialog_view_progress_bar)
+                    bar?.progress = (progress * 100).toInt()
                 }
             }
         }
@@ -1176,42 +1175,51 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     /*     INNER CLASS       */
     /* * * * * * * * * * * * */
 
-    private class CacheProgressListener(activity: TrailDiscoveryActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
+    private class CacheProgressListener(activity: TrailDiscoveryActivity): ICacheProgressListener {
 
         val weakActivity = WeakReference(activity)
 
         override fun onComplete(offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                it.binding.activityTrailOfflinemapProgressLayout.visibility = View.GONE
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    activity.binding.activityTrailOfflinemapProgressLayout.visibility = View.GONE
+                }
             }
         }
 
+        override fun onComplete() {
+            // We do not wan to do anything
+        }
+
         override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                val errorMessage = error.map { e ->
-                    "${e.key.getResourceTypeName()}: ${e.value}"
-                }.joinToString("\n")
-                DialogUtil.buildOkDialog(it,it.getString(R.string.download_failed),errorMessage).show()
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    val errorMessage = error.map { e ->
+                        "${e.key.getResourceTypeName()}: ${e.value}"
+                    }.joinToString("\n")
+                    DialogUtil.buildOkDialog(activity, activity.getString(R.string.download_failed),errorMessage).show()
+                }
             }
         }
 
         override fun onProgressChanged(offlineMap: IOfflineMap) {
-            weakActivity.get()?.let {
-                // Show what is downloading and progress
-                val progressPercents = (100.0 * offlineMap.progress).toInt()
-                it.binding.activityTrailOfflinemapProgressLayout.visibility = View.VISIBLE
-                it.binding.activityTrailOfflinemapProgressBar.progress = progressPercents
+            weakActivity.get()?.let { activity ->
+                activity.lifecycleScope.launchWhenCreated {
+                    // Show what is downloading and progress
+                    val progressPercents = (100.0 * offlineMap.progress).toInt()
+                    activity.binding.activityTrailOfflinemapProgressLayout.visibility = View.VISIBLE
+                    activity.binding.activityTrailOfflinemapProgressBar.progress = progressPercents
 
-                var cacheName = offlineMap.type.name
-                when (offlineMap) {
-                    is ITrailOfflineMap ->
-                        cacheName += "(${offlineMap.trailId})"
-                    is IAreaOfflineMap ->
-                        cacheName += "(${offlineMap.areaName})"
+                    var cacheName = offlineMap.type.name
+                    when (offlineMap) {
+                        is ITrailOfflineMap ->
+                            cacheName += "(${offlineMap.trailId})"
+                        is IAreaOfflineMap ->
+                            cacheName += "(${offlineMap.areaName})"
+                    }
+
+                    activity.binding.activityTrailOfflinemapProgressLabel.text = activity.getString(R.string.downloading_cache, cacheName, progressPercents)
                 }
-
-                it.binding.activityTrailOfflinemapProgressLabel.text = it.getString(R.string.downloading_cache, cacheName, progressPercents)
             }
         }
     }
@@ -1247,7 +1255,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         override fun onNetworkUnavailable() {
             weakActivity.get()?.let {
-                val offlineCacheManager = it.offlineMapService?.offlineMapManager ?: return
+                val offlineCacheManager = it.offlineCacheBgService?.offlineMapManager ?: return
                 it.lifecycleScope.launchWhenResumed {
                     if (offlineCacheManager.getOverlayOfflineMap()?.status == OfflineMapStatus.COMPLETE) {
                         if (it.accuTerraMapView.isStyleLoaded()) {

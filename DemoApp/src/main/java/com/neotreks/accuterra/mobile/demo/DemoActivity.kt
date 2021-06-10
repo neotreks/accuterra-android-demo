@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
+import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
@@ -17,6 +18,7 @@ import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
+import com.neotreks.accuterra.mobile.sdk.cache.model.OfflineCacheConfig
 import com.neotreks.accuterra.mobile.sdk.security.model.AccuTerraMapConfig
 import com.neotreks.accuterra.mobile.sdk.security.model.SdkEndpointConfig
 import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
@@ -184,6 +186,11 @@ class DemoActivity : AppCompatActivity() {
                 //    mapUrl = "",
                 //    mapApiKey = "",
                 // ),
+                // Request to initialize the overlay map download during SDK initialization
+                offlineCacheConfig = OfflineCacheConfig(
+                    downloadOverlayMap = true,
+                    offlineCacheBackgroundServiceClass = ApkOfflineCacheBackgroundService::class.qualifiedName,
+                ),
                 tripConfiguration = TripConfiguration(
                     // Just to demonstrate the upload network type constraint
                     uploadNetworkType = NetworkTypeConstraint.CONNECTED,

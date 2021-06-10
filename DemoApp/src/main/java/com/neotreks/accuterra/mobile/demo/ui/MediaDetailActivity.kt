@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.neotreks.accuterra.mobile.demo.R
@@ -98,17 +97,22 @@ class MediaDetailActivity : AppCompatActivity() {
 
     private fun setupObservers() {
 
-        viewModel.uri.observe(this, Observer { uri ->
-            if (uri == null) {
-                return@Observer
-            }
-            val image = binding.activityMediaDetailImage
-            // Load
+        viewModel.uri.observe(this, { uri ->
             val options = UiUtils.getDefaultImageOptions()
-            Glide.with(this@MediaDetailActivity)
-                .applyDefaultRequestOptions(options)
-                .load(uri)
-                .into(image)
+            val image = binding.activityMediaDetailImage
+            if (uri == null) {
+                // Load error image
+                Glide.with(this@MediaDetailActivity)
+                    .applyDefaultRequestOptions(options)
+                    .load(options.errorId)
+                    .into(image)
+            } else {
+                // Load real image
+                Glide.with(this@MediaDetailActivity)
+                    .applyDefaultRequestOptions(options)
+                    .load(uri)
+                    .into(image)
+            }
             // Hide the progress bar
             binding.activityMediaDetailSpinner.visibility = false.visibility
         })

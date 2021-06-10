@@ -13,8 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityOfflineMapsBinding
+import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.visibility
+import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import java.lang.ref.WeakReference
 
@@ -31,7 +33,7 @@ class OfflineMapsActivity : AppCompatActivity() {
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
 
-    private var offlineMapService: OfflineMapService? = null
+    private var offlineCacheBgService: OfflineCacheBackgroundService? = null
 
     private val viewModel: OfflineMapsViewModel by viewModels()
 
@@ -57,9 +59,7 @@ class OfflineMapsActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Intent(this, OfflineMapService::class.java).also { intent ->
-            bindService(intent, offlineMapServiceConnection, Context.BIND_AUTO_CREATE)
-        }
+        ApkOfflineCacheBackgroundService.bindService(this, lifecycleScope, offlineCacheServiceConnection)
         // Cleanup setting
         setButtonsEnable(true)
     }
@@ -67,7 +67,7 @@ class OfflineMapsActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.i(TAG, "onStop()")
-        unbindService(offlineMapServiceConnection)
+        ApkOfflineCacheBackgroundService.unbindService(this, offlineCacheServiceConnection)
         super.onStop()
     }
 
@@ -86,23 +86,23 @@ class OfflineMapsActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
 
     // Used to map
-    private val connectionListener = object: OfflineMapServiceConnectionListener {
-        override fun onConnected(service: OfflineMapService) {
-            offlineMapService = service
+    private val connectionListener = object: OfflineCacheServiceConnectionListener {
+        override fun onConnected(service: OfflineCacheBackgroundService) {
+            offlineCacheBgService = service
             lifecycleScope.launchWhenCreated {
-                offlineMapService?.offlineMapManager?.addProgressListener(cacheProgressListener)
+                offlineCacheBgService?.offlineMapManager?.addProgressListener(cacheProgressListener)
                 loadOfflineMaps(service.offlineMapManager)
             }
         }
         override fun onDisconnected() {
-            offlineMapService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
-            offlineMapService = null
+            offlineCacheBgService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
+            offlineCacheBgService = null
         }
     }
 
     private val cacheProgressListener = CacheProgressListener(this)
 
-    private val offlineMapServiceConnection = OfflineMapService.createServiceConnection(
+    private val offlineCacheServiceConnection = OfflineCacheBackgroundService.createServiceConnection(
         connectionListener
     )
 
@@ -125,7 +125,7 @@ class OfflineMapsActivity : AppCompatActivity() {
         binding.activityOfflineMapsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.activityOfflineMapsRecyclerView.adapter = activityOfflineMapsViewAdapter
         binding.activityOfflineMapsSwipeRefresh.setOnRefreshListener {
-            offlineMapService?.offlineMapManager?.let {
+            offlineCacheBgService?.offlineMapManager?.let {
                 loadOfflineMaps(it)
             }
         }
@@ -182,7 +182,7 @@ class OfflineMapsActivity : AppCompatActivity() {
                 this,
                 title = getString(R.string.activity_offline_maps_rename_title),
                 positiveCode = { text ->
-                    if (!text.isNullOrBlank()) {
+                    if (text.isNotBlank()) {
                         renameOfflineMap(offlineMap, text)
                     }
                 },
@@ -234,7 +234,7 @@ class OfflineMapsActivity : AppCompatActivity() {
 
     private fun renameOfflineMap(offlineMap: IAreaOfflineMap, newName: String) {
         lifecycleScope.launchWhenCreated {
-            offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+            offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                 offlineMapManager.renameAreaOfflineMap(offlineMap, newName)
                 // reload offline maps
                 loadOfflineMaps(offlineMapManager)
@@ -247,21 +247,9 @@ class OfflineMapsActivity : AppCompatActivity() {
      */
     private fun updateOfflineMap(offlineMap: IOfflineMap) {
         lifecycleScope.launchWhenCreated {
-            offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+            offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                 // Delete current offline map
-                offlineMapManager.deleteOfflineMap(offlineMap.offlineMapId)
-
-                // Download it again
-                when (offlineMap) {
-                    is IAreaOfflineMap ->
-                        offlineMapManager.downloadAreaOfflineMap(offlineMap.bounds,
-                            offlineMap.areaName, offlineMap.containsImagery)
-                    is IOverlayOfflineMap ->
-                        offlineMapManager.downloadOverlayOfflineMap()
-                    is ITrailOfflineMap ->
-                        offlineMapManager.downloadTrailOfflineMap(offlineMap.trailId, )
-                }
-
+                offlineMapManager.updateOfflineMap(offlineMap)
                 // reload offline maps
                 loadOfflineMaps(offlineMapManager)
             }
@@ -270,7 +258,7 @@ class OfflineMapsActivity : AppCompatActivity() {
 
     private fun cancelOrDeleteDownload(offlineMap: IOfflineMap) {
         lifecycleScope.launchWhenCreated {
-            offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+            offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                 offlineMapManager.deleteOfflineMap(offlineMap.offlineMapId)
                 // reload offline maps
                 loadOfflineMaps(offlineMapManager)
@@ -298,10 +286,9 @@ class OfflineMapsActivity : AppCompatActivity() {
     /*     INNER CLASS       */
     /* * * * * * * * * * * * */
 
-    class CacheProgressListener(activity: OfflineMapsActivity):
-        com.neotreks.accuterra.mobile.sdk.map.cache.ICacheProgressListener {
+    class CacheProgressListener(activity: OfflineMapsActivity): ICacheProgressListener {
 
-        val weakActivity = WeakReference(activity)
+        private val weakActivity = WeakReference(activity)
 
         override fun onComplete(offlineMap: IOfflineMap) {
             weakActivity.get()?.let { activity ->
@@ -310,6 +297,10 @@ class OfflineMapsActivity : AppCompatActivity() {
                     activity.activityOfflineMapsViewAdapter.notifyItemChanged(offlineMap)
                 }
             }
+        }
+
+        override fun onComplete() {
+            // We do not wan to do anything
         }
 
         override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
@@ -436,7 +427,7 @@ class OfflineMapsActivity : AppCompatActivity() {
                             true
                         }
                         R.id.activity_offline_maps_menu_resume -> {
-                            it.offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+                            it.offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                                 it.lifecycleScope.launchWhenCreated {
                                     offlineMapManager.resume()
                                 }
@@ -444,7 +435,7 @@ class OfflineMapsActivity : AppCompatActivity() {
                             true
                         }
                         R.id.activity_offline_maps_menu_pause -> {
-                            it.offlineMapService?.offlineMapManager?.let { offlineMapManager ->
+                            it.offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                                 it.lifecycleScope.launchWhenCreated {
                                     offlineMapManager.pause()
                                 }

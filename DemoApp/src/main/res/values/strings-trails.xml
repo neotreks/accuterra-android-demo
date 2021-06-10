@@ -19,4 +19,10 @@
     <!-- Trail Errors -->
     <string name="trail_errors_load_trail_failed_because_of">Error while loading trail: %1$s</string>
 
+    <!-- Service -->
+
+    <!-- Location service -->
+    <string name="offline_cache_service_go_to_apk">Go to APK</string>
+
+
 </resources>

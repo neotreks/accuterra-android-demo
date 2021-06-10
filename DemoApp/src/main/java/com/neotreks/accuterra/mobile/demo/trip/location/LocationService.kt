@@ -134,6 +134,10 @@ class LocationService: LocationUpdatesService() {
         return builder.build()
     }
 
+    override fun getBinder(): IBinder {
+        return binder
+    }
+
     /* * * * * * * * * * * * */
     /*        PUBLIC         */
     /* * * * * * * * * * * * */
@@ -152,14 +156,6 @@ class LocationService: LocationUpdatesService() {
     fun removeLocationRecording() {
         isRecordLocations = false
         setRequestingLocationRecording(this, false)
-    }
-
-    /* * * * * * * * * * * * */
-    /*       PROTECTED       */
-    /* * * * * * * * * * * * */
-
-    override fun getBinder(): IBinder? {
-        return binder
     }
 
     /* * * * * * * * * * * * */
