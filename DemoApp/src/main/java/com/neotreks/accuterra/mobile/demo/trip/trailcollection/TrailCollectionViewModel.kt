@@ -181,7 +181,7 @@ class TrailCollectionViewModel() : ViewModel() {
     fun addMedia(context: Context, uri: Uri, location: Location) {
         viewModelScope.launch {
             val mapLocation = MapLocationBuilder.buildFrom(location)
-            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context, location = mapLocation))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(context, uri, location = mapLocation))
             media.notifyObserver()
         }
     }

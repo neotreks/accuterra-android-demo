@@ -61,7 +61,7 @@ class TripEditPoiViewModel: ViewModel() {
     fun addMedia(uri: Uri, context: Context) {
         viewModelScope.launch {
             val mapLocation = poi.value!!.mapLocation
-            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context, location = mapLocation))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(context, uri, location = mapLocation))
             media.notifyObserver()
         }
     }

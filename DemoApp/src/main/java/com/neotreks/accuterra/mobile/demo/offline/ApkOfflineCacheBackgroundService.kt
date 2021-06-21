@@ -63,6 +63,7 @@ class ApkOfflineCacheBackgroundService: OfflineCacheBackgroundService() {
     /*       COMPANION       */
     /* * * * * * * * * * * * */
 
+    @Keep
     companion object {
 
         private const val TAG = "ApkOfflineCacheService"

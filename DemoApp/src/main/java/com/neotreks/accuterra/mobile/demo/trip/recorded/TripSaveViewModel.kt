@@ -53,7 +53,7 @@ class TripSaveViewModel: ViewModel() {
      */
     fun addMedia(uri: Uri, context: Context) {
         viewModelScope.launch {
-            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context))
+            media.value!!.add(TripRecordingMediaBuilder.buildFromUri(context, uri))
             media.notifyObserver()
         }
     }

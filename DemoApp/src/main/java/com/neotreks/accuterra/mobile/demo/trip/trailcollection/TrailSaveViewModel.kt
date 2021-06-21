@@ -80,7 +80,7 @@ class TrailSaveViewModel: ViewModel() {
      */
     fun addMedia(uri: Uri, context: Context) {
         viewModelScope.launch {
-            tripMedia.value!!.add(TripRecordingMediaBuilder.buildFromUri(uri, context))
+            tripMedia.value!!.add(TripRecordingMediaBuilder.buildFromUri(context, uri))
             tripMedia.notifyObserver()
         }
     }
