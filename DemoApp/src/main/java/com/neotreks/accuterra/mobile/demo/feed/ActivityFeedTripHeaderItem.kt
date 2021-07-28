@@ -6,4 +6,4 @@ import com.neotreks.accuterra.mobile.sdk.ugc.model.ActivityFeedEntry
  * Activity Feed Trip Header Item
  */
 class ActivityFeedTripHeaderItem(info: ActivityFeedEntry):
-    BaseFeedItem<ActivityFeedEntry>(ActivityFeedItemType.ONLINE_TRIP_HEADER, info.trip.uuid, info)
+    BaseFeedItem<ActivityFeedEntry>(ActivityFeedItemType.ONLINE_TRIP_HEADER, info.trip.uuid, info.trip.versionUuid, info)

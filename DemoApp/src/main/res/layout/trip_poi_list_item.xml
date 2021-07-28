@@ -10,7 +10,7 @@
     <!-- POI Type -->
     <TextView
         android:id="@+id/trip_poi_list_item_type"
-        android:layout_width="80dp"
+        android:layout_width="100dp"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|top"
         app:layout_constraintTop_toTopOf="parent"

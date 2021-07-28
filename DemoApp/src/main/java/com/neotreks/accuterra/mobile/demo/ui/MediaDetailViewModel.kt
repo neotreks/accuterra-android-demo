@@ -20,7 +20,19 @@ class MediaDetailViewModel: ViewModel() {
             val service = ServiceFactory.getTripMediaService(context)
             val media = service.getTripRecordingMediaByUuid(uuid)
                 ?: throw IllegalStateException("Cannot find trip media for :$uuid")
-            uri.value = media.uri
+            if (media.isLocalMedia) {
+                // This is the case of standard new `Trip Recording`
+                // Media are available locally and we can display these via `TripRecordingMedia.uri`
+                uri.value = media.uri
+            } else {
+                // This is a case of the `Online Trip Editing`.
+                // Media files are not stored locally but are available on the server.
+                // So we have to display the media as we do for `Online Trip Media`
+                // The base URL is available in the `TripRecordingMedia.serverMediaUrl`
+                media.serverMedialUrl?.let { serverUrl ->
+                    loadMediaFromUrl(serverUrl, context)
+                }
+            }
         }
     }
 

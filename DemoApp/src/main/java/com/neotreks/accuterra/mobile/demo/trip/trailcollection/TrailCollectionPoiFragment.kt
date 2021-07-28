@@ -381,7 +381,7 @@ class TrailCollectionPoiFragment : Fragment() {
     }
 
     private fun setupImageAdapter() {
-        mediaListManager = TripRecordingMediaListManager(requireContext(),
+        mediaListManager = TripRecordingMediaListManager(requireContext(), lifecycleScope,
             binding.fragmentTrailCollectionPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {

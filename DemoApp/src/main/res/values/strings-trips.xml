@@ -22,6 +22,13 @@
     <string name="activity_online_trip_trail_with_name">Trail: %1$s</string>
     <string name="activity_online_trip_promote">Promote to trail</string>
 
+    <string name="activity_online_trip_edit_trip_title">Edit trip?</string>
+    <string name="activity_online_trip_edit_trip_message">Please note that editing will crete new editable trip recording.</string>
+    <string name="activity_online_trip_editing_trip">Preparing trip editing</string>
+    <string name="activity_online_trip_edit_trip_is_null">Trip is null</string>
+    <string name="activity_online_trip_edit_success">The trip was prepared for editing</string>
+    <string name="activity_online_trip_edit_failed">The trip editing start failed because of: %1$s</string>
+
     <string name="activity_online_trip_delete_trip_title">Delete trip?</string>
     <string name="activity_online_trip_delete_trip_message">Do you rally want to delete the `%1$s` trip?</string>
     <string name="activity_online_trip_deleting_trip">Deleting trip</string>
@@ -125,6 +132,13 @@
 
     <!-- RECORDED TRIP -->
     <string name="activity_recorded_trip_trip_not_found">Trip not found</string>
+
+    <string name="activity_recorded_trip_edit_trip_title">Edit trip recording?</string>
+    <string name="activity_recorded_trip_edit_trip_message">Please note that editing will crete new editable trip recording.</string>
+    <string name="activity_recorded_trip_editing_trip">Preparing trip recording editing</string>
+    <string name="activity_recorded_trip_edit_trip_is_null">Trip recording is null</string>
+    <string name="activity_recorded_trip_edit_success">The trip recording was prepared for editing</string>
+    <string name="activity_recorded_trip_edit_failed">The trip recording editing start failed because of: %1$s</string>
 
     <!-- Location service -->
     <string name="location_update_service_go_to_apk">Go to APK</string>

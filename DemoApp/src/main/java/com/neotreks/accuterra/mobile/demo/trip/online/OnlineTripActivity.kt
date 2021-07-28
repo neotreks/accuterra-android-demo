@@ -21,6 +21,7 @@ import com.neotreks.accuterra.mobile.demo.extensions.getLocationLabelString
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateTimeString
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.toast
+import com.neotreks.accuterra.mobile.demo.trip.recorded.TripSaveActivity
 import com.neotreks.accuterra.mobile.demo.ui.OnListItemLongClickListener
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
@@ -45,6 +46,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
 
         const val RESULT_DELETED = 100
         const val RESULT_COMMENTS_COUNT_UPDATED = 101
+        const val RESULT_EDIT_START = 110
 
         fun createNavigateToIntent(context: Context, uuid: String, tabIndex: OnlineTripTabDefinition? = null): Intent {
             return Intent(context, OnlineTripActivity::class.java)
@@ -100,6 +102,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
         super.onPrepareOptionsMenu(menu)
         if (menu != null) {
             val isCurrentUserTrip = isCurrentUserTrip()
+            menu.findItem(R.id.trip_online_menu_item_trip_edit).isEnabled  = isCurrentUserTrip
             menu.findItem(R.id.trip_online_menu_item_trip_promote).isEnabled  = isCurrentUserTrip
             menu.findItem(R.id.trip_online_menu_item_trip_delete).isEnabled  = isCurrentUserTrip
         }
@@ -110,6 +113,10 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
         when(item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
+                return true
+            }
+            R.id.trip_online_menu_item_trip_edit -> {
+                onEditTrip()
                 return true
             }
             R.id.trip_online_menu_item_trip_delete -> {
@@ -425,6 +432,54 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
         val tripUserUuid = viewModel.trip.value?.userInfo?.driverId
         val currentUserUuid = runBlocking { DemoIdentityManager().getUserId(this@OnlineTripActivity) }
         return currentUserUuid == tripUserUuid
+    }
+
+    private fun onEditTrip() {
+        DialogUtil.buildYesNoDialog(
+            context = this,
+            title = getString(R.string.activity_online_trip_edit_trip_title),
+            message = getString(R.string.activity_online_trip_edit_trip_message),
+            positiveCodeLabel = getString(R.string.general_edit),
+            negativeCodeLabel = getString(R.string.general_cancel),
+            positiveCode = {
+                editTrip()
+            }
+        ).show()
+    }
+
+    private fun editTrip() {
+        val dialog = DialogUtil.buildBlockingProgressDialog(
+            context = this,
+            title = getString(R.string.activity_online_trip_editing_trip)
+        )
+        dialog.show()
+        lifecycleScope.launchWhenCreated {
+            val service = ServiceFactory.getTripRecordingService(this@OnlineTripActivity)
+            val trip = viewModel.trip.value
+            if (trip == null) {
+                toast(getString(R.string.activity_online_trip_edit_trip_is_null))
+            } else {
+                // Start trip editing - this will convert given `Trip` into `TripRecording`
+                val result = service.startTripEditing(trip)
+                dialog.dismiss()
+                // Check if we were able to convert the `Trip` into `TripRecording`
+                if (result.isSuccess) {
+                    // We were able to convert the `Trip` into `TripRecording`
+                    toast(getString(R.string.activity_online_trip_edit_success))
+                    setResult(RESULT_EDIT_START)
+                    // Navigate to trip editing screen
+                    val intent = TripSaveActivity.createNavigateToIntent(this@OnlineTripActivity, trip.info.uuid)
+                    startActivity(intent)
+                    // Close the screen
+                    finish()
+                } else {
+                    // We were not able to convert the `Trip` into `TripRecording`
+                    val resultValue = result.value
+                    longToast(getString(R.string.activity_online_trip_edit_failed, resultValue?.name ?: "Unknown"))
+                    CrashSupport.reportError(result, "Trip UUID: ${viewModel.trip.value?.info}")
+                }
+            }
+        }
     }
 
     private fun onDeleteTrip() {

@@ -89,7 +89,7 @@ class TrailSaveActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this).get(TrailSaveViewModel::class.java)
         mediaService = ServiceFactory.getTrailMediaService(this)
-        mediaListManager = TripRecordingMediaListManager(this,
+        mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,
             binding.activityTrailSavePhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
@@ -561,6 +561,7 @@ class TrailSaveActivity : AppCompatActivity() {
         // POI images
         poiImageAdapter = TripRecordingMediaFileViewAdapter(
             this,
+            lifecycleScope,
             (viewModel.poiMedia.value ?: listOf()).toTypedArray(),
             true
         )

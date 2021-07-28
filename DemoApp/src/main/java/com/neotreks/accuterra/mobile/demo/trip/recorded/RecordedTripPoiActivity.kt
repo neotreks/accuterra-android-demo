@@ -52,7 +52,7 @@ class RecordedTripPoiActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRecordedTripPoiBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        mediaListManager = TripRecordingMediaListManager(this,
+        mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,
             binding.activityRecordedTripPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {

@@ -51,17 +51,28 @@ class TripAddPoiActivity : AppCompatActivity() {
 
         private const val KEY_TRIP_UUID = "KEY_TRIP_UUID"
         private const val KEY_LOCATION = "KEY_LOCATION"
+        private const val KEY_USER_TRIP_RECORDER = "KEY_USE_TRIP_RECORDER"
 
         private const val REQUEST_CAPTURE_PICTURE = 12
         private const val REQUEST_SELECT_PHOTO = 13
         private const val REQUEST_SELECT_PHOTO_PERMISSION = 14
         private const val REQUEST_TAKE_PHOTO_PERMISSIONS = 15
 
-        fun createNavigateToIntent(context: Context, tripUuid: String, location: Location?): Intent {
+        fun createNavigateToIntent(
+            context: Context,
+            tripUuid: String,
+            location: Location,
+            /**
+             * If true, view-model will use the [ITripRecorder]. We want to use it during the `trip recording`.
+             * If false, view-model will use the [ITripRecordingService] We want to use it during the `trip editing`.
+             */
+            useTripRecorded: Boolean
+        ): Intent {
             return Intent(context, TripAddPoiActivity::class.java)
                 .apply {
                     putExtra(KEY_TRIP_UUID, tripUuid)
                     putExtra(KEY_LOCATION, location)
+                    putExtra(KEY_USER_TRIP_RECORDER, useTripRecorded)
                 }
         }
 
@@ -76,7 +87,7 @@ class TripAddPoiActivity : AppCompatActivity() {
         binding = ActivityTripAddPoiBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this@TripAddPoiActivity).get(TripAddPoiViewModel::class.java)
-        mediaListManager = TripRecordingMediaListManager(this,
+        mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,
             binding.activityTripAddPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
@@ -161,15 +172,19 @@ class TripAddPoiActivity : AppCompatActivity() {
         // Parse + set the trail ID
         require(intent.hasExtra(KEY_TRIP_UUID)) { "No intent key $KEY_TRIP_UUID provided." }
         require(intent.hasExtra(KEY_LOCATION)) { "No intent key $KEY_LOCATION provided." }
+        require(intent.hasExtra(KEY_USER_TRIP_RECORDER)) { "No intent key $KEY_USER_TRIP_RECORDER provided." }
 
         val tripUuid = intent.getStringExtra(KEY_TRIP_UUID)
-        check(tripUuid.isNotNullNorBlank()) { "Invalid $KEY_TRIP_UUID value." }
+        require(tripUuid.isNotNullNorBlank()) { "Invalid $KEY_TRIP_UUID value." }
 
         val location = intent.getParcelableExtra<Location>(KEY_LOCATION)
-        check(location != null) { "Invalid $KEY_LOCATION value." }
+        requireNotNull(location) { "Invalid $KEY_LOCATION value." }
+
+        val useTripRecorded = intent.getBooleanExtra(KEY_USER_TRIP_RECORDER, true)
+        viewModel.useTripRecorder = useTripRecorded
 
         Log.i(TAG, "tripUUID = $tripUuid")
-        viewModel.loadTrip(location, this)
+        viewModel.loadTrip(this, tripUuid!!, location)
     }
 
     private fun setupToolbar() {
@@ -262,7 +277,7 @@ class TripAddPoiActivity : AppCompatActivity() {
             )
 
             // Add the newly created POI to the trip recording
-            viewModel.addPoi(poi, applicationContext)
+            viewModel.addPoi(applicationContext, poi)
 
             // Close the dialog
             lifecycleScope.launchWhenCreated {

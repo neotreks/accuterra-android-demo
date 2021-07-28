@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.util.visibility
@@ -16,6 +17,7 @@ import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
  */
 class TripRecordingMediaFileViewAdapter internal constructor(
     context: Context,
+    lifecycleScope: LifecycleCoroutineScope,
     private val data: Array<TripRecordingMedia>,
     private val readOnly: Boolean
 ) :
@@ -25,7 +27,7 @@ class TripRecordingMediaFileViewAdapter internal constructor(
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
-    private val viewBinder = TripRecordingMediaFileViewBinder(context)
+    private val viewBinder = TripRecordingMediaFileViewBinder(context, lifecycleScope)
 
     private val selectedItem: TripRecordingMedia? = null
 

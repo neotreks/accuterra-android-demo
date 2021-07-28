@@ -3,6 +3,7 @@ package com.neotreks.accuterra.mobile.demo.trip.recorded
 import android.content.Context
 import android.util.Log
 import android.view.View
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
@@ -14,6 +15,7 @@ import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
  */
 class TripRecordingMediaListManager(
     private val context: Context,
+    private val lifecycleScope: LifecycleCoroutineScope,
     private val view: RecyclerView,
     private val clickListener: TripRecordingMediaListClickListener,
     private val readOnly: Boolean = false
@@ -35,7 +37,7 @@ class TripRecordingMediaListManager(
 
     fun refreshPhotoGridAdapter(mediaList: List<TripRecordingMedia>) {
         // Setup the adapter
-        adapter = TripRecordingMediaFileViewAdapter(context, mediaList.toTypedArray(), readOnly)
+        adapter = TripRecordingMediaFileViewAdapter(context, lifecycleScope, mediaList.toTypedArray(), readOnly)
         adapter.setClickListener(object: TripRecordingMediaFileViewAdapter.ItemClickListener {
             override fun onItemClick(view: View?, position: Int) {
                 val item = adapter.getItem(position)

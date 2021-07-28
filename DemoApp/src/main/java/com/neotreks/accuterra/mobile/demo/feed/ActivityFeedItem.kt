@@ -9,6 +9,8 @@ interface ActivityFeedItem {
 
     val tripUUID: String
 
+    val versionUuid: String
+
     val data: Any?
 
 }

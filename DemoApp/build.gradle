@@ -50,6 +50,8 @@ android {
             buildConfigField 'String', 'WS_AUTH_CLIENT_ID', ws_auth_client_id
             buildConfigField 'String', 'WS_AUTH_CLIENT_SECRET', ws_auth_client_secret
             buildConfigField 'String', 'MAPBOX_TOKEN', mapbox_token
+            buildConfigField 'String', 'HERE_APPID', heremaps_appid
+            buildConfigField 'String', 'HERE_APPCODE', heremaps_appcode
             buildConfigField 'Boolean', 'USE_TRAIL_PATH_EMULATOR', 'false'
             buildConfigField 'Boolean', 'USE_TRAIL_NAVIGATOR_DEBUG_MODE', 'true'
             buildConfigField 'Boolean', 'USE_AUTH', 'true'
@@ -69,20 +71,20 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.11.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.12.0"
     // Download also sources and javadoc for easier orientation - just for the development!
-    // implementation "com.accuterra:accuterra-android-sdk:0.11.0:sources"
-    // implementation "com.accuterra:accuterra-android-sdk:0.11.0:javadoc"
+    // implementation "com.accuterra:accuterra-android-sdk:0.12.0:sources"
+    // implementation "com.accuterra:accuterra-android-sdk:0.12.0:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:1.3.0"
+    implementation "androidx.appcompat:appcompat:1.3.1"
     implementation "androidx.constraintlayout:constraintlayout:2.0.4"
     implementation "androidx.lifecycle:lifecycle-common-java8:2.3.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
-    implementation "androidx.fragment:fragment-ktx:1.3.4"
-    implementation "com.google.android.material:material:1.3.0"
+    implementation "androidx.fragment:fragment-ktx:1.3.6"
+    implementation "com.google.android.material:material:1.4.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.cardview:cardview:1.0.0"
@@ -90,11 +92,11 @@ dependencies {
     implementation "androidx.preference:preference-ktx:1.1.1"
 
     // CameraX core library using the camera2 implementation
-    implementation "androidx.camera:camera-core:1.1.0-alpha05"
-    implementation "androidx.camera:camera-camera2:1.1.0-alpha05"
-    implementation "androidx.camera:camera-lifecycle:1.1.0-alpha05"
-    implementation "androidx.camera:camera-view:1.0.0-alpha25"
-    implementation "androidx.camera:camera-extensions:1.0.0-alpha25"
+    implementation "androidx.camera:camera-core:1.1.0-alpha07"
+    implementation "androidx.camera:camera-camera2:1.1.0-alpha07"
+    implementation "androidx.camera:camera-lifecycle:1.1.0-alpha07"
+    implementation "androidx.camera:camera-view:1.0.0-alpha27"
+    implementation "androidx.camera:camera-extensions:1.0.0-alpha27"
 
     // Retrofit - HTTP Client
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
@@ -105,6 +107,6 @@ dependencies {
     annotationProcessor "com.github.bumptech.glide:compiler:4.11.0"
 
     // Turf - MapBox library for geometry operations
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.2.1'
+    implementation 'org.maplibre.gl:android-sdk-turf:5.9.0'
 
 }

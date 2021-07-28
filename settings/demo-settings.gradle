@@ -10,4 +10,7 @@ ext {
     ws_auth_client_secret = '"***"'
     // MapBox
     mapbox_token = '"***"'
+    // HERE Maps
+    heremaps_appid = '"***"'
+    heremaps_appcode = '"***"'
 }

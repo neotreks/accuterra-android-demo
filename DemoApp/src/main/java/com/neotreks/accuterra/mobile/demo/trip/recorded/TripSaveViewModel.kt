@@ -11,6 +11,7 @@ import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecording
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaBuilder
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -23,6 +24,8 @@ class TripSaveViewModel: ViewModel() {
 
     val media = MutableLiveData(mutableListOf<TripRecordingMedia>())
 
+    val pois = MutableLiveData(listOf<TripRecordingPoi>())
+
     fun loadTrip(tripUUID: String, context: Context) {
         viewModelScope.launch {
             val tripService = ServiceFactory.getTripRecordingService(context)
@@ -30,6 +33,7 @@ class TripSaveViewModel: ViewModel() {
                 ?: throw IllegalStateException("")
             tripRecording.value = loadedTrip
             media.value = loadedTrip.media.toMutableList()
+            pois.value = tripService.getTripRecordingPOIs(tripUUID).toMutableList()
         }
     }
 

@@ -10,6 +10,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
+import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsInterceptor
+import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsStyle
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
@@ -19,7 +21,8 @@ import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
 import com.neotreks.accuterra.mobile.sdk.cache.model.OfflineCacheConfig
-import com.neotreks.accuterra.mobile.sdk.security.model.AccuTerraMapConfig
+import com.neotreks.accuterra.mobile.sdk.map.ImageryMapConfig
+import com.neotreks.accuterra.mobile.sdk.map.MapConfig
 import com.neotreks.accuterra.mobile.sdk.security.model.SdkEndpointConfig
 import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailConfiguration
@@ -203,7 +206,12 @@ class DemoActivity : AppCompatActivity() {
                     updateTrailDbDuringSdkInit = true,
                     // Update trail User Data during SDK initialization
                     updateTrailUserDataDuringSdkInit = true
-                )
+                ),
+                // Using Here Maps
+                // Please note we have to provide also a custom `HereMapsInterceptor` below
+                // mapConfig = MapConfig (
+                //    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE)
+                // )
             )
             // This is the main initialization of the AccuTerra SDK.
             // The listener is notified about progress of the initialization.
@@ -211,7 +219,11 @@ class DemoActivity : AppCompatActivity() {
             // (after APK installation) to be able to use the SDK.
             val result = SdkManager.initSdk(applicationContext, config, DemoAccessManager(), DemoIdentityManager(),
                 listener = listener,
-                dbEncryptConfigProvider = dbEncryptProvider)
+                dbEncryptConfigProvider = dbEncryptProvider,
+                // Using HERE Maps
+                // Please note you have to configure also `imageryMapConfig` in the configuration above
+                // mapRequestInterceptor = HereMapsInterceptor(),
+            )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
                     onSdkInitSuccess()

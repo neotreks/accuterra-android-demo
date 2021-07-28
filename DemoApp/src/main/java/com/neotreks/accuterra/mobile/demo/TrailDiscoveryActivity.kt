@@ -21,14 +21,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.android.core.location.*
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.location.engine.*
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
 import com.neotreks.accuterra.mobile.demo.extensions.setOnSingleClickListener
+import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsStyle
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItemAdapter
@@ -143,13 +144,13 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     // Available online styles
     private val styles: List<String> = listOf(
         AccuTerraStyle.VECTOR,
-        Style.SATELLITE_STREETS
+        HereMapsStyle.SATELLITE
     )
 
     // Available offline styles
     private val offlineStyles: List<String> = listOf(
         AccuTerraStyle.VECTOR,
-        Style.SATELLITE_STREETS
+        HereMapsStyle.SATELLITE
     )
 
     /* * * * * * * * * * * * */

@@ -15,6 +15,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityObjectUploadBinding
+import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.ui.OnListItemLongClickListener
@@ -51,11 +52,13 @@ class ObjectUploadActivity : AppCompatActivity() {
         private const val TAG = "ObjectUploadActivity"
 
         private const val KEY_OBJECT_UUID = "OBJECT_ID"
+        private const val KEY_VERSION_UUID = "VERSION_ID"
 
-        fun createNavigateToIntent(context: Context, objectUUD: String): Intent {
+        fun createNavigateToIntent(context: Context, objectUUD: String, versionUuid: String): Intent {
             return Intent(context, ObjectUploadActivity::class.java)
                 .apply {
                     putExtra(KEY_OBJECT_UUID, objectUUD)
+                    putExtra(KEY_VERSION_UUID, versionUuid)
                 }
         }
 
@@ -79,7 +82,7 @@ class ObjectUploadActivity : AppCompatActivity() {
         lifecycleScope.launchWhenCreated {
             viewModel.uuid.value?.let { uuid ->
                 displayProgressBar()
-                viewModel.loadData(this@ObjectUploadActivity, uuid)
+                viewModel.loadData(this@ObjectUploadActivity, uuid, viewModel.versionUuid.value)
                 hideProgressBar()
             }
         }
@@ -134,8 +137,13 @@ class ObjectUploadActivity : AppCompatActivity() {
     private fun parseIntent() {
         require(intent.hasExtra(KEY_OBJECT_UUID)) { "No intent key $KEY_OBJECT_UUID provided." }
 
-        viewModel.uuid.value = intent.getStringExtra(KEY_OBJECT_UUID)
-        require(viewModel.uuid.value != null) { "Invalid $KEY_OBJECT_UUID value." }
+        val objectUuid = intent.getStringExtra(KEY_OBJECT_UUID)
+        val versionUuid = intent.getStringExtra(KEY_VERSION_UUID)
+
+        require(objectUuid.isNotNullNorBlank()) { "No intent key $KEY_OBJECT_UUID provided." }
+
+        viewModel.uuid.value = objectUuid
+        viewModel.versionUuid.value = versionUuid
     }
 
     private fun setupToolbar() {

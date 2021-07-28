@@ -21,6 +21,7 @@ import java.io.File
  */
 class TripAddPoiViewModel: ViewModel() {
 
+    var useTripRecorder: Boolean = true
     val location = MutableLiveData<Location>(null)
     val trip = MutableLiveData<TripRecording>(null)
     val media = MutableLiveData(mutableListOf<TripRecordingMedia>())
@@ -28,22 +29,46 @@ class TripAddPoiViewModel: ViewModel() {
     /**
      * Initializes the view model
      */
-    suspend fun loadTrip(location: Location, context: Context) {
+    suspend fun loadTrip(context: Context, tripUuid: String, location: Location) {
 
-        val tripService = ServiceFactory.getTripRecorder(context)
-        val trip = tripService.getActiveTripRecording()
-            ?: throw IllegalStateException("There is no currently recorded trip!")
+        if (useTripRecorder) {
 
-        this.location.value = location
-        this.trip.value = trip
+            // Trip Recording is active - we want to use trip recording.
+            val tripService = ServiceFactory.getTripRecorder(context)
+            val trip = tripService.getActiveTripRecording()
+                ?: throw IllegalStateException("There is no currently recorded trip!")
+
+            this.location.value = location
+            this.trip.value = trip
+
+        } else {
+            // We are in case of trip editing - we want to use the `Trip Recording Service`
+            val tripService = ServiceFactory.getTripRecordingService(context)
+            val trip = tripService.getTripRecordingByUUID(tripUuid)
+                ?: throw IllegalStateException("There is no trip of uuid: $tripUuid")
+
+            if (!trip.isEditable()) {
+                throw IllegalStateException("The trip recording $tripUuid is not editable!")
+            }
+
+            this.location.value = location
+            this.trip.value = trip
+        }
+
     }
 
     /**
      * Add the newly created POI to the trip recording
       */
-    suspend fun addPoi(poi: TripRecordingPoi, context: Context) {
-        val recorder = ServiceFactory.getTripRecorder(context)
-        recorder.addPoi(poi)
+    suspend fun addPoi(context: Context, poi: TripRecordingPoi) {
+        if (useTripRecorder) {
+            val recorder = ServiceFactory.getTripRecorder(context)
+            recorder.addPoi(poi)
+        } else {
+            val service = ServiceFactory.getTripRecordingService(context)
+            val tripUuid = trip.value?.tripInfo?.uuid ?: throw IllegalStateException("Missing tripUuid")
+            service.addTripRecordingPoi(tripUuid, poi)
+        }
     }
 
     /**

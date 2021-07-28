@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.FragmentRecordedTripPhotosBinding
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
@@ -42,7 +43,7 @@ class RecordedTripPhotosFragment : RecordedTripFragment() {
 
         // Setup the photo manager
         mediaListManager = TripRecordingMediaListManager(
-            requireContext(),
+            requireContext(), lifecycleScope,
             binding.fragmentRecordedTripPhotos,
             object : TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {

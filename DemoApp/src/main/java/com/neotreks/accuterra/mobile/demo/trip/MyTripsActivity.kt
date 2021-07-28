@@ -30,6 +30,7 @@ import com.neotreks.accuterra.mobile.demo.util.NetworkStateReceiver
 import com.neotreks.accuterra.mobile.demo.util.jsonToClass
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.sync.model.TripRecordingNotification
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingBasicInfo
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingSearchCriteria
@@ -38,6 +39,8 @@ import com.neotreks.accuterra.mobile.sdk.ugc.model.ActivityFeedEntry
 import com.neotreks.accuterra.mobile.sdk.ugc.model.GetMyActivityFeedCriteria
 import com.neotreks.accuterra.mobile.sdk.ugc.model.SetTripLikedResult
 import com.neotreks.accuterra.mobile.sdk.ugc.model.TripProcessingStatus
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import java.lang.ref.WeakReference
 
 class MyTripsActivity : AppCompatActivity() {
@@ -87,6 +90,7 @@ class MyTripsActivity : AppCompatActivity() {
 
         setupListView()
         registerViewModelObservers()
+        registerTripUploadObserver()
         viewModel.reset()
     }
 
@@ -124,6 +128,40 @@ class MyTripsActivity : AppCompatActivity() {
             activityFeedAdapter.setItems(trips)
             binding.activityMyTripsNoTripsLabel.visibility = trips.isEmpty().visibility
         })
+    }
+
+    private fun registerTripUploadObserver() {
+        val tripRecService = ServiceFactory.getTripRecordingService(this)
+        lifecycleScope.launchWhenCreated {
+            tripRecService.tripRecordingNotifications
+                // Intermediate catch operator. If an exception is thrown,
+                // catch and update the UI
+                .catch { exception ->
+                    val message = "Error while collecting trip upload notifications: ${exception.localizedMessage}"
+                    Log.e(TAG, message, exception)
+                    longToast(message)
+                }
+                .collect { notification ->
+                    // Let's display info when the trip is being uploaded to the server.
+                    when(notification) {
+                        is TripRecordingNotification.TripRecordingStatusChange -> {
+                            // Reload local trips if local mode
+                            if (!isOnline()) {
+                                loadTrips(false)
+                            }
+                            // Display and log the message about trip being uploaded.
+                            val message = "'${notification.name}' is ${notification.status}."
+                            Log.i(TAG, message)
+                            longToast(message)
+                        }
+                        else -> {
+                            val message = "Unknown upload notification: $notification"
+                            Log.i(TAG, message)
+                            longToast(message)
+                        }
+                    }
+                }
+        }
     }
 
     private fun hideProgressBar() {
@@ -307,7 +345,9 @@ class MyTripsActivity : AppCompatActivity() {
                             }
                         }
                         TripRecordingStatus.QUEUED,
-                        TripRecordingStatus.UPLOADED -> {
+                        TripRecordingStatus.UPLOADED,
+                        TripRecordingStatus.PROCESSED,
+                        TripRecordingStatus.REJECTED, -> {
                             val intent = RecordedTripActivity.createNavigateToIntent(activity, trip.uuid)
                             activity.startActivityForResult(intent, REQUEST_RECORDED)
                         }
@@ -332,7 +372,7 @@ class MyTripsActivity : AppCompatActivity() {
                 ActivityFeedItemType.LOCAL_RECORDED_TRIP -> {
                     // Navigate to object upload activity
                     val activity = activityRef.get() ?: return false
-                    val intent = ObjectUploadActivity.createNavigateToIntent(activity, item.tripUUID)
+                    val intent = ObjectUploadActivity.createNavigateToIntent(activity, item.tripUUID, item.versionUuid)
                     activity.startActivity(intent)
                     return true
                 }

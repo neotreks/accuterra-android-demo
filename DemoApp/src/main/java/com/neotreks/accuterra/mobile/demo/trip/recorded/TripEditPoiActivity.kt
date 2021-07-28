@@ -72,7 +72,7 @@ class TripEditPoiActivity : AppCompatActivity() {
         binding = ActivityTripEditPoiBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this@TripEditPoiActivity).get(TripEditPoiViewModel::class.java)
-        mediaListManager = TripRecordingMediaListManager(this,
+        mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,
             binding.activityTripEditPoiPhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {

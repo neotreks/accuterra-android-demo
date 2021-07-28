@@ -316,7 +316,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
         val tripUuid = getTripUuid()
             ?: return
 
-        val intent = TripAddPoiActivity.createNavigateToIntent(this, tripUuid, poiLocation)
+        val intent = TripAddPoiActivity.createNavigateToIntent(this, tripUuid, poiLocation, useTripRecorded = true)
         startActivityForResult(intent, REQUEST_ADD_POI)
 
     }

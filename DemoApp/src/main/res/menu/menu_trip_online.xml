@@ -4,6 +4,10 @@
     tools:context="com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity">
 
     <item
+        android:id="@+id/trip_online_menu_item_trip_edit"
+        android:title="@string/general_edit" />
+
+    <item
         android:id="@+id/trip_online_menu_item_trip_promote"
         android:title="@string/activity_online_trip_promote" />
 

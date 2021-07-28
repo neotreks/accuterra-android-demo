@@ -3,6 +3,7 @@ package com.neotreks.accuterra.mobile.demo.trip.recorded
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,20 +14,22 @@ import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripSaveBinding
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.longToast
+import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
-import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.CampingType
 import com.neotreks.accuterra.mobile.sdk.trail.model.SdkCampingType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripSharingType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.random.Random
 
 class TripSaveActivity : AppCompatActivity() {
 
@@ -37,6 +40,8 @@ class TripSaveActivity : AppCompatActivity() {
     private lateinit var viewModel: TripSaveViewModel
 
     private lateinit var mediaListManager: TripRecordingMediaListManager
+
+    private lateinit var poiListManager: TripRecordingPoiListManager
 
     private lateinit var binding: ActivityTripSaveBinding
 
@@ -52,6 +57,9 @@ class TripSaveActivity : AppCompatActivity() {
         private const val REQUEST_SELECT_PHOTO = 13
         private const val REQUEST_SELECT_PHOTO_PERMISSION = 14
         private const val REQUEST_TAKE_PHOTO_PERMISSIONS = 15
+
+        private const val REQUEST_ADD_POI = 20
+        private const val REQUEST_EDIT_POI = 21
 
         fun createNavigateToIntent(context: Context, tripUUID: String): Intent {
             return Intent(context, TripSaveActivity::class.java)
@@ -71,7 +79,7 @@ class TripSaveActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         viewModel = ViewModelProvider(this).get(TripSaveViewModel::class.java)
-        mediaListManager = TripRecordingMediaListManager(this,
+        mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,
             binding.activityTripSavePhotos,
             object: TripRecordingMediaListManager.TripRecordingMediaListClickListener {
                 override fun onItemClicked(media: TripRecordingMedia) {
@@ -85,6 +93,18 @@ class TripSaveActivity : AppCompatActivity() {
                     viewModel.deleteMedia(media)
                 }
             })
+
+        poiListManager = TripRecordingPoiListManager(this,
+            view = binding.activityTripSavePoiList,
+            clickListener = object : TripRecordingPoiListManager.TripRecordingPoiListClickListener {
+                override fun onItemClicked(item: TripRecordingPoi) {
+                    println("On POI Clicked: $item")
+                    val intent = TripEditPoiActivity.createNavigateToIntent(item.uuid, this@TripSaveActivity)
+                    startActivityForResult(intent, REQUEST_EDIT_POI)
+                }
+            }
+        )
+
 
         setupToolbar()
         setupButtons()
@@ -113,6 +133,16 @@ class TripSaveActivity : AppCompatActivity() {
                 return
             }
             viewModel.addMedia(uri, this)
+        }
+        if (requestCode == REQUEST_EDIT_POI
+            && (resultCode == ActivityResult.RESULT_OBJECT_UPDATED
+                    || resultCode == ActivityResult.RESULT_OBJECT_DELETED)) {
+            // POI edited
+            refreshPois()
+        }
+        if (requestCode == REQUEST_ADD_POI && resultCode == ActivityResult.RESULT_OBJECT_CREATED) {
+            // POI added
+            refreshPois()
         }
     }
 
@@ -231,6 +261,10 @@ class TripSaveActivity : AppCompatActivity() {
             mediaListManager.refreshPhotoGridAdapter(mediaList)
         })
 
+        viewModel.pois.observe(this, { pois ->
+            poiListManager.refreshAdapter(pois)
+        })
+
     }
 
     private fun parseIntent() {
@@ -265,6 +299,22 @@ class TripSaveActivity : AppCompatActivity() {
         binding.activityTripSaveShufflePhoto.setOnClickListener {
             onShuffleImage()
         }
+        binding.activityTripSaveAddPoiButton.setOnClickListener {
+            onAddPoi()
+        }
+    }
+
+    private fun onAddPoi() {
+        val tripRecording = viewModel.tripRecording.value ?: return
+        val uuid = tripRecording.tripInfo.uuid
+        val mapBounds = tripRecording.tripLocationInfo.mapBounds
+        val location = Location("test")
+        // Let's create a random location
+        location.latitude = (mapBounds.maxLat - mapBounds.minLat) + (Random.nextDouble(-0.1, 0.1))
+        location.longitude = (mapBounds.maxLon - mapBounds.minLon) + (Random.nextDouble(-0.1, 0.1))
+        location.altitude = Random.nextDouble(100.0, 300.0)
+        val intent = TripAddPoiActivity.createNavigateToIntent(this, uuid, location, useTripRecorded = false)
+        startActivityForResult(intent, REQUEST_ADD_POI)
     }
 
     private fun onAddImage() {
@@ -388,6 +438,15 @@ class TripSaveActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun refreshPois() {
+        lifecycleScope.launchWhenCreated {
+            val service = ServiceFactory.getTripRecordingService(this@TripSaveActivity)
+            val uuid = viewModel.tripRecording.value?.tripInfo?.uuid ?: return@launchWhenCreated
+            val pois = service.getTripRecordingPOIs(uuid)
+            viewModel.pois.value = pois.toMutableList()
+        }
     }
 
 }

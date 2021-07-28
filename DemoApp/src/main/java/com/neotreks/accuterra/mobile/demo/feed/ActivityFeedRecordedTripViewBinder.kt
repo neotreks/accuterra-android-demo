@@ -42,9 +42,11 @@ class ActivityFeedRecordedTripViewBinder(listener: ActivityFeedViewHolder.Listen
         // Status
         binding.tripListItemStatus.text = data.status.getName()
         val color = if (data.status == TripRecordingStatus.QUEUED || data.status == TripRecordingStatus.UPLOADED) {
-                view.context.getColor(R.color.colorPrimary)
+            view.context.getColor(R.color.difficulty_easy)
+        } else if (data.status == TripRecordingStatus.PROCESSED) {
+            view.context.getColor(R.color.difficulty_piece_of_cake)
         } else {
-                view.context.getColor(R.color.colorAccent)
+                view.context.getColor(R.color.difficulty_advanced)
         }
         binding.tripListItemStatus.setTextColor(color)
     }
