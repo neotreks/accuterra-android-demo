@@ -28,6 +28,7 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
+import com.neotreks.accuterra.mobile.demo.extensions.fromMilesToMeters
 import com.neotreks.accuterra.mobile.demo.extensions.setOnSingleClickListener
 import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsStyle
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
@@ -1001,9 +1002,9 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             val maxTripDistance = viewModel.maxTripDistance
             val favorite = if (viewModel.favoriteOnly) true else null // We wan to use filter only in `favorite = true`
 
-            val techRatingSearchCriteria = maxDifficultyLevel?.let { TechRatingSearchCriteria(maxDifficultyLevel, Comparison.LESS_EQUALS) }
-            val userRatingSearchCriteria = minUserRating?.let { UserRatingSearchCriteria(minUserRating.toFloat(), Comparison.GREATER_EQUALS) }
-            val lengthSearchCriteria = maxTripDistance?.let { LengthSearchCriteriaBuilder.build(maxTripDistance.toFloat()) }
+            val techRatingSearchCriteria = maxDifficultyLevel?.let { TechRatingSearchCriteriaBuilder.build(maxDifficultyLevel, Comparison.LESS_EQUALS) }
+            val userRatingSearchCriteria = minUserRating?.let { UserRatingSearchCriteriaBuilder.build(minUserRating.toFloat(), Comparison.GREATER_EQUALS) }
+            val lengthSearchCriteria = maxTripDistance?.let { LengthSearchCriteriaBuilder.build(maxTripDistance.toFloat().fromMilesToMeters()) }
 
             val limit = QueryLimitBuilder.build(200)
 

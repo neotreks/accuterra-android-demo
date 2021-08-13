@@ -9,8 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.neotreks.accuterra.mobile.demo.extensions.notifyObserver
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.AccessConcern
-import com.neotreks.accuterra.mobile.sdk.trail.model.Tag
 import com.neotreks.accuterra.mobile.sdk.trail.model.TechnicalRating
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailTag
 import com.neotreks.accuterra.mobile.sdk.trip.model.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -34,7 +34,7 @@ class TrailSaveViewModel: ViewModel() {
     var techRatings: List<TechnicalRating> = listOf()
     var accessConcerns: List<AccessConcern> = listOf()
 
-    lateinit var tagMapping: MutableMap<Int, Tag>
+    lateinit var trailTagMapping: MutableMap<Int, TrailTag>
 
     var isFormDirty: Boolean = false
 
@@ -101,12 +101,12 @@ class TrailSaveViewModel: ViewModel() {
     private suspend fun loadEnums(context: Context) {
         techRatings = ServiceFactory.getEnumService(context).getTechRatings()
         accessConcerns = ServiceFactory.getEnumService(context).getAccessConcerns()
-        tagMapping = tagMapping(context)
+        trailTagMapping = tagMapping(context)
     }
 
-    private suspend fun tagMapping(context: Context): MutableMap<Int, Tag> {
-        val mapping = mutableMapOf<Int, Tag>()
-        val tags = ServiceFactory.getEnumService(context).getTags()
+    private suspend fun tagMapping(context: Context): MutableMap<Int, TrailTag> {
+        val mapping = mutableMapOf<Int, TrailTag>()
+        val tags = ServiceFactory.getEnumService(context).getTrailTags()
         tags.forEachIndexed { id, tag ->
             mapping[id] = tag
         }

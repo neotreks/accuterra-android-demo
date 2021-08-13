@@ -316,12 +316,13 @@ class TrailSaveActivity : AppCompatActivity() {
         // Clear previous values
         chipGroup.removeAllViews()
         // Let's add all tags into the list
-        for((id, tag) in viewModel.tagMapping.entries) {
+        for((id, tag) in viewModel.trailTagMapping.entries) {
             // Avoid navigation tags
-            if (tag.pointTypeCode == SdkPointType.NAVIGATION.code) {
+            if ((tag.type != TrailTagType.TRIP_ONLY && tag.type != TrailTagType.TRIP_AND_TRAIL)
+                || tag.code == SdkTag.TRAIL_HEAD.code || tag.code == SdkTag.TRAIL_END.code) {
                 continue
             }
-            val isPoiTag = poiTags.contains(tag)
+            val isPoiTag = poiTags.find { it.trailTagCode == tag.code } != null
             val isSelected = tripTags.contains(tag)
             // Handle UI
             val chip = Chip(chipGroup.context)
@@ -441,7 +442,7 @@ class TrailSaveActivity : AppCompatActivity() {
             campingType = enumService.getCampingTypeByCode(SdkCampingType.DISPERSED.code)
         }
 
-        var trip = viewModel.tripRecording.value
+        val trip = viewModel.tripRecording.value
             ?: throw IllegalStateException("Trip not set")
 
         // UI blocking dialog
@@ -450,28 +451,27 @@ class TrailSaveActivity : AppCompatActivity() {
 
         // Tags
         val selectedTagIds = binding.activityTrailSaveTags.checkedChipIds
-        val tags = viewModel.tagMapping.filter { selectedTagIds.contains(it.key) }.values.toList()
+        val tags = viewModel.trailTagMapping.filter { selectedTagIds.contains(it.key) }.values.toList()
 
         // Update the trip with gathered data
-        var tripInfo = trip.tripInfo
-        tripInfo = tripInfo.copy(
-            name = binding.activityTrailSaveTrailName.text.toString(),
-            description = binding.activityTrailSaveTrailDescription.text.trimOrNull(),
-            campingTypes = listOf(campingType),
-            tags = tags
-        )
+        trip.tripInfo.apply {
+            this.name = binding.activityTrailSaveTrailName.text.toString()
+            this.description = binding.activityTrailSaveTrailDescription.text.trimOrNull()
+            this.campingTypes = listOf(campingType)
+            this.tags = tags
+        }
         // Add dummy data for now
-        var userInfo = trip.userInfo
         val rating = null
         val note = binding.activityTrailSaveTrailPersonalNote.text.trimOrNull()
         val sharingType = TripSharingType.PRIVATE
         val promote = true
-        userInfo = userInfo.copy(
-            userRating = rating,
-            personalNote = note,
-            sharingType = sharingType,
-            promoteToTrail = promote
-        )
+        trip.userInfo.apply {
+            this.userRating = rating
+            this.userRating = rating
+            this.personalNote = note
+            this.sharingType = sharingType
+            this.promoteToTrail = promote
+        }
         // Custom Data
         val ratingValue = binding.activityTrailSaveTechRating.value.toInt()
         val permitRequired = binding.activityTrailSavePermitRequired.isChecked
@@ -510,13 +510,11 @@ class TrailSaveActivity : AppCompatActivity() {
         var allMedia = viewModel.tripMedia.value!!
         allMedia = ApkMediaUtil.updatePositions(allMedia)
 
-        // Copy gathered data
-        trip = trip.copy(
-            tripInfo = tripInfo,
-            userInfo = userInfo,
-            media = allMedia,
-            extProperties = ExtPropertiesBuilder.buildList(trailCollectionData),
-        )
+        // Apply gathered data
+        trip.apply {
+            this.media = allMedia
+            this.extProperties = ExtPropertiesBuilder.buildList(trailCollectionData)
+        }
 
         // Validation
         val validationError = getValidationError(trip)

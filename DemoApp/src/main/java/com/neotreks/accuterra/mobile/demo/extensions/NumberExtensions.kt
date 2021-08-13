@@ -24,6 +24,10 @@ fun Float.fromMetersToInches(): Float {
     return this * 39.37f
 }
 
+/** Converts miles into meters */
+fun Float.fromMilesToMeters(): Float {
+    return this * 1609.344F
+}
 
 /**
  * Returns human readable size for bytes value, for example 1.1 GB

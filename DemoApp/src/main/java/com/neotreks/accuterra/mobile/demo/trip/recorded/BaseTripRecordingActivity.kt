@@ -13,7 +13,6 @@ import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateString
 import com.neotreks.accuterra.mobile.demo.toast
-import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
@@ -207,9 +206,8 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
             null -> {
                 val tripName = "Trip ${Date().toLocalDateString()}" // Default name
                 lifecycleScope.launchWhenResumed {
-                            val driverId = DemoIdentityManager().getUserId(this@BaseTripRecordingActivity)
                             val vehicleId = "test_vehicle" // TODO: Load vehicle ID
-                            val result = recorder.startTripRecording(tripName, getTrailId(), driverId, vehicleId,
+                            val result = recorder.startTripRecording(tripName, getTrailId(), vehicleId,
                                 getExtProperties(), getTelemetryModel()
                             )
                             when {
@@ -296,7 +294,8 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
         // We want to copy tags from POIs to Trip itself
         val pois = ServiceFactory.getTripRecordingService(this).getTripRecordingPOIs(uuid)
         val poisTags = pois.flatMap { it.tags }
-        recorder.setTripRecordingTags(poisTags)
+        val trailTags = ServiceFactory.getEnumService(applicationContext).getCorrespondingTrailTags(poisTags)
+        recorder.setTripRecordingTags(trailTags)
         // Now we want to finish trip recording
         recorder.finishTripRecording()
         updateRecordingButtons()

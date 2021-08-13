@@ -348,7 +348,7 @@ class TripSaveActivity : AppCompatActivity() {
             campingType = enumService.getCampingTypeByCode(SdkCampingType.DISPERSED.code)
         }
 
-        var trip = viewModel.tripRecording.value
+        val trip = viewModel.tripRecording.value
             ?: throw IllegalStateException("Trip not set")
 
         // UI blocking dialog
@@ -356,32 +356,28 @@ class TripSaveActivity : AppCompatActivity() {
         dialog.show()
 
         // Update the trip with gathered data
-        var tripInfo = trip.tripInfo
-        tripInfo = tripInfo.copy(
-            name = binding.activityTripSaveTripName.text.toString(),
-            description = binding.activityTripSaveTripDescription.text.toString(),
-            campingTypes = listOf(campingType)
-        )
+        trip.tripInfo.apply {
+            this.name = binding.activityTripSaveTripName.text.toString()
+            this.description = binding.activityTripSaveTripDescription.text.toString()
+            this.campingTypes = listOf(campingType)
+        }
         // Add dummy data for now
-        var userInfo = trip.userInfo
         val rating = binding.activityTripSaveMyRating.rating
         val note = binding.activityTripSaveTripPersonalNote.text?.toString()
         val sharingType = binding.activityTripSaveShare.selectedItem as TripSharingType
-        userInfo = userInfo.copy(
-            userRating = rating,
-            personalNote = note,
-            sharingType = sharingType,
-            promoteToTrail = binding.activityTripSaveTripPromote.isChecked
-        )
+        trip.userInfo.apply {
+            this.userRating = rating
+            this.personalNote = note
+            this.sharingType = sharingType
+            this.promoteToTrail = binding.activityTripSaveTripPromote.isChecked
+        }
         // Media
         var allMedia = viewModel.media.value!!
         allMedia = ApkMediaUtil.updatePositions(allMedia)
-        // Copy gathered data
-        trip = trip.copy(
-            tripInfo = tripInfo,
-            userInfo = userInfo,
+        // Apply gathered data
+        trip.apply {
             media = allMedia
-        )
+        }
 
         GlobalScope.launch {
             // Safe Trip Data into the DB

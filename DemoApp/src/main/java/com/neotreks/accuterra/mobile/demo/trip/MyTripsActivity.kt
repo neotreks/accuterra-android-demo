@@ -183,7 +183,7 @@ class MyTripsActivity : AppCompatActivity() {
                 return
             }
             // Online
-            val criteria = GetMyActivityFeedCriteria()
+            val criteria = GetMyActivityFeedCriteria(includeExtProperties = true)
             viewModel.loadOnlineTrips(this, criteria)
         } else {
             // Local

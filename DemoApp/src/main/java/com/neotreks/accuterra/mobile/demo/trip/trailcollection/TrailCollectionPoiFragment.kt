@@ -32,8 +32,8 @@ import com.neotreks.accuterra.mobile.demo.util.DemoAppFileProvider
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.trail.model.PoiTag
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
-import com.neotreks.accuterra.mobile.sdk.trail.model.Tag
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 import java.io.File
@@ -266,7 +266,7 @@ class TrailCollectionPoiFragment : Fragment() {
         val description = binding.fragmentTrailCollectionPoiFormTrailDescription.text.toString()
         val pointType = binding.fragmentTrailCollectionPoiFormPoiType.selectedItem as PointType
         val tags = binding.fragmentTrailCollectionPoiFormTags.checkedChipIds.mapNotNull { id ->
-            viewModel.tagMapping[id] ?: throw IllegalStateException("Cannot find tag object for id $id")
+            viewModel.poiTagMapping[id] ?: throw IllegalStateException("Cannot find tag object for id $id")
         }
         val media = viewModel.media.value!!
 
@@ -299,7 +299,7 @@ class TrailCollectionPoiFragment : Fragment() {
         val description = binding.fragmentTrailCollectionPoiFormTrailDescription.text.toString()
         val pointType = binding.fragmentTrailCollectionPoiFormPoiType.selectedItem as? PointType
         val tags = binding.fragmentTrailCollectionPoiFormTags.checkedChipIds.mapNotNull { id ->
-            viewModel.tagMapping[id] ?: throw IllegalStateException("Cannot find tag object for id $id")
+            viewModel.poiTagMapping[id] ?: throw IllegalStateException("Cannot find tag object for id $id")
         }
         viewModel.poiBackup = TrailCollectionViewModel.PoiBackup(
             name, description, pointType, tags
@@ -337,7 +337,7 @@ class TrailCollectionPoiFragment : Fragment() {
         val chipGroup = binding.fragmentTrailCollectionPoiFormTags
         chipGroup.removeAllViews()
         // Let's add all tags into the list
-        for((id, tag) in viewModel.tagMapping.entries) {
+        for((id, tag) in viewModel.poiTagMapping.entries) {
             if (tag.pointTypeCode != pointType.code) {
                 continue
             }
@@ -372,7 +372,7 @@ class TrailCollectionPoiFragment : Fragment() {
         // Mark as selected if backup is present
         val chipGroup = binding.fragmentTrailCollectionPoiFormTags
         val mappingEntries =
-            viewModel.poiBackup?.tags?.mapNotNull { tag -> viewModel.tagMapping.entries.find { it.value.code == tag.code } }
+            viewModel.poiBackup?.tags?.mapNotNull { tag -> viewModel.poiTagMapping.entries.find { it.value.code == tag.code } }
         if (mappingEntries != null && mappingEntries.isNotEmpty()) {
             for (entry in mappingEntries) {
                 chipGroup.check(entry.key)
@@ -417,8 +417,8 @@ class TrailCollectionPoiFragment : Fragment() {
 
     private fun markTags(poi: TripRecordingPoi) {
         for (tag in poi.tags) {
-            val entry = viewModel.tagMapping.entries.find { it.value.code == tag.code }
-                ?: throw IllegalStateException("Cannot find tag ID for tag: $tag, mapping: ${viewModel.tagMapping}")
+            val entry = viewModel.poiTagMapping.entries.find { it.value.code == tag.code }
+                ?: throw IllegalStateException("Cannot find tag ID for tag: $tag, mapping: ${viewModel.poiTagMapping}")
             binding.fragmentTrailCollectionPoiFormTags.check(entry.key)
         }
     }
@@ -467,7 +467,7 @@ class TrailCollectionPoiFragment : Fragment() {
     private fun getValidationError(
         name: String,
         description: String,
-        tags: List<Tag>,
+        tags: List<PoiTag>,
         media: MutableList<TripRecordingMedia>
     ): FormValidationError? {
         // Check mandatory values
@@ -493,7 +493,7 @@ class TrailCollectionPoiFragment : Fragment() {
             name: String,
             description: String,
             pointType: PointType,
-            tags: List<Tag>,
+            tags: List<PoiTag>,
             media: MutableList<TripRecordingMedia>
         )
 

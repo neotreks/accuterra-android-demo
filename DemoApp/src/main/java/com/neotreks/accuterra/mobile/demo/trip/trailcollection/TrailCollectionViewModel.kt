@@ -9,8 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.neotreks.accuterra.mobile.demo.extensions.notifyObserver
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocationBuilder
+import com.neotreks.accuterra.mobile.sdk.trail.model.PoiTag
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
-import com.neotreks.accuterra.mobile.sdk.trail.model.Tag
+import com.neotreks.accuterra.mobile.sdk.trail.model.TrailTag
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMediaBuilder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
@@ -37,7 +38,8 @@ class TrailCollectionViewModel() : ViewModel() {
 
     val tripStatistics: MutableLiveData<TripStatistics?> = MutableLiveData(null)
 
-    lateinit var tagMapping: MutableMap<Int, Tag>
+    lateinit var poiTagMapping: MutableMap<Int, PoiTag>
+    lateinit var trailTagMapping: MutableMap<Int, TrailTag>
 
     var isAddPoiMode = false
 
@@ -62,7 +64,7 @@ class TrailCollectionViewModel() : ViewModel() {
         var name: String?,
         var description: String?,
         var pointType: PointType?,
-        var tags: List<Tag> = listOf()
+        var tags: List<PoiTag> = listOf()
     )
 
 
@@ -73,16 +75,23 @@ class TrailCollectionViewModel() : ViewModel() {
     /* * * * * * * * * * * * */
 
     suspend fun initTagMapping(context: Context) {
-        // Lets create mapping
-        val mapping = mutableMapOf<Int, Tag>()
-        ServiceFactory.getEnumService(context).getTags().mapIndexed { id, tag ->
-            mapping[id] = tag
+        // Lets create POI TAG mapping
+        val poiMapping = mutableMapOf<Int, PoiTag>()
+        ServiceFactory.getEnumService(context).getPoiTags().mapIndexed { id, tag ->
+            poiMapping[id] = tag
         }
-        this.tagMapping = mapping
+        this.poiTagMapping = poiMapping
+
+        // Lets create DRIVE TAG mapping
+        val trialMapping = mutableMapOf<Int, TrailTag>()
+        ServiceFactory.getEnumService(context).getTrailTags().mapIndexed { id, tag ->
+            trialMapping[id] = tag
+        }
+        this.trailTagMapping = trialMapping
     }
 
-    fun getWaypointTags(context: Context, pointType: PointType): List<Tag> {
-        return tagMapping.values.filter { it.pointTypeCode == pointType.code }
+    fun getWaypointTags(context: Context, pointType: PointType): List<PoiTag> {
+        return poiTagMapping.values.filter { it.pointTypeCode == pointType.code }
     }
 
     fun getTripRecorder(context: Context): ITripRecorder {

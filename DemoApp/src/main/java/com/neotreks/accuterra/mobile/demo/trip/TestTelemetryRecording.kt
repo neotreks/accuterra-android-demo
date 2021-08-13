@@ -24,7 +24,6 @@ class TestTelemetryRecording(private val _context: Context) {
     private lateinit var recorder: ITripRecorder
     private lateinit var service: ITripRecordingService
 
-    private val driverId = "test user"
     private val vehicleId = "test vehicle"
     private val telemetryTypeName = "locations"
 
@@ -52,7 +51,6 @@ class TestTelemetryRecording(private val _context: Context) {
             if (activeTripRecording == null) {
                 telemetryModel = buildTestTelemetryModel()
                 val result = recorder.startTripRecording("Testing trip",
-                    driverId = driverId ,
                     vehicleId = vehicleId,
                     telemetryModel = telemetryModel,
                 )

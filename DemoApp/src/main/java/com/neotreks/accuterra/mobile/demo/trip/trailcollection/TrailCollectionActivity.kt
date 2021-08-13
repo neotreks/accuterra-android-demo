@@ -41,8 +41,8 @@ import com.neotreks.accuterra.mobile.sdk.model.ExtPropertiesBuilder
 import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryModel
 import com.neotreks.accuterra.mobile.sdk.trail.extension.toMapLocation
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
+import com.neotreks.accuterra.mobile.sdk.trail.model.PoiTag
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
-import com.neotreks.accuterra.mobile.sdk.trail.model.Tag
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailCollectionData
 import com.neotreks.accuterra.mobile.sdk.trip.model.*
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
@@ -330,7 +330,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         name: String,
         description: String,
         pointType: PointType,
-        tags: List<Tag>,
+        tags: List<PoiTag>,
         media: MutableList<TripRecordingMedia>
     ) {
 
