@@ -1000,7 +1000,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             val maxDifficultyLevel = viewModel.maxDifficultyLevel?.level
             val minUserRating = viewModel.minUserRating
             val maxTripDistance = viewModel.maxTripDistance
-            val favorite = if (viewModel.favoriteOnly) true else null // We wan to use filter only in `favorite = true`
+            val favorite = if (viewModel.favoriteOnly) true else null // We want to use filter only in `favorite = true`
 
             val techRatingSearchCriteria = maxDifficultyLevel?.let { TechRatingSearchCriteriaBuilder.build(maxDifficultyLevel, Comparison.LESS_EQUALS) }
             val userRatingSearchCriteria = minUserRating?.let { UserRatingSearchCriteriaBuilder.build(minUserRating.toFloat(), Comparison.GREATER_EQUALS) }
@@ -1031,6 +1031,11 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 val trails = viewModel.findTrails(searchCriteria, this@TrailDiscoveryActivity)
                 zoomCamera.invoke(trails)
 
+                val trailIds = trails.map { trailInfo -> trailInfo.id }
+
+                trailLayersManager.setVisibleTrails(trailIds.toSet())
+
+
                 // backup the bounds settings. otherwise we won't be able to get them
                 // if the map is hidden and user wants to filter it
                 viewModel.lastSearchedMapBounds = mapBounds
@@ -1049,6 +1054,11 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 // Run the query
                 val trails = viewModel.findTrails(searchCriteria, this@TrailDiscoveryActivity)
                 zoomCamera.invoke(trails)
+
+                val trailIds = trails.map { trailInfo -> trailInfo.id }
+
+                trailLayersManager.setVisibleTrails(trailIds.toSet())
+
             }
         }
     }
