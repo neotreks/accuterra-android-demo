@@ -48,7 +48,8 @@
     <string name="demo_activity_downloading_trail_db">Downloading TRAIL DB</string>
     <string name="demo_activity_unpacking_trail_db">Unpacking TRAIL DB</string>
     <string name="demo_activity_updating_trail_db">Updating TRAIL DB</string>
-    <string name="demo_activity_updating_trail_user_data">Updating TRAIL USER DATA</string>
+    <string name="demo_activity_updating_trail_user_data">Updating Trail User Data</string>
+    <string name="demo_activity_updating_trail_dynamic_data">Updating Trail Dynamic Data</string>
     <string name="demo_activity_init_trail_paths_cache">Initializing Trail Paths Cache</string>
     <string name="demo_activity_init_trail_markers_cache">Initializing Trail Markers Cache</string>
 

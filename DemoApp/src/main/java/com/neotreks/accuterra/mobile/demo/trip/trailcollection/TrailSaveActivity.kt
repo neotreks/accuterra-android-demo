@@ -31,10 +31,7 @@ import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.model.ExtPropertiesBuilder
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
 import com.neotreks.accuterra.mobile.sdk.trail.service.ITrailMediaService
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecording
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripSharingType
+import com.neotreks.accuterra.mobile.sdk.trip.model.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -454,11 +451,15 @@ class TrailSaveActivity : AppCompatActivity() {
         val tags = viewModel.trailTagMapping.filter { selectedTagIds.contains(it.key) }.values.toList()
 
         // Update the trip with gathered data
+        val techRatingLevel = binding.activityTrailSaveTechRating.value.toInt()
+        val techRating = viewModel.techRatings.find { it.level == techRatingLevel }
+        val techRatingDescription = binding.activityTrailSaveTrailDifficultyDescription.text.trimOrNull()
         trip.tripInfo.apply {
             this.name = binding.activityTrailSaveTrailName.text.toString()
             this.description = binding.activityTrailSaveTrailDescription.text.trimOrNull()
             this.campingTypes = listOf(campingType)
             this.tags = tags
+            this.technicalRating = TripTechRating(null, techRating, techRatingDescription)
         }
         // Add dummy data for now
         val rating = null
@@ -473,13 +474,12 @@ class TrailSaveActivity : AppCompatActivity() {
             this.promoteToTrail = promote
         }
         // Custom Data
-        val ratingValue = binding.activityTrailSaveTechRating.value.toInt()
         val permitRequired = binding.activityTrailSavePermitRequired.isChecked
         val trailCollectionData = TrailCollectionData(
             // Mandatory
             // For Trail collection we gather just one value and not low/high values
-            difficultyRating = ratingValue,
-            difficultyDescription = binding.activityTrailSaveTrailDifficultyDescription.text.trimOrNull(),
+            difficultyRating = techRatingLevel,
+            difficultyDescription = techRatingDescription,
             // Optional: Basic
             highlights = binding.activityTrailSaveHighlights.text.trimOrNull(),
             history = binding.activityTrailSaveHistory.text.trimOrNull(),

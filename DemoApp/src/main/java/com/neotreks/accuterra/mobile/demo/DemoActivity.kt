@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
-import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsInterceptor
+import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
 import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsStyle
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
@@ -204,11 +204,13 @@ class DemoActivity : AppCompatActivity() {
                 trailConfiguration = TrailConfiguration(
                     // Update trail DB during SDK initialization
                     updateTrailDbDuringSdkInit = true,
-                    // Update trail User Data during SDK initialization
-                    updateTrailUserDataDuringSdkInit = true
+                    // Update trail User Data during SDK initialization (user rating, user like)
+                    updateTrailUserDataDuringSdkInit = true,
+                    // Update trail Dynamic Data during SDK initialization (ratings, reported closed dates, etc.)
+                    updateTrailDynamicDataDuringSdkInit = true,
                 ),
                 // Using Here Maps
-                // Please note we have to provide also a custom `HereMapsInterceptor` below
+                // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
                 // mapConfig = MapConfig (
                 //    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE)
                 // )
@@ -222,7 +224,7 @@ class DemoActivity : AppCompatActivity() {
                 dbEncryptConfigProvider = dbEncryptProvider,
                 // Using HERE Maps
                 // Please note you have to configure also `imageryMapConfig` in the configuration above
-                // mapRequestInterceptor = HereMapsInterceptor(),
+                // mapRequestInterceptor = ApkHereMapsInterceptor(),
             )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
@@ -260,6 +262,10 @@ class DemoActivity : AppCompatActivity() {
             // TRAIL USER DATA Update
             SdkInitStateDetail.TRAIL_USER_DATA_UPDATE -> {
                 binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_updating_trail_user_data)
+            }
+            // TRAIL Dynamic Data Update
+            SdkInitStateDetail.TRAIL_DYNAMIC_DATA_UPDATE -> {
+                binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_updating_trail_dynamic_data)
             }
             // Init Trail Paths
             SdkInitStateDetail.TRAIL_PATHS_CACHE_INIT -> {
