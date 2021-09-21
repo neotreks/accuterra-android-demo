@@ -7,7 +7,7 @@ import android.graphics.Bitmap
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import com.neotreks.accuterra.mobile.demo.ui.ApkIOUtils
+import com.neotreks.accuterra.mobile.demo.util.ApkIOUtils
 import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import kotlinx.coroutines.Dispatchers

@@ -2,4 +2,5 @@
 <paths>
     <files-path name="app_camera_images" path="camera" />
     <files-path name="app_trip_bundles" path="accuterra-trip-bundles" />
+    <files-path name="app_db_share" path="db_share" />
 </paths>

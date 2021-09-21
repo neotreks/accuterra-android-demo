@@ -15,6 +15,18 @@
         android:title="@string/general_copy_to_clipboard" />
 
     <item
+        android:id="@+id/upload_object_menu_share_sdk_db"
+        android:title="@string/upload_share_sdk_db" />
+
+    <item
+        android:id="@+id/upload_object_menu_share_trip_db"
+        android:title="@string/upload_share_trip_db" />
+
+    <item
+        android:id="@+id/upload_object_menu_share_location_db"
+        android:title="@string/upload_share_location_db" />
+
+    <item
         android:id="@+id/upload_object_menu_item_resume_queue"
         android:title="@string/upload_resume_upload_queue" />
 

@@ -209,11 +209,11 @@ class DemoActivity : AppCompatActivity() {
                     // Update trail Dynamic Data during SDK initialization (ratings, reported closed dates, etc.)
                     updateTrailDynamicDataDuringSdkInit = true,
                 ),
-                // Using Here Maps
-                // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
-                // mapConfig = MapConfig (
-                //    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE)
-                // )
+                mapConfig = MapConfig (
+                    // Using Here Maps
+                    // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
+                    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE)
+                )
             )
             // This is the main initialization of the AccuTerra SDK.
             // The listener is notified about progress of the initialization.
@@ -222,9 +222,7 @@ class DemoActivity : AppCompatActivity() {
             val result = SdkManager.initSdk(applicationContext, config, DemoAccessManager(), DemoIdentityManager(),
                 listener = listener,
                 dbEncryptConfigProvider = dbEncryptProvider,
-                // Using HERE Maps
-                // Please note you have to configure also `imageryMapConfig` in the configuration above
-                // mapRequestInterceptor = ApkHereMapsInterceptor(),
+                mapRequestInterceptor = ApkHereMapsInterceptor(),
             )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {

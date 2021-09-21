@@ -3,13 +3,24 @@ package com.neotreks.accuterra.mobile.demo.ui
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
+import android.view.View
+import android.view.View.MeasureSpec
+import android.view.ViewGroup
+import android.widget.ListAdapter
+import android.widget.ListView
+import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.view.isVisible
+import androidx.core.view.marginBottom
+import androidx.core.view.marginStart
+import androidx.core.view.marginTop
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.neotreks.accuterra.mobile.demo.BuildConfig
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.loadDrawable
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
+
 
 /**
  * UI related utility methods
@@ -70,6 +81,57 @@ object UiUtils {
 
     fun setApkVersionText(textView: TextView) {
         textView.text = BuildConfig.VERSION_NAME
+    }
+
+    /**
+     * Resizes passed [listView] height to display all items.
+     * This is needed e.g. when the list is inside a [ScrollView]
+     */
+    fun resizeToFitAllItems(listView: ListView) {
+        val adapter: ListAdapter = listView.adapter
+            ?: return //do nothing
+        //set listAdapter in loop for getting final size
+        var totalHeight = 0
+        val listViewWeight = getInnerWidthWeight(listView)
+        for (index in 0 until adapter.count) {
+            val listItem: View = adapter.getView(index, null, listView)
+            if (!listItem.isVisible) {
+                continue
+            }
+            val desiredWeight = MeasureSpec.makeMeasureSpec(listViewWeight, MeasureSpec.EXACTLY)
+            // Measure list item height
+            listItem.measure(desiredWeight, MeasureSpec.UNSPECIFIED)
+            totalHeight += listItem.measuredHeight
+        }
+        // Add the divider's height
+        totalHeight += (listView.dividerHeight * (adapter.count - 1)) + listView.marginTop + listView.marginBottom
+        //setting listview item in adapter
+        val params: ViewGroup.LayoutParams = listView.layoutParams
+        params.height = totalHeight
+        listView.layoutParams = params
+    }
+
+    /**
+     * Calculates _pure inner width_ for given view based on its parens, margins, etc.
+     */
+    private fun getInnerWidthWeight(view: View): Int {
+        var margins = 0
+        var curView:View? = view
+        var width = -1
+        do {
+            if (curView?.width ?: -1 > 0) {
+                width = curView?.width ?: -1
+                margins += curView?.marginStart ?: 0
+            }
+            curView = curView?.parent as? View
+        } while (curView != null && width < 1)
+
+        return if (width < 0) {
+            width
+        } else {
+            width - (2 * margins)
+        }
+
     }
 
 }

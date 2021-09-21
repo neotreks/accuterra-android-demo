@@ -17,6 +17,7 @@ import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
+import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
@@ -263,6 +264,7 @@ class TripSaveActivity : AppCompatActivity() {
 
         viewModel.pois.observe(this, { pois ->
             poiListManager.refreshAdapter(pois)
+            UiUtils.resizeToFitAllItems(binding.activityTripSavePoiList)
         })
 
     }

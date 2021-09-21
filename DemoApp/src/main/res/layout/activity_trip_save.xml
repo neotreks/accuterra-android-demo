@@ -20,12 +20,11 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_trip_save_toolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/activity_trip_save_toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -256,7 +255,7 @@
             <ListView
                 android:id="@+id/activity_trip_save_poi_list"
                 android:layout_width="match_parent"
-                android:layout_height="500dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin" />
 
         </LinearLayout>

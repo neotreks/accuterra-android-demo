@@ -27,6 +27,7 @@ import kotlinx.coroutines.runBlocking
 @Keep
 class LocationService: LocationUpdatesService() {
 
+    @Keep
     companion object {
 
         fun requestingLocationUpdates(context: Context): Boolean {

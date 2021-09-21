@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -437,7 +438,13 @@ class MyTripsActivity : AppCompatActivity() {
         ): TrailCollectionData? {
             val service = ServiceFactory.getTripRecordingService(context)
             val tripRecording = service.getTripRecordingByUUID(uuid)
-            return tripRecording?.extProperties?.firstOrNull()?.data?.jsonToClass(TrailCollectionData::class.java)
+            return try {
+                tripRecording?.extProperties?.firstOrNull()?.data?.jsonToClass(TrailCollectionData::class.java)
+            } catch (e: Exception) {
+                Log.e(TAG, "Cannot parse extProperties string: ${tripRecording?.extProperties}", e)
+                Toast.makeText(context, "Cannot parse extProperties due to: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                return null
+            }
         }
 
     }
