@@ -14,6 +14,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingActivity
+import com.neotreks.accuterra.mobile.demo.util.toJson
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.location.LocationUpdatesService
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
@@ -27,7 +28,6 @@ import kotlinx.coroutines.runBlocking
 @Keep
 class LocationService: LocationUpdatesService() {
 
-    @Keep
     companion object {
 
         fun requestingLocationUpdates(context: Context): Boolean {
@@ -85,7 +85,10 @@ class LocationService: LocationUpdatesService() {
         // Record locations if requested
         if (isRecordLocations) {
             serviceScope.launch {
-                recorder.logTrackPoint(location)
+                recorder.logTrackPoint(
+                    location = location,
+                    debugString = LocationDebugInfo.build(this@LocationService, location).toJson() // optional debug string
+                )
             }
         }
 

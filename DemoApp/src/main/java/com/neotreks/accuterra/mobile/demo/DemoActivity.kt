@@ -191,7 +191,7 @@ class DemoActivity : AppCompatActivity() {
                 // ),
                 // Request to initialize the overlay map download during SDK initialization
                 offlineCacheConfig = OfflineCacheConfig(
-                    downloadOverlayMap = true,
+                    downloadOverlayMap = false,
                     offlineCacheBackgroundServiceClass = ApkOfflineCacheBackgroundService::class.qualifiedName,
                 ),
                 tripConfiguration = TripConfiguration(

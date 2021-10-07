@@ -13,6 +13,9 @@
     <string name="settings_user_category">User</string>
     <string name="settings_user_id">User ID</string>
 
+    <string name="settings_recording_category">Trip Recording</string>
+    <string name="settings_recording_location_provider">Location Provider</string>
+
     <!-- DB Passcode -->
     <string name="activity_db_passcode_title">DB Passcode</string>
     <string name="activity_db_passcode_current_password">Current DB Passcode</string>

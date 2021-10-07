@@ -25,6 +25,10 @@ class RecordedTripPoiActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordedTripPoiBinding
 
+    private val poiNameFormatter by lazy {
+        TripPoiNameFormatter(this)
+    }
+
     /* * * * * * * * * * * * */
     /*       COMPANION       */
     /* * * * * * * * * * * * */
@@ -120,6 +124,7 @@ class RecordedTripPoiActivity : AppCompatActivity() {
             binding.activityRecordedTripPoiTripName.text = poi.name
             binding.activityRecordedTripPoiTripDescription.text = poi.description
             binding.activityRecordedTripPoiPoiType.text = poi.pointType.name
+            binding.activityRecordedTripPoiTripDistanceMarker.text = poiNameFormatter.getDistanceMarker(poi)
         })
         viewModel.media.observe(this, { mediaList ->
             mediaListManager.refreshPhotoGridAdapter(mediaList)

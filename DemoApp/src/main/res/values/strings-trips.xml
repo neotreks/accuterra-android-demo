@@ -66,6 +66,7 @@
     <string name="activity_trip_add_poi_title">Add POI</string>
     <string name="activity_trip_add_poi_name">POI Name</string>
     <string name="activity_trip_add_poi_description">Description</string>
+    <string name="activity_trip_add_poi_distance_marker">Distance marker:</string>
     <string name="activity_trip_add_poi_add_photos">Add Photos</string>
     <string name="activity_trip_add_poi_poi_type_label">POI type:</string>
     <string name="activity_trip_add_poi_is_wp_label">Is Waypoint:</string>

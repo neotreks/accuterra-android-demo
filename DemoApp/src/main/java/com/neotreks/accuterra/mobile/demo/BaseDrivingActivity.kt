@@ -6,17 +6,20 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.UiThread
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
+import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
 import com.neotreks.accuterra.mobile.demo.trip.location.LocationActivity
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.ApkMapActivityUtil
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.NetworkStateReceiver
 import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
+import com.neotreks.accuterra.mobile.sdk.location.SdkLocationProvider
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
@@ -241,7 +244,8 @@ abstract class BaseDrivingActivity : LocationActivity() {
         Log.d(TAG, "initializeGpsLocationUpdates()")
 
         if (hasLocationPermissions()) {
-            getLocationService()?.requestLocationUpdates()
+            val provider = getPreferredLocationProvider()
+            getLocationService()?.requestLocationUpdates(provider)
         } else {
             requestPermissions()
         }
@@ -275,6 +279,18 @@ abstract class BaseDrivingActivity : LocationActivity() {
             setLocationTracking(newTracking)
         } else {
             setLocationTracking(lastGpsTracking)
+        }
+    }
+
+    protected open fun getPreferredLocationProvider(): SdkLocationProvider? {
+        // Read from shared preferences
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        // We need to use default value also here since
+        val providerString =  sharedPreferences.getString(UserSettingsActivity.KEY_LOCATION_PROVIDER, null)
+        return if (providerString.isNullOrBlank()) {
+            null
+        } else {
+            SdkLocationProvider.valueOf(providerString)
         }
     }
 

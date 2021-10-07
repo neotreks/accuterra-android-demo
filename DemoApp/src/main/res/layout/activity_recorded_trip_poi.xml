@@ -66,6 +66,29 @@
             android:maxLines="4"
             tools:text="Very long description that is possible not that long as it could be..." />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/DemoAppTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:labelFor="@id/activity_recorded_trip_poi_trip_description"
+                android:text="@string/activity_trip_add_poi_distance_marker" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/activity_recorded_trip_poi_trip_distance_marker"
+                android:layout_margin="@dimen/default_margin"
+                tools:text="4.4 MI" />
+
+        </LinearLayout>
+
+
         <!-- PHOTOS -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/activity_recorded_trip_poi_photos"

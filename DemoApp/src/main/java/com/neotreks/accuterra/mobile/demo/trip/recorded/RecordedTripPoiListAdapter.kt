@@ -10,7 +10,7 @@ import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 class RecordedTripPoiListAdapter(
     context: Context,
     pois: List<TripRecordingPoi>
-) : ListItemAdapter<TripRecordingPoi>(context, pois, RecordedTripPoiListViewBinder()) {
+) : ListItemAdapter<TripRecordingPoi>(context, pois, RecordedTripPoiListViewBinder(context)) {
 
     override fun getItemId(item: TripRecordingPoi): Long {
         return item.pk!!

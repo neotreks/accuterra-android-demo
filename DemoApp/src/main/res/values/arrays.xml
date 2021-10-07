@@ -6,4 +6,18 @@
         <item>5.0</item>
     </array>
 
+    <!-- Keep in sync with enum class SdkLocationProvider -->
+    <array name="settings_sdk_location_providers">
+        <item>FUSED</item>
+        <item>GPS_AND_NETWORK</item>
+        <item>GPS</item>
+    </array>
+
+    <!-- Keep in sync with enum class SdkLocationProvider -->
+    <array name="settings_sdk_location_providers_labels">
+        <item>FUSED</item>
+        <item>GPS AND NETWORK</item>
+        <item>GPS</item>
+    </array>
+
 </resources>

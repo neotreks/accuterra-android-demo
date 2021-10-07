@@ -12,8 +12,8 @@ android {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 1600
-        versionName "0.16.0"
+        versionCode 1700
+        versionName "0.17.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -71,15 +71,15 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.16.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.17.0"
     // Download also sources and javadoc for easier orientation - just for the development!
-    // implementation "com.accuterra:accuterra-android-sdk:0.16.0:sources"
-    // implementation "com.accuterra:accuterra-android-sdk:0.16.0:javadoc"
+    // implementation "com.accuterra:accuterra-android-sdk:0.17.0:sources"
+    // implementation "com.accuterra:accuterra-android-sdk:0.17.0:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "androidx.appcompat:appcompat:1.3.1"
-    implementation "androidx.constraintlayout:constraintlayout:2.1.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.1"
     implementation "androidx.lifecycle:lifecycle-common-java8:2.3.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
