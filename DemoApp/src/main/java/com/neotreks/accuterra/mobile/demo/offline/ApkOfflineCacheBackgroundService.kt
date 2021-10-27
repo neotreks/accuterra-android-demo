@@ -43,7 +43,8 @@ class ApkOfflineCacheBackgroundService: OfflineCacheBackgroundService() {
         // The PendingIntent to launch activity.
         val activityPendingIntent = PendingIntent.getActivity(
             this, 0,
-            Intent(this, OfflineMapsActivity::class.java), 0
+            Intent(this, OfflineMapsActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
         )
 
         // Extend Default Builder

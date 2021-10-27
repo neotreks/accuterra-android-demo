@@ -243,9 +243,6 @@ class TripSaveActivity : AppCompatActivity() {
                 trip?.userInfo?.userRating?.let { rating ->
                     binding.activityTripSaveMyRating.rating = rating
                 }
-                trip?.userInfo?.personalNote?.let { note ->
-                    binding.activityTripSaveTripPersonalNote.setText(note)
-                }
                 trip?.userInfo?.sharingType?.let { sharingType ->
                     // We expect sorting by ordinal
                     binding.activityTripSaveShare.setSelection(sharingType.ordinal, true)
@@ -365,11 +362,9 @@ class TripSaveActivity : AppCompatActivity() {
         }
         // Add dummy data for now
         val rating = binding.activityTripSaveMyRating.rating
-        val note = binding.activityTripSaveTripPersonalNote.text?.toString()
         val sharingType = binding.activityTripSaveShare.selectedItem as TripSharingType
         trip.userInfo.apply {
             this.userRating = rating
-            this.personalNote = note
             this.sharingType = sharingType
             this.promoteToTrail = binding.activityTripSaveTripPromote.isChecked
         }

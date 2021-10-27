@@ -43,7 +43,6 @@ class RecordedTripInfoFragment : RecordedTripFragment() {
                 binding.fragmentRecordedTripInfoMyRating.rating = rating
             }
             binding.fragmentRecordedTripInfoPromote.isChecked = trip.userInfo.promoteToTrail
-            binding.fragmentRecordedTripInfoTripPersonalNote.text = trip.userInfo.personalNote
         })
     }
 

@@ -11,6 +11,5 @@ ext {
     // MapBox
     mapbox_token = '"***"'
     // HERE Maps
-    heremaps_appid = '"***"'
-    heremaps_appcode = '"***"'
+    heremaps_api_key = '"***"'
 }

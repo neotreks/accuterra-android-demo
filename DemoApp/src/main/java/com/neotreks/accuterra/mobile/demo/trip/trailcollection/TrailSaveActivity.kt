@@ -264,7 +264,6 @@ class TrailSaveActivity : AppCompatActivity() {
             }
             binding.activityTrailSaveTrailRecommendedClearance.setText(trailCollectionData.recommendedClearance?.fromMetersToInches()?.toString())
             binding.activityTrailSaveTrailBestDirection.setText(trailCollectionData.bestDirection)
-            binding.activityTrailSaveTrailPersonalNote.setText(trip.userInfo.personalNote)
             // Preferred image
             viewModel.preferredImageUuid = trailCollectionData.preferredImageUuid
         }
@@ -298,7 +297,6 @@ class TrailSaveActivity : AppCompatActivity() {
         binding.activityTrailSaveSeasonWinter.addTextChangedListener { onFormValueChanged() }
         binding.activityTrailSaveTrailRecommendedClearance.addTextChangedListener { onFormValueChanged() }
         binding.activityTrailSaveTrailBestDirection.addTextChangedListener { onFormValueChanged() }
-        binding.activityTrailSaveTrailPersonalNote.addTextChangedListener { onFormValueChanged() }
     }
 
     private fun onFormValueChanged() {
@@ -463,13 +461,10 @@ class TrailSaveActivity : AppCompatActivity() {
         }
         // Add dummy data for now
         val rating = null
-        val note = binding.activityTrailSaveTrailPersonalNote.text.trimOrNull()
         val sharingType = TripSharingType.PRIVATE
         val promote = true
         trip.userInfo.apply {
             this.userRating = rating
-            this.userRating = rating
-            this.personalNote = note
             this.sharingType = sharingType
             this.promoteToTrail = promote
         }

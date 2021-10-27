@@ -116,7 +116,8 @@ class LocationService: LocationUpdatesService() {
         // The PendingIntent to launch activity.
         val activityPendingIntent = PendingIntent.getActivity(
             this, 0,
-            Intent(this, TripRecordingActivity::class.java), 0
+            Intent(this, TripRecordingActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
         )
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .addAction(

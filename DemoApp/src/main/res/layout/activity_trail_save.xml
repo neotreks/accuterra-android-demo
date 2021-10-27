@@ -561,26 +561,6 @@
                     android:maxLines="4"
                     tools:text="Best Direction text" />
 
-                <!-- PERSONAL NOTE -->
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
-                    android:layout_marginHorizontal="@dimen/default_margin"
-                    android:labelFor="@id/activity_trail_save_trail_personal_note"
-                    android:text="@string/activity_save_trail_personal_note" />
-
-                <EditText
-                    android:id="@+id/activity_trail_save_trail_personal_note"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/default_margin"
-                    android:importantForAutofill="no"
-                    android:inputType="textCapSentences|textMultiLine"
-                    android:maxLines="4"
-                    tools:text="I should take more gasoline next time." />
-
             </LinearLayout>
 
         </LinearLayout>

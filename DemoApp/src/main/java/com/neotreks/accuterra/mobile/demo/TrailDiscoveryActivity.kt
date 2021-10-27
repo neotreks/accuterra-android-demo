@@ -26,11 +26,9 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.engine.*
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
 import com.neotreks.accuterra.mobile.demo.extensions.fromMilesToMeters
 import com.neotreks.accuterra.mobile.demo.extensions.setOnSingleClickListener
-import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsStyle
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItemAdapter
@@ -1024,7 +1022,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                     userRating = userRatingSearchCriteria,
                     length = lengthSearchCriteria,
                     favorite = favorite,
-                    limit = limit
+                    limit = limit,
+                    trailSearchType = TrailMapBoundsSearchType.BY_TRAIL_BOUNDS,
                 )
 
                 // Run the query

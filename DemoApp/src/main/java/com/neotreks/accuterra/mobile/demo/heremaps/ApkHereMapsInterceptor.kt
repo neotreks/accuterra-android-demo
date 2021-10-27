@@ -8,12 +8,8 @@ import com.neotreks.accuterra.mobile.sdk.map.util.HereMapsInterceptor
  */
 class ApkHereMapsInterceptor: HereMapsInterceptor() {
 
-    override fun getAppId(): String {
-        return BuildConfig.HERE_APPID
-    }
-
-    override fun getAppCode(): String {
-        return BuildConfig.HERE_APPCODE
+    override fun getApiKey(): String {
+        return BuildConfig.HERE_MAPS_API_KEY
     }
 
 }

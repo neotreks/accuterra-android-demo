@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
-import com.neotreks.accuterra.mobile.demo.heremaps.HereMapsStyle
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
@@ -21,6 +20,7 @@ import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
 import com.neotreks.accuterra.mobile.sdk.cache.model.OfflineCacheConfig
+import com.neotreks.accuterra.mobile.sdk.map.HereMapsStyle
 import com.neotreks.accuterra.mobile.sdk.map.ImageryMapConfig
 import com.neotreks.accuterra.mobile.sdk.map.MapConfig
 import com.neotreks.accuterra.mobile.sdk.security.model.SdkEndpointConfig

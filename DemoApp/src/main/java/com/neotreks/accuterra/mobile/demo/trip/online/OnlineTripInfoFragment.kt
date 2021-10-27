@@ -45,7 +45,6 @@ class OnlineTripInfoFragment : OnlineTripFragment() {
                 binding.fragmentTripInfoMyRating.rating = rating
             }
             binding.fragmentTripInfoPromote.isChecked = trip.userInfo.promoteToTrail
-            binding.fragmentTripInfoTripPersonalNote.text = trip.userInfo.personalNote
         })
     }
 

@@ -158,10 +158,20 @@ abstract class LocationActivity : AppCompatActivity(),
                     // receive empty arrays.
                     Log.i(TAG, "User interaction was cancelled.")
                 }
-                grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
+                grantResults.all { it == PackageManager.PERMISSION_GRANTED } -> {
                     // Permission was granted.
                     mService!!.requestLocationUpdates()
                     onLocationPermissionsGranted()
+                }
+                grantResults.contains(PackageManager.PERMISSION_GRANTED) -> {
+                    // Only some Permission was granted.
+                    Snackbar.make(
+                        getViewForSnackbar(),
+                        R.string.location_update_service_permission_partially_denied_explanation,
+                        Snackbar.LENGTH_INDEFINITE
+                    )
+                        .addSettingsAction(this)
+                        .show()
                 }
                 else -> {
                     // Permission denied.
@@ -280,7 +290,7 @@ abstract class LocationActivity : AppCompatActivity(),
                 R.string.location_update_service_permission_rationale,
                 Snackbar.LENGTH_INDEFINITE
             )
-                .setAction(R.string.general_ok) {
+                .setAction(R.string.action_settings) {
                     // Request permission
                     LocationPermissionUtil.checkForegroundLocationPermission(this@LocationActivity,
                         REQUEST_PERMISSIONS_REQUEST_CODE)
