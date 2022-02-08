@@ -175,7 +175,7 @@
     <string name="activity_trail_collection_poi_panel_edit_poi">Edit POI</string>
     <string name="activity_trail_collection_poi_form_poi_type_tags">POI Type and Tags</string>
     <string name="activity_trail_collection_poi_form_is_wp_label">Is Waypoint:</string>
-    <string name="activity_trail_collection_poi_form_photos">Photos (3 minimum)</string>
+    <string name="activity_trail_collection_poi_form_photos">Photos (1 minimum)</string>
     <string name="activity_trail_collection_poi_panel_add_photos">Add Photos</string>
     <string name="activity_trail_collection_poi_form_name">Name</string>
     <string name="activity_trail_collection_poi_panel_description">Description</string>
@@ -188,7 +188,7 @@
 
     <string name="activity_trail_collection_validation_name">Please provide a POI name of at least 3 character long.</string>
     <string name="activity_trail_collection_validation_description">Please provide a description text of at least 10 characters long.</string>
-    <string name="activity_trail_collection_validation_photos">Please provide at least 3 photos.</string>
+    <string name="activity_trail_collection_validation_photos">Please provide at least 1 photo.</string>
     <string name="activity_trail_collection_validation_tags">Please select at least 1 tag.</string>
 
     <string name="activity_trail_collection_recording_status_recording">Recording Track</string>

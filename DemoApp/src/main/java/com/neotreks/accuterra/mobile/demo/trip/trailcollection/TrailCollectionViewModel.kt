@@ -37,7 +37,7 @@ class TrailCollectionViewModel() : ViewModel() {
     val lastLocation: MutableLiveData<Location?> = MutableLiveData(null)
 
     val tripStatistics: MutableLiveData<TripStatistics?> = MutableLiveData(null)
-
+    val mapFocus: MutableLiveData<Boolean> = MutableLiveData(false)
     lateinit var poiTagMapping: MutableMap<Int, PoiTag>
     lateinit var trailTagMapping: MutableMap<Int, TrailTag>
 
@@ -73,6 +73,14 @@ class TrailCollectionViewModel() : ViewModel() {
     /* * * * * * * * * * * * */
     /*        PUBLIC         */
     /* * * * * * * * * * * * */
+
+    fun setUserAsMapFocus(boolean: Boolean){
+        mapFocus.postValue(boolean)
+    }
+    fun isUserTheMapFocus():Boolean{
+        return mapFocus.value == true
+    }
+
 
     suspend fun initTagMapping(context: Context) {
         // Lets create POI TAG mapping

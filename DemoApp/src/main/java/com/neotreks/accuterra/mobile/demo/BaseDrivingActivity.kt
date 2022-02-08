@@ -22,6 +22,7 @@ import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.location.SdkLocationProvider
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
+import com.neotreks.accuterra.mobile.sdk.map.HereMapsStyle
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapPoint
@@ -62,12 +63,12 @@ abstract class BaseDrivingActivity : LocationActivity() {
     // Available online styles
     private val styles: Array<String> = arrayOf(
         AccuTerraStyle.VECTOR,
-        Style.SATELLITE_STREETS
+        HereMapsStyle.SATELLITE
     )
 
     // Available offline styles
     private val offlineStyles: List<String> = listOf(
-        Style.SATELLITE_STREETS,
+        HereMapsStyle.SATELLITE,
         AccuTerraStyle.VECTOR
     )
 

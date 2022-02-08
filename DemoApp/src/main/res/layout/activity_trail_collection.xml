@@ -110,7 +110,6 @@
     </FrameLayout>
 
     <!-- Crosshair -->
-
     <ImageView
         android:id="@+id/activity_trail_collection_cross_hair"
         android:layout_width="wrap_content"
@@ -121,6 +120,7 @@
         app:layout_constraintBottom_toBottomOf="@id/activity_trail_collection_map_frame"
         android:src="@drawable/ic_crosshair"
         android:contentDescription="@string/trail_collection_content_description_crosshair"/>
+
 
     <!-- RECORDING PANEL -->
 

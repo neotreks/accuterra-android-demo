@@ -473,7 +473,7 @@ class TrailCollectionPoiFragment : Fragment() {
         // Check mandatory values
         if (name.length < 3) return FormValidationError( getString(R.string.activity_trail_collection_validation_name), binding.fragmentTrailCollectionPoiFormTrailName)
         if (description.length < 10) return FormValidationError( getString(R.string.activity_trail_collection_validation_description), binding.fragmentTrailCollectionPoiFormTrailDescription)
-        if (media.size < 3) return FormValidationError( getString(R.string.activity_trail_collection_validation_photos), binding.fragmentTrailCollectionPoiFormTakePhoto)
+        if (media.size < 1) return FormValidationError( getString(R.string.activity_trail_collection_validation_photos), binding.fragmentTrailCollectionPoiFormTakePhoto)
         if (tags.isEmpty()) return FormValidationError(getString(R.string.activity_trail_collection_validation_tags), binding.fragmentTrailCollectionPoiFormTags)
         // Everything OK
         return null

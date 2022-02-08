@@ -26,6 +26,7 @@ import com.neotreks.accuterra.mobile.sdk.map.MapConfig
 import com.neotreks.accuterra.mobile.sdk.security.model.SdkEndpointConfig
 import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailConfiguration
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripAttachmentSplitConfig
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripConfiguration
 import kotlinx.coroutines.*
 
@@ -191,7 +192,7 @@ class DemoActivity : AppCompatActivity() {
                 // ),
                 // Request to initialize the overlay map download during SDK initialization
                 offlineCacheConfig = OfflineCacheConfig(
-                    downloadOverlayMap = false,
+                    downloadOverlayMap = true,
                     offlineCacheBackgroundServiceClass = ApkOfflineCacheBackgroundService::class.qualifiedName,
                 ),
                 tripConfiguration = TripConfiguration(
@@ -199,7 +200,8 @@ class DemoActivity : AppCompatActivity() {
                     uploadNetworkType = NetworkTypeConstraint.CONNECTED,
                     // Let's keep the trip recording on the device for development reasons,
                     // otherwise it should be deleted
-                    deleteRecordingAfterUpload = false
+                    deleteRecordingAfterUpload = false,
+                    attachmentSplitConfig = TripAttachmentSplitConfig(attachmentSplitSizeLimit = 2.0f, attachmentSplitChunkSize = 1.0f)
                 ),
                 trailConfiguration = TrailConfiguration(
                     // Update trail DB during SDK initialization

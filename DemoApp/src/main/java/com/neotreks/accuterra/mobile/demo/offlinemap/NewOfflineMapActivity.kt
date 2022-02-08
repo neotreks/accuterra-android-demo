@@ -116,13 +116,13 @@ class NewOfflineMapActivity : AppCompatActivity() {
     // Available online styles
     private val styles: List<String> = listOf(
         AccuTerraStyle.VECTOR,
-        Style.SATELLITE_STREETS
+        HereMapsStyle.SATELLITE
     )
 
     // Available offline styles
     private val offlineStyles: List<String> = listOf(
         AccuTerraStyle.VECTOR,
-        Style.SATELLITE_STREETS
+        HereMapsStyle.SATELLITE
     )
 
     /* * * * * * * * * * * * */

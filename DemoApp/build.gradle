@@ -12,8 +12,8 @@ android {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 1800
-        versionName "0.18.0"
+        versionCode 1900
+        versionName "0.19.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -70,7 +70,7 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.18.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.19.0"
     // Download also sources and javadoc for easier orientation - just for the development!
     // implementation "com.accuterra:accuterra-android-sdk:0.18.0:sources"
     // implementation "com.accuterra:accuterra-android-sdk:0.18.0:javadoc"

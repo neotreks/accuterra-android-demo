@@ -2,21 +2,25 @@ package com.neotreks.accuterra.mobile.demo
 
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.UiThread
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailInfoBinding
 import com.neotreks.accuterra.mobile.demo.extensions.getFavoriteIconResource
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
+import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
+import com.neotreks.accuterra.mobile.demo.trip.location.LocationActivity
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.util.CrashSupport
@@ -25,7 +29,9 @@ import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
+import com.neotreks.accuterra.mobile.sdk.location.SdkLocationProvider
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
+import com.neotreks.accuterra.mobile.sdk.map.navigation.TrailNavigator
 import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 import com.neotreks.accuterra.mobile.sdk.trail.service.ITrailMediaService
@@ -40,7 +46,7 @@ import java.lang.ref.WeakReference
 import kotlin.math.round
 
 
-class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
+class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
 
     /* * * * * * * * * * * * */
     /*       COMPANION       */
@@ -118,6 +124,39 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         super.onStop()
     }
 
+    override fun onLocationPermissionsGranted() {
+        tryRegisteringLocationObservers()
+    }
+
+    override fun onLocationServiceBind() {
+        initializeGpsLocationUpdates()
+    }
+
+    protected fun initializeGpsLocationUpdates() {
+        Log.d(TAG, "initializeGpsLocationUpdates()")
+
+        if (hasLocationPermissions()) {
+            val provider = getPreferredLocationProvider()
+            getLocationService()?.requestLocationUpdates(provider)
+        } else {
+            requestPermissions()
+        }
+    }
+    override fun getViewForSnackbar(): View {
+        return binding.root
+    }
+
+    override fun getLastLocationLiveData(): MutableLiveData<Location?> {
+        return viewModel.lastLocation
+    }
+
+    override fun onLocationUpdated(location: Location) {
+        Log.i(TAG, "ILocationUpdateListener.onLocationUpdated()")
+        Log.d(TAG, location.toString())
+
+        viewModel.setLastLocation(location)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTrailInfoBinding.inflate(layoutInflater)
@@ -156,9 +195,33 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
         }
     }
 
+
+    protected open fun getPreferredLocationProvider(): SdkLocationProvider? {
+        // Read from shared preferences
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        // We need to use default value also here since
+        val providerString =  sharedPreferences.getString(UserSettingsActivity.KEY_LOCATION_PROVIDER, null)
+        return if (providerString.isNullOrBlank()) {
+            null
+        } else {
+            SdkLocationProvider.valueOf(providerString)
+        }
+    }
+
     /* * * * * * * * * * * * */
     /*        PRIVATE        */
     /* * * * * * * * * * * * */
+    private fun tryRegisteringLocationObservers() {
+        if (hasLocationPermissions()) {
+            registerLocationObservers()
+        }
+    }
+
+    private fun registerLocationObservers() {
+        viewModel.lastLocation.observe(this, { lastLocation ->
+
+        })
+    }
 
     private fun setupToolbar() {
         binding.activityTrailInfoBackButton.setOnClickListener {
@@ -195,7 +258,19 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
 
     private fun setupButtons() {
         binding.activityTrailInfoGetStartIcon.setOnClickListener {
-            startActivity(DrivingActivity.createNavigateToIntent(this, viewModel.trailId))
+            if(!hasLocationPermissions()) {
+                requestPermissions()
+            }else if(hasLocationPermissions() && viewModel.drive.value?.let { trailDrive -> viewModel.getLastLocation()
+                    ?.let { location -> TrailNavigator.Direction.isCloseToTrailHeadSegment(trailDrive, location) } } == true){
+                startActivity(DrivingActivity.createNavigateToIntent(this, viewModel.trailId))
+            }else{
+                DialogUtil.buildOkDialog(
+                    context = this@TrailInfoActivity,
+                    title = getString(R.string.start_trail_title),
+                    message = getString(R.string.start_trail_message),
+                    null)
+                    .show()
+            }
         }
 
         binding.activityTrailInfoGetDownloadButton.setOnClickListener {
@@ -528,6 +603,7 @@ class TrailInfoActivity : AppCompatActivity(), TrailMediaClickListener {
             showProgressBar(false)
         }
     }
+
 
     /* * * * * * * * * * * * */
     /*     INNER CLASS       */

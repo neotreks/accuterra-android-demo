@@ -334,62 +334,126 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         media: MutableList<TripRecordingMedia>
     ) {
 
-        val mapCenter = binding.activityTrailCollectionAccuterraMapView.getMapboxMap().cameraPosition.target
-        val mapLocation = MapLocation(mapCenter.latitude, mapCenter.longitude)
+        checkLocationPermissions()
+        if (viewModel.isUserTheMapFocus()) {
+            val currentLocation = getCurrentLocation()
+            val mapLocation = MapLocation(currentLocation!!.latitude, currentLocation.longitude)
 
-        val dialog = DialogUtil.buildBlockingProgressDialog(this, getString(R.string.general_saving))
-        dialog.show()
+            val dialog =
+                DialogUtil.buildBlockingProgressDialog(this, getString(R.string.general_saving))
+            dialog.show()
 
-        GlobalScope.launch {
+            GlobalScope.launch {
 
-            // Gather POI data
-            val enumService = ServiceFactory.getEnumService(applicationContext)
+                // Gather POI data
+                val enumService = ServiceFactory.getEnumService(applicationContext)
 
-            val viewModelPoi = viewModel.poi.value
+                val viewModelPoi = viewModel.poi.value
 
-            var addPoi = false
-            val poi = if (viewModelPoi == null) {
-                addPoi = true
-                // Build the new POI
-                TripRecordingPoiBuilder.buildNewPoi(
-                    name = name,
-                    description = description,
-                    mapLocation = mapLocation,
-                    descriptionShort = null,
-                    media = media, // Just default value
-                    pointTypeCode = pointType.code,
-                    tags = tags,
-                    enumService = enumService
-                )
-            } else {
-                viewModelPoi.copy(
-                    name = name,
-                    description = description,
-                    mapLocation = mapLocation,
-                    descriptionShort = null,
-                    media = media, // Just default value
-                    pointType = pointType,
-                    tags = tags
-                )
+                var addPoi = false
+                val poi = if (viewModelPoi == null) {
+                    addPoi = true
+                    // Build the new POI
+                    TripRecordingPoiBuilder.buildNewPoi(
+                        name = name,
+                        description = description,
+                        mapLocation = mapLocation,
+                        descriptionShort = null,
+                        media = media, // Just default value
+                        pointTypeCode = pointType.code,
+                        tags = tags,
+                        enumService = enumService
+                    )
+                } else {
+                    viewModelPoi.copy(
+                        name = name,
+                        description = description,
+                        mapLocation = mapLocation,
+                        descriptionShort = null,
+                        media = media, // Just default value
+                        pointType = pointType,
+                        tags = tags
+                    )
+                }
+
+                if (addPoi) {
+                    // Add the newly created POI to the trip recording
+                    viewModel.addPoi(poi, applicationContext)
+                } else {
+                    // Update the existing POI
+                    viewModel.updatePoi(poi, applicationContext)
+                }
+
+                // We need to cleanup the camera folder since images were copies into SDK and are not needed anymore
+                ApkMediaUtil.clearCameraTempFolder(this@TrailCollectionActivity)
+
+                // Close the dialog
+                lifecycleScope.launchWhenCreated {
+                    dialog.dismiss()
+                    setModeStandard()
+                }
+
             }
+        }
+        else {
+            val mapCenter = binding.activityTrailCollectionAccuterraMapView.getMapboxMap().cameraPosition.target
+            val mapLocation = MapLocation(mapCenter.latitude, mapCenter.longitude)
 
-            if (addPoi) {
-                // Add the newly created POI to the trip recording
-                viewModel.addPoi(poi, applicationContext)
-            } else {
-                // Update the existing POI
-                viewModel.updatePoi(poi, applicationContext)
+            val dialog =
+                DialogUtil.buildBlockingProgressDialog(this, getString(R.string.general_saving))
+            dialog.show()
+
+            GlobalScope.launch {
+
+                // Gather POI data
+                val enumService = ServiceFactory.getEnumService(applicationContext)
+
+                val viewModelPoi = viewModel.poi.value
+
+                var addPoi = false
+                val poi = if (viewModelPoi == null) {
+                    addPoi = true
+                    // Build the new POI
+                    TripRecordingPoiBuilder.buildNewPoi(
+                        name = name,
+                        description = description,
+                        mapLocation = mapLocation,
+                        descriptionShort = null,
+                        media = media, // Just default value
+                        pointTypeCode = pointType.code,
+                        tags = tags,
+                        enumService = enumService
+                    )
+                } else {
+                    viewModelPoi.copy(
+                        name = name,
+                        description = description,
+                        mapLocation = mapLocation,
+                        descriptionShort = null,
+                        media = media, // Just default value
+                        pointType = pointType,
+                        tags = tags
+                    )
+                }
+
+                if (addPoi) {
+                    // Add the newly created POI to the trip recording
+                    viewModel.addPoi(poi, applicationContext)
+                } else {
+                    // Update the existing POI
+                    viewModel.updatePoi(poi, applicationContext)
+                }
+
+                // We need to cleanup the camera folder since images were copies into SDK and are not needed anymore
+                ApkMediaUtil.clearCameraTempFolder(this@TrailCollectionActivity)
+
+                // Close the dialog
+                lifecycleScope.launchWhenCreated {
+                    dialog.dismiss()
+                    setModeStandard()
+                }
+
             }
-
-            // We need to cleanup the camera folder since images were copies into SDK and are not needed anymore
-            ApkMediaUtil.clearCameraTempFolder(this@TrailCollectionActivity)
-
-            // Close the dialog
-            lifecycleScope.launchWhenCreated {
-                dialog.dismiss()
-                setModeStandard()
-            }
-
         }
 
     }
@@ -567,10 +631,15 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             val update = CameraUpdateFactory.newLatLng(location.toLatLng())
             getAccuTerraMapView().getMapboxMap().animateCamera(update, 2_000)
         }
-        // Display Map Crosshair
-        binding.activityTrailCollectionCrossHair.visibility = true.visibility
+
+        // Displays cross hairs when map center is used instead of user location to add POI
+        if (!viewModel.isUserTheMapFocus()){
+            binding.activityTrailCollectionCrossHair.visibility = true.visibility
+        }
+
         // Display POI form
         binding.activityTrailCollectionPoiPanel.visibility = true.visibility
+
     }
 
     private fun setModeStandard() {
@@ -584,6 +653,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         mapFrame.requestLayout()
         // Hide POI form
         binding.activityTrailCollectionPoiPanel.visibility = false.visibility
+
         // Hide Crosshair
         binding.activityTrailCollectionCrossHair.visibility = false.visibility
     }
@@ -592,6 +662,18 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         // We can navigate back if there is no active recording
         val status = viewModel.getTripRecorder(this).getStatus()
         return status != TripRecorderStatus.RECORDING && status != TripRecorderStatus.PAUSED
+    }
+
+    private fun toggleCrosshairs(){
+            viewModel.mapFocus.observe(this,{ isUserFocus ->
+                if (viewModel.isAddPoiMode) {
+                    if (isUserFocus == false) {
+                        binding.activityTrailCollectionCrossHair.visibility = true.visibility
+                    } else {
+                        binding.activityTrailCollectionCrossHair.visibility = false.visibility
+                    }
+                }
+            })
     }
 
     /* * * * * * * * * * * * */
@@ -625,10 +707,18 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
         override fun onSignificantMapBoundsChange() {
             // nothing to do. only the GPS data matters - not the map bounds
+
         }
 
         override fun onTrackingModeChanged(mode: TrackingOption) {
             // TODO #16292 - anything we want to do here?
+            if (mode.isTrackingOption()) {
+                weakActivity.get()?.viewModel?.setUserAsMapFocus(true)
+                weakActivity.get()?.toggleCrosshairs()
+            } else {
+                weakActivity.get()?.viewModel?.setUserAsMapFocus(false)
+                weakActivity.get()?.toggleCrosshairs()
+            }
         }
     }
 

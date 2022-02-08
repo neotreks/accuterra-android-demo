@@ -127,6 +127,7 @@ class TrailDetailsFragment: TrailInfoFragment() {
         appendList("Vehicle Requirements", info.vehicleRequirements, builder)
         appendString("Status", info.status.toString(), builder)
         appendList("Tags", info.tags, builder)
+        appendList("Groups", info.groups, builder)
         appendSectionFooter(builder)
     }
 

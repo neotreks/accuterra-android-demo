@@ -2,6 +2,7 @@ package com.neotreks.accuterra.mobile.demo
 
 import android.app.Activity
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
@@ -37,6 +38,8 @@ class TrailInfoViewModel: ViewModel() {
     var trail = MutableLiveData<Trail?>()
         private set
 
+    val lastLocation: MutableLiveData<Location?> = MutableLiveData(null)
+
     var imageUrls = MutableLiveData<List<TrailMedia>>()
 
     var drive = MutableLiveData<TrailDrive>()
@@ -62,6 +65,14 @@ class TrailInfoViewModel: ViewModel() {
         viewModelScope.launch {
             techRatings = ServiceFactory.getEnumService(context).getTechRatings()
         }
+    }
+
+    fun setLastLocation(location: Location?) {
+        lastLocation.postValue(location)
+    }
+
+    fun getLastLocation(): MapLocation? {
+        return lastLocation.value?.let { MapLocationBuilder.buildFrom(it) }
     }
 
     @Throws(IllegalStateException::class)

@@ -111,6 +111,8 @@
     <string name="activity_offline_maps_menu_resume">Resume</string>
     <string name="activity_offline_maps_menu_pause">Pause</string>
     <string name="download_paused">Paused</string>
+    <string name="start_trail_title">Too Far From Trail Head</string>
+    <string name="start_trail_message">Start Trail Routing once you are at the beginning of the Trail</string>
 
     <plurals name="star">
         <item quantity="one">%d Star</item>
