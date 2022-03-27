@@ -27,16 +27,14 @@ import com.neotreks.accuterra.mobile.demo.trip.recorded.PointTypeAdapter
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingMediaListManager
 import com.neotreks.accuterra.mobile.demo.ui.FormValidationError
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
-import com.neotreks.accuterra.mobile.demo.util.CrashSupport
-import com.neotreks.accuterra.mobile.demo.util.DemoAppFileProvider
-import com.neotreks.accuterra.mobile.demo.util.DialogUtil
-import com.neotreks.accuterra.mobile.demo.util.PermissionSupport
+import com.neotreks.accuterra.mobile.demo.util.*
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.trail.model.PoiTag
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
 import java.io.File
+import java.util.*
 
 class TrailCollectionPoiFragment : Fragment() {
 
@@ -216,6 +214,9 @@ class TrailCollectionPoiFragment : Fragment() {
         binding.fragmentTrailCollectionPoiFormTakePhoto.setOnClickListener {
             onCameraAppPhoto()
         }
+        binding.fragmentTrailCollectionPoiPanelDeletePoiButton.setOnClickListener{
+            lifecycleScope.launchWhenStarted { onDeletePoiClicked() }
+        }
     }
 
     @Suppress("unused")
@@ -292,6 +293,13 @@ class TrailCollectionPoiFragment : Fragment() {
             ).show()
         }
 
+    }
+
+    private suspend fun onDeletePoiClicked(){
+        // Gather POI data
+        val poiUuid = viewModel.poi.value?.uuid
+           ?: throw IllegalStateException("Cannot find POI by uuid")
+        listener.onDeletePoi(poiUuid)
     }
 
     private fun backupFormData() {
@@ -426,8 +434,11 @@ class TrailCollectionPoiFragment : Fragment() {
     private fun loadFormHeader(isNew: Boolean) {
         if (isNew) {
             binding.fragmentTrailCollectionPoiHeaderText.text = getString(R.string.activity_trail_collection_poi_panel_add_new_poi)
+            binding.fragmentTrailCollectionPoiPanelDeletePoiButton.visibility = false.visibility
+
         } else {
             binding.fragmentTrailCollectionPoiHeaderText.text = getString(R.string.activity_trail_collection_poi_panel_edit_poi)
+            binding.fragmentTrailCollectionPoiPanelDeletePoiButton.visibility = true.visibility
         }
     }
 
@@ -496,6 +507,8 @@ class TrailCollectionPoiFragment : Fragment() {
             tags: List<PoiTag>,
             media: MutableList<TripRecordingMedia>
         )
+
+        suspend fun onDeletePoi(poiUuid: String)
 
         fun getCurrentLocation(): Location?
 

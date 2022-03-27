@@ -76,6 +76,7 @@
 
     <string name="activity_trip_edit_poi_delete_poi_title">Delete POI</string>
     <string name="activity_trip_edit_poi_delete_poi_message">Do you really want to delete this POI?</string>
+    <string name="activity_trip_edit_poi_delete_poi_confirmed">POI deleted successfully</string>
 
     <!-- Recorded Trip POI Activity -->
     <string name="activity_recorded_trip_poi_title">POI</string>
@@ -185,6 +186,8 @@
 
     <string name="activity_trail_collection_close_form_title">Close PIO editing?</string>
     <string name="activity_trail_collection_close_form_message">There are unsaved changes. Do you want to close the form anyway?</string>
+    <string name="activity_trail_collection_delete_poi_form_title">Delete POI?</string>
+    <string name="activity_trail_collection_delete_poi_form_message">Would you like to proceed deleting this POI?</string>
 
     <string name="activity_trail_collection_validation_name">Please provide a POI name of at least 3 character long.</string>
     <string name="activity_trail_collection_validation_description">Please provide a description text of at least 10 characters long.</string>

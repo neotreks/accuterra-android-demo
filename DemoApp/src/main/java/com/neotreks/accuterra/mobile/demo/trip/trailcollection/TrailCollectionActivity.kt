@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -17,6 +18,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.maps.MapView
@@ -31,6 +33,7 @@ import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingButtonsPane
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingStatsPanel
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
+import com.neotreks.accuterra.mobile.demo.util.hideSoftKeyboard
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.SdkManager
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
@@ -44,7 +47,10 @@ import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
 import com.neotreks.accuterra.mobile.sdk.trail.model.PoiTag
 import com.neotreks.accuterra.mobile.sdk.trail.model.PointType
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailCollectionData
-import com.neotreks.accuterra.mobile.sdk.trip.model.*
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingMedia
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoi
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingPoiBuilder
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorderListener
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.TripRecorderStatus
@@ -72,7 +78,14 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
         override suspend fun onPoiUpdated(tripPoi: TripRecordingPoi) {}
 
-        override suspend fun onPoiDeleted(poiUuid: String) {}
+        override suspend fun onPoiDeleted(poiUuid: String) {
+            lifecycleScope.launchWhenCreated {
+                Log.d(TAG,"Successfully deleted PoiUuid: $poiUuid")
+                val snackBar = Snackbar
+                    .make(getSnackbarView(), R.string.activity_trip_edit_poi_delete_poi_confirmed, Snackbar.LENGTH_SHORT)
+                showNewSnackBar(snackBar)
+            }
+        }
 
         override suspend fun onRecentLocationBufferChanged(newLocation: Location, bufferFlushed: Boolean) {}
 
@@ -389,6 +402,9 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
                 // Close the dialog
                 lifecycleScope.launchWhenCreated {
+                    // Hide Keyboard after save
+                    val view = currentFocus
+                    this@TrailCollectionActivity.hideSoftKeyboard(view)
                     dialog.dismiss()
                     setModeStandard()
                 }
@@ -449,6 +465,12 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
                 // Close the dialog
                 lifecycleScope.launchWhenCreated {
+                    // Hide Keyboard after save
+                    val view = currentFocus
+                    if (view != null){
+                        val imm = this@TrailCollectionActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.hideSoftInputFromWindow(view.windowToken, 0)
+                    }
                     dialog.dismiss()
                     setModeStandard()
                 }
@@ -456,6 +478,22 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             }
         }
 
+    }
+
+    override suspend fun onDeletePoi(poiUuid: String) = DialogUtil.buildYesNoDialog(
+        context = this,
+        title = getString(R.string.activity_trail_collection_delete_poi_form_title),
+        message = getString(R.string.activity_trail_collection_delete_poi_form_message),
+        positiveCode = {lifecycleScope.launch { deletePoi(poiUuid) }}
+    ).show()
+
+    private suspend fun deletePoi(poiUuid: String){
+        try {
+            getTripRecorder().deletePoi(poiUuid)
+            setModeStandard()
+        } catch (e: Exception) {
+            throw IllegalStateException("Cannot delete POI by uuid: $poiUuid")
+        }
     }
 
     override fun onPoiPanelBackClicked() {

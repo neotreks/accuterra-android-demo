@@ -3,7 +3,6 @@ package com.neotreks.accuterra.mobile.demo
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.FragmentTrailDescriptionContentBinding
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
@@ -15,16 +14,22 @@ class TrailDetailsFragment: TrailInfoFragment() {
 
     private val viewModel: TrailInfoViewModel by activityViewModels()
 
+    private lateinit var binding: FragmentTrailDescriptionContentBinding
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.trail.observe(this.viewLifecycleOwner, Observer { trail ->
+        binding = FragmentTrailDescriptionContentBinding.bind(view)
+
+        viewModel.trail.observe(this.viewLifecycleOwner) { trail ->
             viewLifecycleOwner.lifecycleScope.launch {
-                val binding = FragmentTrailDescriptionContentBinding.bind(view)
                 binding.fragmentTrailInfoDescription.text = getTrailDetails(trail)
             }
-        })
+        }
 
+        viewModel.customTrailFields.observe(this.viewLifecycleOwner) { customTrailFields ->
+            binding.fragmentCustomTrailFields.text = getTrailCustomFieldsString(customTrailFields)
+        }
     }
 
     /**
@@ -34,7 +39,7 @@ class TrailDetailsFragment: TrailInfoFragment() {
         if (trail == null) {
             return getString(R.string.general_na)
         }
-        return withContext(Dispatchers.Main) {
+        return withContext(Dispatchers.Default) {
             val builder = StringBuilder()
             appendInfo("Info", trail.info, builder)
             appendStatistics("Statistics", trail.statistics, builder)
@@ -46,6 +51,23 @@ class TrailDetailsFragment: TrailInfoFragment() {
             appendNavigation("Navigation", trail.navigationInfo, builder)
             builder.toString()
         }
+    }
+
+    private fun getTrailCustomFieldsString(customFields: Map<String, String?>): String {
+        val builder = StringBuilder()
+        appendSectionSeparator("Custom Trail Fields", builder)
+
+        if (customFields.isEmpty()) {
+            builder.append(getString(R.string.general_na))
+        } else {
+            customFields.keys.forEach { key ->
+                appendString(key, customFields.getValue(key) ?: "NULL", builder)
+            }
+        }
+
+        appendSectionFooter(builder)
+
+        return builder.toString()
     }
 
     private fun appendSystemAttributes(name: String, info: TrailSystemAttributes, builder: StringBuilder) {

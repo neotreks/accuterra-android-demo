@@ -1,13 +1,17 @@
 package com.neotreks.accuterra.mobile.demo
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -22,8 +26,8 @@ import com.neotreks.accuterra.mobile.demo.databinding.ActivityDrivingBinding
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
 import com.neotreks.accuterra.mobile.demo.databinding.DrivingActivityToolbarBinding
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
-import com.neotreks.accuterra.mobile.demo.trail.WaypointListAdapter
 import com.neotreks.accuterra.mobile.demo.trail.TrailPoiDetailActivity
+import com.neotreks.accuterra.mobile.demo.trail.WaypointListAdapter
 import com.neotreks.accuterra.mobile.demo.trip.recorded.BaseTripRecordingActivity
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingButtonsPanel
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingStatsPanel
@@ -45,8 +49,8 @@ import com.neotreks.accuterra.mobile.sdk.trail.model.Trail
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDrive
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDriveWaypoint
 import com.neotreks.accuterra.mobile.sdk.trail.service.TrailLoadFilter
-import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
+import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -270,15 +274,15 @@ class DrivingActivity : BaseTripRecordingActivity() {
             }
             1 -> {
                 val trailPois = searchResult.trailPois[0]
-                when(trailPois.poiIds.size) {
+                return when(trailPois.poiIds.size) {
                     0 -> throw IllegalStateException("Search returned a layer with an empty POIs set.")
                     1 -> {
                         handleTrailPoiMapClick(trailPois.poiIds.first())
-                        return true
+                        true
                     }
                     else -> {
                         handleMultiTrailPoiMapClick()
-                        return true
+                        true
                     }
                 }
             }
@@ -325,11 +329,11 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private fun registerTrailObserver() {
         Log.d(TAG, "registerTrailObserver()")
 
-        viewModel.trail.observe(this, { trail ->
+        viewModel.trail.observe(this) { trail ->
             if (trail != null) {
                 onTrailDataLoaded(trail, viewModel.trailDrive)
             }
-        })
+        }
     }
 
     private fun onTrailDataLoaded(trail: Trail, trailDrive: TrailDrive) {
@@ -342,13 +346,14 @@ class DrivingActivity : BaseTripRecordingActivity() {
         bindingToolbar.activityDrivingToolbarTrailName.visibility = View.VISIBLE
         bindingToolbar.activityDrivingToolbarWayPointPanel.visibility = View.GONE
 
-        viewModel.navigatorStatus.observe(this, { navigatorStatus ->
+        viewModel.navigatorStatus.observe(this) { navigatorStatus ->
             // do not update the list if the trail is lost or when going in the wrong direction
             if (navigatorStatus.status == NavigatorStatusType.NOT_READY
-                || navigatorStatus.status == NavigatorStatusType.NAVIGATING) {
+                || navigatorStatus.status == NavigatorStatusType.NAVIGATING
+            ) {
                 updateNextWayPointInList(navigatorStatus.nextWayPoint)
             }
-        })
+        }
 
         hideProgressBar()
     }
@@ -380,6 +385,52 @@ class DrivingActivity : BaseTripRecordingActivity() {
             longToast("Error while loading the trail: ${e.localizedMessage}")
             finish()
         }
+    }
+
+    private fun handleChangeWaypointButtonClick() {
+        val lastLocation = viewModel.lastLocation.value
+            ?: return
+
+        val trailNavigator = trailNavigator
+            ?: return
+
+        val candidates = trailNavigator.findPossibleNextWayPoints(lastLocation)
+
+        when(candidates.size) {
+            0 -> {
+                Toast.makeText(this, getString(R.string.cannot_determine_next_waypoint), Toast.LENGTH_SHORT).show()
+            }
+            1 -> {
+                changeNextWaypoint(candidates[0])
+            }
+            else -> {
+                showWaypointSelectionDialog(candidates)
+            }
+        }
+    }
+
+    private fun changeNextWaypoint(waypoint: TrailDriveWaypoint) {
+        trailNavigator!!.nextExpectedWayPoint = waypoint
+        val label = getString(R.string.navigating_to_wp_number, waypoint.navigationOrder)
+        Toast.makeText(this, label, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showWaypointSelectionDialog(waypoints: List<TrailDriveWaypoint>) {
+        val listItems = waypoints
+            .map { trailDriveWaypoint ->
+                return@map "#${trailDriveWaypoint.navigationOrder} ${trailDriveWaypoint.name}"
+            }
+            .toTypedArray()
+
+        val listener = DialogInterface.OnClickListener { _, which ->
+            changeNextWaypoint(waypoints[which])
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.select_a_waypoint))
+            .setItems(listItems, listener)
+            .create()
+            .show()
     }
 
     private fun toggleListView() {
@@ -463,6 +514,9 @@ class DrivingActivity : BaseTripRecordingActivity() {
             onToggleMapStyle()
         }
 
+        binding.activityDrivingChangeWaypointButton.setOnClickListener {
+            handleChangeWaypointButtonClick()
+        }
     }
 
     private fun initRecordingPanel() {
@@ -533,9 +587,9 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private fun setupNextWayPointLabels() {
         Log.v(TAG, "setupNextWayPointLabels()")
 
-        viewModel.navigatorStatus.observe(this, { navigatorStatus ->
+        viewModel.navigatorStatus.observe(this) { navigatorStatus ->
             @Suppress("REDUNDANT_ELSE_IN_WHEN")
-            when(navigatorStatus.status) {
+            when (navigatorStatus.status) {
                 NavigatorStatusType.NOT_READY -> {
                     // nothing to do
                 }
@@ -545,7 +599,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
                 NavigatorStatusType.WRONG_DIRECTION -> showWrongDirection()
                 else -> throw NotImplementedError("Unhandled NavigatorStatusType ${navigatorStatus.status}.")
             }
-        })
+        }
     }
 
     private fun showNextWayPointLabels(situation: NextWayPoint) {
@@ -701,7 +755,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
             trailLayersManager = getAccuTerraMapView().trailLayersManager
             isTrailsLayerManagersLoaded = true
 
-            viewModel.trail.observe(this@DrivingActivity, { trail ->
+            viewModel.trail.observe(this@DrivingActivity) { trail ->
                 if (trail == null) {
                     Log.d(TAG, "addTrailLayers() - the trail has not been loaded yet")
                 } else {
@@ -712,7 +766,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
                         filterTrail(trail)
                     }
                 }
-            })
+            }
         }
     }
 
@@ -726,11 +780,11 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
                 trailLayersManager.showTrailPOIs(trail)
 
-                viewModel.navigatorStatus.observe(this@DrivingActivity, { navigatorStatus ->
+                viewModel.navigatorStatus.observe(this@DrivingActivity) { navigatorStatus ->
                     if (navigatorStatus.status == NavigatorStatusType.NAVIGATING) {
                         trailLayersManager.highlightPOI(navigatorStatus.nextWayPoint!!.trailPOI.id)
                     }
-                })
+                }
             }
         }
     }
@@ -744,15 +798,16 @@ class DrivingActivity : BaseTripRecordingActivity() {
     }
 
     private fun registerLocationObservers() {
-        viewModel.lastLocation.observe(this, { lastLocation ->
+        viewModel.lastLocation.observe(this) { lastLocation ->
             updateLocationOnMap(lastLocation)
-        })
+            binding.activityDrivingChangeWaypointButton.isVisible = (lastLocation != null)
+        }
 
-        viewModel.trail.observe(this, { trail ->
+        viewModel.trail.observe(this) { trail ->
             if (trail != null) {
                 initializeTrailNavigator(trail, viewModel.trailDrive)
             }
-        })
+        }
     }
 
     private fun initializeTrailNavigator(trail: Trail, trailDrive: TrailDrive) {
@@ -773,23 +828,23 @@ class DrivingActivity : BaseTripRecordingActivity() {
                 addListener(trailNavigatorListener)
             }
 
-        viewModel.lastLocation.observe(this, { lastLocation ->
+        viewModel.lastLocation.observe(this) { lastLocation ->
             Log.v(TAG, "update trailNavigator location $lastLocation")
 
             if (lastLocation != null) {
                 trailNavigator!!.evaluateLocation(lastLocation)
             }
-        })
+        }
     }
 
     @UiThread
     private fun initializeTrailPathSimulatorLocationEngine() {
-        viewModel.trail.observe(this, { trail ->
+        viewModel.trail.observe(this) { trail ->
             if (trail != null) {
                 trailPathLocationSimulator = TrailPathLocationSimulator(viewModel.trailDrive, this)
                 trailPathLocationSimulator?.start()
             }
-        })
+        }
     }
 
     private fun updateNavigatorStatus(status: NavigatorStatus) {

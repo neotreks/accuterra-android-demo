@@ -89,7 +89,7 @@
 
     <!-- MAP WRAPPER -->
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/activity_driving_map_wrapper"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -115,42 +115,50 @@
             android:foregroundTint="@android:color/white"
             app:borderWidth="0dp" />
 
-        <LinearLayout
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_driving_change_waypoint_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:orientation="vertical"
-            >
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/activity_driving_add_poi_button"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_outline_alt_route_24"
+            android:tint="@android:color/black"
+            android:backgroundTint="@android:color/white"
+            android:foregroundTint="@android:color/white"
+            android:contentDescription="@string/set_next_waypoint"
+            app:borderWidth="0dp" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/activity_driving_add_poi_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:src="@drawable/ic_location_record_add_poi"
-                android:tint="@android:color/black"
-                android:backgroundTint="@android:color/white"
-                android:foregroundTint="@android:color/white"
-                android:visibility="gone"
-                app:borderWidth="0dp" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_driving_add_poi_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/activity_driving_to_driving_mode_button"
+            android:src="@drawable/ic_location_record_add_poi"
+            android:tint="@android:color/black"
+            android:backgroundTint="@android:color/white"
+            android:foregroundTint="@android:color/white"
+            android:visibility="gone"
+            app:borderWidth="0dp" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/activity_driving_to_driving_mode_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="8dp"
-                android:src="@drawable/ic_location_driving_24px"
-                android:tint="@android:color/black"
-                android:backgroundTint="@android:color/white"
-                android:foregroundTint="@android:color/white"
-                android:visibility="gone"
-                android:contentDescription="@string/driving_mode"
-                app:borderWidth="0dp" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_driving_to_driving_mode_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_location_driving_24px"
+            android:tint="@android:color/black"
+            android:backgroundTint="@android:color/white"
+            android:foregroundTint="@android:color/white"
+            android:visibility="gone"
+            android:contentDescription="@string/driving_mode"
+            app:borderWidth="0dp" />
 
-        </LinearLayout>
-
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 

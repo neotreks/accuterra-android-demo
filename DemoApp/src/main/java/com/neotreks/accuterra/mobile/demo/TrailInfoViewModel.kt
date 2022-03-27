@@ -5,6 +5,7 @@ import android.content.Context
 import android.location.Location
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,23 +36,25 @@ class TrailInfoViewModel: ViewModel() {
 
     var trailId: Long = Long.MIN_VALUE
 
-    var trail = MutableLiveData<Trail?>()
-        private set
+    val trail = MutableLiveData<Trail?>()
 
     val lastLocation: MutableLiveData<Location?> = MutableLiveData(null)
 
-    var imageUrls = MutableLiveData<List<TrailMedia>>()
+    val imageUrls = MutableLiveData<List<TrailMedia>>()
 
-    var drive = MutableLiveData<TrailDrive>()
+    val drive = MutableLiveData<TrailDrive>()
 
     var techRatings: List<TechnicalRating> = listOf()
         private set
 
     val comments: MutableLiveData<List<TrailComment>?> = MutableLiveData()
 
-    var commentsCount: MutableLiveData<Int> = MutableLiveData(0)
+    val commentsCount: MutableLiveData<Int> = MutableLiveData(0)
 
     val userData: MutableLiveData<TrailUserData?> = MutableLiveData()
+
+    private val customTrailFieldsMutable = MutableLiveData<Map<String, String?>>()
+    val customTrailFields: LiveData<Map<String, String?>> = customTrailFieldsMutable
 
     /* * * * * * * * * * * * */
     /*        PUBLIC         */
@@ -102,6 +105,9 @@ class TrailInfoViewModel: ViewModel() {
                 }
                 // Images
                 imageUrls.value = mediaList
+
+                // Custom Trail Fields
+                customTrailFieldsMutable.value = trailService.getTrailFieldValues(trailId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error while loading trail: ${e.localizedMessage}", e)
                 CrashSupport.reportError(e, "Trail ID: $trailId")

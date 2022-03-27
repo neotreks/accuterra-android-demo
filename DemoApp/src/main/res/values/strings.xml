@@ -113,6 +113,10 @@
     <string name="download_paused">Paused</string>
     <string name="start_trail_title">Too Far From Trail Head</string>
     <string name="start_trail_message">Start Trail Routing once you are at the beginning of the Trail</string>
+    <string name="set_next_waypoint">Set Next Waypoint</string>
+    <string name="cannot_determine_next_waypoint">Cannot determine next waypoint. You\'re too far from the trail.</string>
+    <string name="navigating_to_wp_number">Navigating to #%1$d</string>
+    <string name="select_a_waypoint">Select a Waypoint</string>
 
     <plurals name="star">
         <item quantity="one">%d Star</item>

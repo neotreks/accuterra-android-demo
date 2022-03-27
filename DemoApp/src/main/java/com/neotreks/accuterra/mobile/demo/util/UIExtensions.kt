@@ -36,3 +36,9 @@ fun Context.showSoftKeyBoard(view: View?) {
             }, 150)
         }
 }
+
+fun Context.hideSoftKeyboard(view: View?) {
+    if (view == null) return
+    val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(view.windowToken, 0)
+}

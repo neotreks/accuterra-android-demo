@@ -23,6 +23,8 @@ class DemoApplication: Application() {
     override fun onCreate() {
         super.onCreate()
 
+        Mapbox.getInstance(this, BuildConfig.MAPBOX_TOKEN)
+
         //
         // It is recommended to initialize the SDK context at the very beginning of the APK start.
         //
@@ -30,7 +32,5 @@ class DemoApplication: Application() {
         // the [SdkManager.initSdk(Context, IAccessProvider, SdkConfig)] to configure the SDK.
         // After that initialization just with the context is sufficient.
         SdkManager.initSdkContext(applicationContext)
-
-        Mapbox.getInstance(this, BuildConfig.MAPBOX_TOKEN)
     }
 }

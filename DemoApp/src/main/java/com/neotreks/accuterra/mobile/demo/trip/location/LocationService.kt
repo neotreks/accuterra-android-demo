@@ -204,7 +204,7 @@ class LocationService: LocationUpdatesService() {
      *
      * @param context The [Context].
      */
-    private fun requestingLocationRecording(context: Context?): Boolean {
+    private fun requestingLocationRecording(context: Context): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getBoolean(KEY_REQUESTING_LOCATION_RECORDING, false)
     }

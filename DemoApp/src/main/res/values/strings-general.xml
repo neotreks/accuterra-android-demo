@@ -30,6 +30,7 @@
     <string name="general_save">Save</string>
     <string name="general_save_and_upload">Save and upload</string>
     <string name="general_saving">Saving…</string>
+    <string name="general_update">Update…</string>
     <string name="general_edit">Edit</string>
     <string name="general_detail">Detail</string>
     <string name="general_exit">Exit</string>
