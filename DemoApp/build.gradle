@@ -70,10 +70,10 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.20.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.21.0"
     // Download also sources and javadoc for easier orientation - just for the development!
-    // implementation "com.accuterra:accuterra-android-sdk:0.20.0:sources"
-    // implementation "com.accuterra:accuterra-android-sdk:0.20.0:javadoc"
+    // implementation "com.accuterra:accuterra-android-sdk:0.21.0:sources"
+    // implementation "com.accuterra:accuterra-android-sdk:0.21.0:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])

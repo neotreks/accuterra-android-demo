@@ -8,9 +8,9 @@ import androidx.annotation.UiThread
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
 import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
 import com.neotreks.accuterra.mobile.demo.trip.location.LocationActivity
@@ -199,6 +199,25 @@ abstract class BaseDrivingActivity : LocationActivity() {
      */
     @UiThread
     protected open fun setLocationTracking(trackingOption: TrackingOption) {
+
+        // Set padding for current camera position
+        val mapView = getAccuTerraMapView()
+        val mapboxMap = mapView.getMapboxMap()
+        val topPadding: Double = if (trackingOption == TrackingOption.DRIVING) {
+            mapView.measuredHeight * 0.3
+        } else {
+            0.0
+        }
+        val currentCamera = mapboxMap.cameraPosition
+        val cameraPosition = CameraPosition.Builder()
+            .target(currentCamera.target)
+            .bearing(currentCamera.bearing)
+            .tilt(currentCamera.tilt)
+            .zoom(currentCamera.zoom)
+            .padding(0.0, topPadding, 0.0, 0.0)
+            .build()
+        mapboxMap.cameraPosition = cameraPosition
+
         currentTracking = trackingOption
         if (trackingOption.isTrackingOption()) {
             lastGpsTracking = trackingOption
