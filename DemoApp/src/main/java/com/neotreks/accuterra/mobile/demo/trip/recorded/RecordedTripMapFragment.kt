@@ -28,7 +28,6 @@ class RecordedTripMapFragment : RecordedTripFragment() {
     private lateinit var accuTerraMapView: AccuTerraMapView
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
-    private val mapViewLoadingFailListener = MapLoadingFailListener(this)
 
     // Current style id
     private var currentStyle = AccuTerraStyle.VECTOR
@@ -99,7 +98,6 @@ class RecordedTripMapFragment : RecordedTripFragment() {
         Log.i(TAG, "onLowMemory()")
         super.onDestroy()
         accuTerraMapView.removeListener(getAccuTerraMapViewListener())
-        accuTerraMapView.removeOnDidFailLoadingMapListener(getMapViewLoadingFailListener())
         accuTerraMapView.onDestroy()
     }
 
@@ -109,10 +107,6 @@ class RecordedTripMapFragment : RecordedTripFragment() {
 
     private fun getAccuTerraMapView(): AccuTerraMapView {
         return binding.fragmentRecordedTripMapMap
-    }
-
-    private fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
-        return mapViewLoadingFailListener
     }
 
     private fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
@@ -126,7 +120,6 @@ class RecordedTripMapFragment : RecordedTripFragment() {
         accuTerraMapView = getAccuTerraMapView()
         accuTerraMapView.onCreate(savedInstanceState)
         accuTerraMapView.addListener(getAccuTerraMapViewListener())
-        accuTerraMapView.addOnDidFailLoadingMapListener(getMapViewLoadingFailListener())
 
         accuTerraMapView.initialize(lifecycleScope, currentStyle)
 
@@ -171,7 +164,7 @@ class RecordedTripMapFragment : RecordedTripFragment() {
 
         private val weakFragment = WeakReference(fragment)
 
-        override fun onInitialized(mapboxMap: MapboxMap) {
+        override fun onInitialized(map: AccuTerraMapView) {
             Log.i(TAG, "AccuTerraMapViewListener.onInitialized()")
 
             val fragment = weakFragment.get()
@@ -180,7 +173,16 @@ class RecordedTripMapFragment : RecordedTripFragment() {
             fragment.onAccuTerraMapViewReady()
         }
 
-        override fun onStyleChanged(mapboxMap: MapboxMap) {
+        override fun onInitializationFailed(map: AccuTerraMapView, errorMessage: String?) {
+            weakFragment.get()?.let { fragment ->
+                DialogUtil.buildOkDialog(
+                    fragment.requireContext(), "Error",
+                    errorMessage ?: "Unknown Error While Loading Map"
+                ).show()
+            }
+        }
+
+        override fun onStyleChanged(map: AccuTerraMapView) {
             weakFragment.get()?.let { fragment ->
                 // Reload recorded trip path after the style has changed
                 fragment.lifecycleScope.launchWhenResumed {
@@ -189,27 +191,18 @@ class RecordedTripMapFragment : RecordedTripFragment() {
             }
         }
 
+        override fun onStyleChangeFailed(map: AccuTerraMapView, errorMessage: String?) {
+        }
+
+        override fun onStyleChangeStart(map: AccuTerraMapView) {
+        }
+
         override fun onSignificantMapBoundsChange() {
             // nothing to do
         }
 
         override fun onTrackingModeChanged(mode: TrackingOption) {
             // nothing to do
-        }
-    }
-
-    private class MapLoadingFailListener(fragment: RecordedTripMapFragment) :
-        MapView.OnDidFailLoadingMapListener {
-
-        private val weakFragment = WeakReference(fragment)
-
-        override fun onDidFailLoadingMap(errorMessage: String?) {
-            weakFragment.get()?.let { fragment ->
-                DialogUtil.buildOkDialog(
-                    fragment.requireContext(), "Error",
-                    errorMessage ?: "Unknown Error While Loading Map"
-                )
-            }
         }
     }
 

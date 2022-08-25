@@ -21,6 +21,6 @@ object ApkMapActivityUtil {
         return AccuterraStyleProvider(context)
     }
 
-    private fun isSatellite(style: String) = style.contains("satellite-streets")
+    private fun isSatellite(style: String) = style.contains("satellite")
 
 }

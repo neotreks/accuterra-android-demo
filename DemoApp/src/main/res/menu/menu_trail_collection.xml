@@ -15,4 +15,9 @@
         android:title="@string/trail_collection_menu_item_display_guide"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/trail_collection_menu_item_cancel_recording"
+        android:title="@string/trail_collection_menu_item_cancel_recording"
+        app:showAsAction="never"/>
+
 </menu>

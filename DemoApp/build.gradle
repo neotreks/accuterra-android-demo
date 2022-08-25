@@ -3,17 +3,15 @@ apply plugin: 'kotlin-android'
 apply from: file('../settings/demo-settings.gradle')
 
 android {
-    compileSdkVersion 31
-    // Tools
-    buildToolsVersion "30.0.3"
+    compileSdkVersion(31)
     ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 1900
-        versionName "0.19.0"
+        versionCode 2550
+        versionName "0.25.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,12 +29,15 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             minifyEnabled false
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
+        }
+        getByName("debug") {
+            minifyEnabled false
         }
     }
 
@@ -44,7 +45,9 @@ android {
 
     productFlavors {
         demo {
+            applicationId = "com.neotreks.accuterra.mobile.demodev"
             dimension "buildtype"
+            manifestPlaceholders = [USE_CLEARTEXT_TRAFFIC:'false']
             buildConfigField 'String', 'WS_BASE_URL', ws_base_url
             buildConfigField 'String', 'WS_AUTH_URL', ws_auth_url
             buildConfigField 'String', 'WS_AUTH_CLIENT_ID', ws_auth_client_id
@@ -64,16 +67,15 @@ android {
     lintOptions {
         disable 'NullSafeMutableLiveData'
     }
-
 }
 
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.21.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.25.5"
     // Download also sources and javadoc for easier orientation - just for the development!
-    // implementation "com.accuterra:accuterra-android-sdk:0.21.0:sources"
-    // implementation "com.accuterra:accuterra-android-sdk:0.21.0:javadoc"
+    // implementation "com.accuterra:accuterra-android-sdk:0.25.5:sources"
+    // implementation "com.accuterra:accuterra-android-sdk:0.25.5:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -88,7 +90,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-    implementation "androidx.preference:preference-ktx:1.2.0"
+    // V 1.1.1 Needed to support usage on Android 30 and older versions
+    implementation "androidx.preference:preference-ktx:1.1.1"
 
     // CameraX core library using the camera2 implementation
     implementation "androidx.camera:camera-core:1.1.0-beta02"

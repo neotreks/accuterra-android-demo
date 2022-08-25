@@ -117,6 +117,12 @@
     <string name="cannot_determine_next_waypoint">Cannot determine next waypoint. You\'re too far from the trail.</string>
     <string name="navigating_to_wp_number">Navigating to #%1$d</string>
     <string name="select_a_waypoint">Select a Waypoint</string>
+    <string name="repeat">Repeat</string>
+    <string name="download_waiting">Waiting</string>
+    <string name="activity_trip_recording_finish_failed_dialog_title">Failed to finish trip recording</string>
+    <string name="activity_trip_recording_cancel_dialog_title">Cancel trip recording?</string>
+    <string name="activity_trip_recording_cancel_dialog_message">Do you really want to cancel trip recording?</string>
+    <string name="trail_collection_menu_item_cancel_recording">Cancel Recording</string>
 
     <plurals name="star">
         <item quantity="one">%d Star</item>

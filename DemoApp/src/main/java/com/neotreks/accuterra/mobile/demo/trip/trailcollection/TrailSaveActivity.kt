@@ -202,7 +202,7 @@ class TrailSaveActivity : AppCompatActivity() {
 
     private fun setupObservers() {
 
-        viewModel.tripRecording.observe(this, { trip ->
+        viewModel.tripRecording.observe(this) { trip ->
             // Refresh the menu
             invalidateOptionsMenu()
             if (trip == null) {
@@ -211,15 +211,15 @@ class TrailSaveActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 loadTrailToForm(trip, viewModel.tripPois)
             }
-        })
+        }
 
-        viewModel.poiMedia.observe(this@TrailSaveActivity, {
+        viewModel.poiMedia.observe(this@TrailSaveActivity) {
             showImages()
-        })
+        }
 
-        viewModel.tripMedia.observe(this, { mediaList ->
+        viewModel.tripMedia.observe(this) { mediaList ->
             mediaListManager.refreshPhotoGridAdapter(mediaList)
-        })
+        }
 
     }
 
@@ -232,10 +232,12 @@ class TrailSaveActivity : AppCompatActivity() {
         binding.activityTrailSaveTrailDescription.setText(trip.tripInfo.description)
         trip.extProperties.firstOrNull()?.data?.jsonToClass(TrailCollectionData::class.java)?.let { trailCollectionData ->
             // Main Custom data
-            // For Trail collection we define just one value
-            val techRatingLow = trailCollectionData.difficultyRating?.toFloat() ?: 1f
-            binding.activityTrailSaveTechRating.value = techRatingLow
-            binding.activityTrailSaveTechRatingText.text = viewModel.techRatings.find { it.level == techRatingLow.toInt() }?.name
+            val techRatingHigh = trailCollectionData.difficultyRatingHigh?.toFloat() ?: 1f
+            binding.activityTrailSaveTechRatingHigh.value = techRatingHigh
+            binding.activityTrailSaveTechRatingHighText.text = viewModel.techRatingsHigh.find { it.level == techRatingHigh.toInt() }?.name
+            val techRatingLow = trailCollectionData.difficultyRatingLow?.toFloat() ?: 1f
+            binding.activityTrailSaveTechRatingLow.value = techRatingLow
+            binding.activityTrailSaveTechRatingLowText.text = viewModel.techRatingsLow.find { it.level == techRatingLow.toInt() }?.name
             binding.activityTrailSaveTrailDifficultyDescription.setText(trailCollectionData.difficultyDescription)
             // Optional: Basic
             binding.activityTrailSaveHighlights.setText(trailCollectionData.highlights)
@@ -279,7 +281,8 @@ class TrailSaveActivity : AppCompatActivity() {
     private fun initializeFormListeners() {
         binding.activityTrailSaveTrailName.addTextChangedListener { onFormValueChanged() }
         binding.activityTrailSaveTrailDescription.addTextChangedListener { onFormValueChanged() }
-        binding.activityTrailSaveTechRating.addOnChangeListener(Slider.OnChangeListener { _, _, _ -> onFormValueChanged() })
+        binding.activityTrailSaveTechRatingHigh.addOnChangeListener(Slider.OnChangeListener { _, _, _ -> onFormValueChanged() })
+        binding.activityTrailSaveTechRatingLow.addOnChangeListener(Slider.OnChangeListener { _, _, _ -> onFormValueChanged() })
         binding.activityTrailSaveTrailDifficultyDescription.addTextChangedListener { onFormValueChanged() }
         binding.activityTrailSaveHighlights.addTextChangedListener { onFormValueChanged() }
         binding.activityTrailSaveHistory.addTextChangedListener { onFormValueChanged() }
@@ -383,11 +386,19 @@ class TrailSaveActivity : AppCompatActivity() {
         // Hide optional fields at the beginning
         binding.activityTrailSaveOptionalFieldsContainer.visibility = false.visibility
         // Display names of selected technical ratings
-        binding.activityTrailSaveTechRating.addOnChangeListener(Slider.OnChangeListener { slider, _, _ ->
+        binding.activityTrailSaveTechRatingHigh.addOnChangeListener(Slider.OnChangeListener { slider, _, _ ->
             lifecycleScope.launchWhenCreated {
-                val techRatings = viewModel.techRatings
+                val techRatings = viewModel.techRatingsHigh
                 val value = slider.value
-                binding.activityTrailSaveTechRatingText.text = techRatings.find { it.level == value.toInt() }?.name
+                binding.activityTrailSaveTechRatingHighText.text = techRatings.find { it.level == value.toInt() }?.name
+            }
+        })
+        // Display names of selected technical ratings
+        binding.activityTrailSaveTechRatingLow.addOnChangeListener(Slider.OnChangeListener { slider, _, _ ->
+            lifecycleScope.launchWhenCreated {
+                val techRatings = viewModel.techRatingsLow
+                val value = slider.value
+                binding.activityTrailSaveTechRatingLowText.text = techRatings.find { it.level == value.toInt() }?.name
             }
         })
         // handle the permit required switch
@@ -449,15 +460,22 @@ class TrailSaveActivity : AppCompatActivity() {
         val tags = viewModel.trailTagMapping.filter { selectedTagIds.contains(it.key) }.values.toList()
 
         // Update the trip with gathered data
-        val techRatingLevel = binding.activityTrailSaveTechRating.value.toInt()
-        val techRating = viewModel.techRatings.find { it.level == techRatingLevel }
+        val techRatingLevelHigh = binding.activityTrailSaveTechRatingHigh.value.toInt()
+        val techRatingLevelLow = binding.activityTrailSaveTechRatingLow.value.toInt()
+        val techRatingHigh = viewModel.techRatingsHigh.find { it.level == techRatingLevelHigh }
+        val techRatingLow = viewModel.techRatingsHigh.find { it.level == techRatingLevelLow }
+        if (!viewModel.validateHighLowRating(techRatingHigh?.level,techRatingLow?.level)){
+            toast("Low difficulty must be less than or equal to High difficulty")
+            savingDialog.dismiss()
+            return
+        }
         val techRatingDescription = binding.activityTrailSaveTrailDifficultyDescription.text.trimOrNull()
         trip.tripInfo.apply {
             this.name = binding.activityTrailSaveTrailName.text.toString()
             this.description = binding.activityTrailSaveTrailDescription.text.trimOrNull()
             this.campingTypes = listOf(campingType)
             this.tags = tags
-            this.technicalRating = TripTechRating(null, techRating, techRatingDescription)
+            this.technicalRating = TripTechRating(techRatingLow, techRatingHigh, techRatingDescription)
         }
         // Add dummy data for now
         val rating = null
@@ -473,7 +491,8 @@ class TrailSaveActivity : AppCompatActivity() {
         val trailCollectionData = TrailCollectionData(
             // Mandatory
             // For Trail collection we gather just one value and not low/high values
-            difficultyRating = techRatingLevel,
+            difficultyRatingHigh = techRatingLevelHigh,
+            difficultyRatingLow = techRatingLevelLow,
             difficultyDescription = techRatingDescription,
             // Optional: Basic
             highlights = binding.activityTrailSaveHighlights.text.trimOrNull(),

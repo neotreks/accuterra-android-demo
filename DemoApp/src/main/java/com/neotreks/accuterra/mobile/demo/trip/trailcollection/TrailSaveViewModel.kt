@@ -31,7 +31,8 @@ class TrailSaveViewModel: ViewModel() {
     var poiMedia = MutableLiveData<List<TripRecordingMedia>>()
     var preferredImageUuid: String? = null
 
-    var techRatings: List<TechnicalRating> = listOf()
+    var techRatingsHigh: List<TechnicalRating> = listOf()
+    var techRatingsLow: List<TechnicalRating> = listOf()
     var accessConcerns: List<AccessConcern> = listOf()
 
     lateinit var trailTagMapping: MutableMap<Int, TrailTag>
@@ -94,12 +95,17 @@ class TrailSaveViewModel: ViewModel() {
         return tripRecording.value?.isEditable() ?: false
     }
 
+    fun validateHighLowRating(technicalRatingHigh: Int?, technicalRatingLow:Int?):Boolean {
+        return technicalRatingHigh!! >= technicalRatingLow!!
+    }
+
     /* * * * * * * * * * * * */
     /*        PRIVATE        */
     /* * * * * * * * * * * * */
 
     private suspend fun loadEnums(context: Context) {
-        techRatings = ServiceFactory.getEnumService(context).getTechRatings()
+        techRatingsHigh = ServiceFactory.getEnumService(context).getTechRatings()
+        techRatingsLow = ServiceFactory.getEnumService(context).getTechRatings()
         accessConcerns = ServiceFactory.getEnumService(context).getAccessConcerns()
         trailTagMapping = tagMapping(context)
     }

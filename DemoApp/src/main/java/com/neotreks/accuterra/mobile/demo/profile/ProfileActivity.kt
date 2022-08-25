@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.*
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityProfileBinding
 import com.neotreks.accuterra.mobile.demo.offlinemap.OfflineMapsActivity
-import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
+import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
 import com.neotreks.accuterra.mobile.demo.ui.ProgressDialogHolder
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
@@ -85,7 +85,7 @@ class ProfileActivity : AppCompatActivity() {
         dialogHolder.displayProgressDialog(this, getString(R.string.upload_reset_access_token))
         lifecycleScope.launchWhenCreated {
             try {
-                DemoAccessManager().resetToken(this@ProfileActivity)
+                DemoCredentialsAccessManager().resetToken(this@ProfileActivity)
                 this@ProfileActivity.toast(getString(R.string.upload_reset_access_token_done))
             } catch (e: Exception) {
                 this@ProfileActivity.toast(getString(R.string.upload_reset_access_token_failed, e.localizedMessage))

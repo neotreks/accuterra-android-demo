@@ -3,15 +3,16 @@ package com.neotreks.accuterra.mobile.demo.security
 import android.content.Context
 import androidx.annotation.Keep
 import com.neotreks.accuterra.mobile.demo.BuildConfig
-import com.neotreks.accuterra.mobile.sdk.IAccessProvider
+import com.neotreks.accuterra.mobile.sdk.ICredentialsAccessProvider
+import com.neotreks.accuterra.mobile.sdk.ITokenAccessProvider
 import com.neotreks.accuterra.mobile.sdk.SdkManager
 import com.neotreks.accuterra.mobile.sdk.security.model.ClientCredentials
 
 /**
- * Class for managing access to AccuTerra services
+ * Class for managing access to AccuTerra services using credentials
  */
 @Keep
-class DemoAccessManager : IAccessProvider {
+class DemoCredentialsAccessManager : ICredentialsAccessProvider {
 
     /* * * * * * * * * * * * */
     /*       OVERRIDE        */
@@ -32,4 +33,23 @@ class DemoAccessManager : IAccessProvider {
         SdkManager.resetAccessToken(context)
     }
 
+}
+
+/**
+ * Class for managing access to AccuTerra services by providing the token
+ */
+@Keep
+class DemoTokenAccessManager : ITokenAccessProvider {
+
+    /* * * * * * * * * * * * */
+    /*       OVERRIDE        */
+    /* * * * * * * * * * * * */
+
+    override suspend fun getAccessToken(context: Context): String? {
+        throw NotImplementedError("Implement custom token provider here")
+    }
+
+    override suspend fun refreshAccessToken(context: Context): String? {
+        throw NotImplementedError("Implement token refresh here")
+    }
 }

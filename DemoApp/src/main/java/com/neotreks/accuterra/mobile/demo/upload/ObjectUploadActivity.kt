@@ -20,7 +20,7 @@ import com.neotreks.accuterra.mobile.demo.databinding.ActivityObjectUploadBindin
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.extensions.toIsoDateTimeString
 import com.neotreks.accuterra.mobile.demo.longToast
-import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
+import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.ui.OnListItemLongClickListener
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
@@ -346,7 +346,7 @@ class ObjectUploadActivity : AppCompatActivity() {
     private fun onResetAccessToken() {
         lifecycleScope.launchWhenCreated {
             try {
-                DemoAccessManager().resetToken(this@ObjectUploadActivity)
+                DemoCredentialsAccessManager().resetToken(this@ObjectUploadActivity)
                 toast(getString(R.string.upload_reset_access_token_done))
             } catch (e: Exception) {
                 this@ObjectUploadActivity.toast(getString(R.string.upload_reset_access_token_failed, e.localizedMessage))

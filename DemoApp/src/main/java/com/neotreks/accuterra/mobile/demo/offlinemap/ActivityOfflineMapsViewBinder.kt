@@ -52,6 +52,8 @@ class ActivityOfflineMapsViewBinder(val listener: ActivityOfflineMapsViewHolder.
                 view.context.getString(R.string.download_failed)
             OfflineMapStatus.PAUSED ->
                 view.context.getString(R.string.download_paused)
+            OfflineMapStatus.WAITING ->
+                view.context.getString(R.string.download_waiting)
             else ->
                 view.context.getString(
                     R.string.downloading_percents,

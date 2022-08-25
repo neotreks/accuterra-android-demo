@@ -97,7 +97,6 @@ class DrivingActivity : BaseTripRecordingActivity() {
     private var isTrailsLayerManagersLoaded = false
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
-    private val mapViewLoadingFailListener = MapLoadingFailListener(this)
     private val trailNavigatorListener = TrailNavigatorListener(this)
 
     private var trailNavigator: ITrailNavigator? = null
@@ -166,10 +165,6 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
     override fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
         return accuTerraMapViewListener
-    }
-
-    override fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
-        return mapViewLoadingFailListener
     }
 
     override fun getDrivingModeButton(): FloatingActionButton {
@@ -868,7 +863,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
 
         private val weakActivity= WeakReference(activity)
 
-        override fun onInitialized(mapboxMap: MapboxMap) {
+        override fun onInitialized(map: AccuTerraMapView) {
             Log.i(TAG, "AccuTerraMapViewListener.onInitialized()")
 
             val activity = weakActivity.get()
@@ -877,12 +872,30 @@ class DrivingActivity : BaseTripRecordingActivity() {
             activity.onAccuTerraMapViewReady()
         }
 
-        override fun onStyleChanged(mapboxMap: MapboxMap) {
+        override fun onStyleChanged(map: AccuTerraMapView) {
             Log.v(TAG, "AccuTerraMapViewListener.onStyleChanged()")
             weakActivity.get()?.let { activity ->
                 activity.getMapLayerButton().isEnabled = true
                 activity.getDrivingModeButton().isEnabled = true
             }
+        }
+
+        override fun onStyleChangeFailed(map: AccuTerraMapView, errorMessage: String?) {
+        }
+
+        override fun onInitializationFailed(map: AccuTerraMapView, errorMessage: String?) {
+            Log.e(TAG, "MapLoadingFailListener.onDidFailLoadingMap(errorMessage=$errorMessage)")
+            CrashSupport.reportError(errorMessage)
+
+            weakActivity.get()?.let { context ->
+                DialogUtil.buildOkDialog(context,"Error",
+                    errorMessage ?: "Unknown Error While Loading Map")
+                    .show()
+            }
+        }
+
+        override fun onStyleChangeStart(map: AccuTerraMapView) {
+            Log.v(TAG, "AccuTerraMapViewListener.onStyleChangeStart()")
         }
 
         override fun onSignificantMapBoundsChange() {
@@ -893,22 +906,6 @@ class DrivingActivity : BaseTripRecordingActivity() {
         override fun onTrackingModeChanged(mode: TrackingOption) {
             Log.i(TAG, "AccuTerraMapViewListener.onTrackingModeChanged(mode=$mode)")
             // TODO #16292 - anything we want to do here?
-        }
-    }
-
-    private class MapLoadingFailListener(activity: DrivingActivity) :
-        MapView.OnDidFailLoadingMapListener {
-
-        private val weakActivity= WeakReference(activity)
-
-        override fun onDidFailLoadingMap(errorMessage: String?) {
-            Log.e(TAG, "MapLoadingFailListener.onDidFailLoadingMap(errorMessage=$errorMessage)")
-            CrashSupport.reportError(errorMessage)
-
-            weakActivity.get()?.let { context ->
-                DialogUtil.buildOkDialog(context,"Error",
-                    errorMessage ?: "Unknown Error While Loading Map")
-            }
         }
     }
 

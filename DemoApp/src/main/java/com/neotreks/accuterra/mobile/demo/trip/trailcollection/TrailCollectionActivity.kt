@@ -68,7 +68,6 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
     private lateinit var viewModel: TrailCollectionViewModel
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
-    private val mapViewLoadingFailListener = MapLoadingFailListener(this)
 
     private lateinit var binding: ActivityTrailCollectionBinding
 
@@ -163,6 +162,9 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             R.id.trail_collection_menu_item_display_guide -> {
                 onShowGuide()
             }
+            R.id.trail_collection_menu_item_cancel_recording -> {
+                onCancelRecording()
+            }
             android.R.id.home -> {
                 onBackPressed()
                 return true
@@ -221,10 +223,6 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
     override fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
         return accuTerraMapViewListener
-    }
-
-    override fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
-        return mapViewLoadingFailListener
     }
 
     override fun getDrivingModeButton(): FloatingActionButton {
@@ -655,6 +653,19 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         startActivity(intent)
     }
 
+    private fun onCancelRecording() {
+        DialogUtil.buildYesNoDialog(this,
+            title = getString(R.string.activity_trip_recording_cancel_dialog_title),
+            message = getString(R.string.activity_trip_recording_cancel_dialog_message),
+            positiveCode = {
+                lifecycleScope.launchWhenCreated {
+                    onRecordingCancelConfirmed()
+                    super.onBackPressed()
+                }
+            }
+        ).show()
+    }
+
     private fun setModePoi(location: MapLocation?) {
         // Mark POI flag in view model
         viewModel.isAddPoiMode = true
@@ -723,7 +734,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
 
         private val weakActivity= WeakReference(activity)
 
-        override fun onInitialized(mapboxMap: MapboxMap) {
+        override fun onInitialized(map: AccuTerraMapView) {
             Log.i(TAG, "AccuTerraMapViewListener.onInitialized()")
 
             val activity = weakActivity.get()
@@ -732,7 +743,16 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             activity.onAccuTerraMapViewReady()
         }
 
-        override fun onStyleChanged(mapboxMap: MapboxMap) {
+        override fun onInitializationFailed(map: AccuTerraMapView, errorMessage: String?) {
+            weakActivity.get()?.let { context ->
+                DialogUtil.buildOkDialog(
+                    context, "Error",
+                    errorMessage ?: "Unknown Error While Loading Map"
+                ).show()
+            }
+        }
+
+        override fun onStyleChanged(map: AccuTerraMapView) {
             weakActivity.get()?.let { activity ->
                 activity.getMapLayerButton().isEnabled = true
                 activity.getDrivingModeButton().isEnabled = true
@@ -741,6 +761,12 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
                     activity.getAccuTerraMapView().tripLayersManager.reloadTripRecorderData()
                 }
             }
+        }
+
+        override fun onStyleChangeFailed(map: AccuTerraMapView, errorMessage: String?) {
+        }
+
+        override fun onStyleChangeStart(map: AccuTerraMapView) {
         }
 
         override fun onSignificantMapBoundsChange() {
@@ -756,21 +782,6 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             } else {
                 weakActivity.get()?.viewModel?.setUserAsMapFocus(false)
                 weakActivity.get()?.toggleCrosshairs()
-            }
-        }
-    }
-
-    private class MapLoadingFailListener(activity: TrailCollectionActivity) :
-        MapView.OnDidFailLoadingMapListener {
-
-        private val weakActivity = WeakReference(activity)
-
-        override fun onDidFailLoadingMap(errorMessage: String?) {
-            weakActivity.get()?.let { context ->
-                DialogUtil.buildOkDialog(
-                    context, "Error",
-                    errorMessage ?: "Unknown Error While Loading Map"
-                )
             }
         }
     }

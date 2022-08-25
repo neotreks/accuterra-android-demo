@@ -280,9 +280,20 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
             message = getString(R.string.activity_trip_recording_finish_dialog_message),
             positiveCode = {
                 lifecycleScope.launchWhenCreated {
-                    onRecordingFinishConfirmed()
+                    try {
+                        onRecordingFinishConfirmed()
+                    } catch(e: Exception) {
+                        onRecordingFinishFailed(e)
+                    }
                 }
             }
+        ).show()
+    }
+
+    protected open suspend fun onRecordingFinishFailed(error: Exception) {
+        DialogUtil.buildOkDialog(this,
+            title = getString(R.string.activity_trip_recording_finish_failed_dialog_title),
+            message = error.message ?: "unknown error"
         ).show()
     }
 
@@ -302,6 +313,16 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
         getAccuTerraMapView().tripLayersManager.setTripRecorder(null)
         val intent = buildOnRecordingFinishedIntent(uuid)
         startActivityForResult(intent, REQUEST_SAVE_TRIP)
+    }
+
+    protected open suspend fun onRecordingCancelConfirmed() {
+        val recorder = getTripRecorder()
+        val uuid = recorder.getActiveTripRecording()?.tripInfo?.uuid
+            ?: throw IllegalStateException("No trip UUID available.")
+        stopLocationRecording()
+        recorder.cancelTripRecording()
+        updateRecordingButtons()
+        getAccuTerraMapView().tripLayersManager.setTripRecorder(null)
     }
 
     protected open fun buildOnRecordingFinishedIntent(uuid: String): Intent {

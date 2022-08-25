@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
-import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
+import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
 import com.neotreks.accuterra.mobile.demo.user.DemoIdentityManager
 import com.neotreks.accuterra.mobile.demo.util.CrashSupport
@@ -185,11 +185,6 @@ class DemoActivity : AppCompatActivity() {
                     wsBaseUrl = BuildConfig.WS_BASE_URL,
                     wsAuthUrl = BuildConfig.WS_AUTH_URL,
                 ),
-                // Custom Map Configuration - mostly for the development purpose
-                // accuTerraMapConfig = AccuTerraMapConfig(
-                //    mapUrl = "",
-                //    mapApiKey = "",
-                // ),
                 // Request to initialize the overlay map download during SDK initialization
                 offlineCacheConfig = OfflineCacheConfig(
                     downloadOverlayMap = true,
@@ -214,14 +209,19 @@ class DemoActivity : AppCompatActivity() {
                 mapConfig = MapConfig (
                     // Using Here Maps
                     // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
-                    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE)
+                    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE),
+                    // Custom Map Configuration - mostly for the development purpose
+                    //accuTerraMapConfig = AccuTerraMapConfig(
+                    //    mapUrl = "",
+                    //    mapApiKey = "",
+                    //)
                 )
             )
             // This is the main initialization of the AccuTerra SDK.
             // The listener is notified about progress of the initialization.
             // This initialization must be called and successfully finish at least once
             // (after APK installation) to be able to use the SDK.
-            val result = SdkManager.initSdk(applicationContext, config, DemoAccessManager(), DemoIdentityManager(),
+            val result = SdkManager.initSdk(applicationContext, config, DemoCredentialsAccessManager(), DemoIdentityManager(),
                 listener = listener,
                 dbEncryptConfigProvider = dbEncryptProvider,
                 mapRequestInterceptor = ApkHereMapsInterceptor(),

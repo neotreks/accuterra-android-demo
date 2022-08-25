@@ -213,7 +213,8 @@
     <string name="activity_save_trail_title">Save Trail</string>
     <string name="activity_save_trail_name">Trail Name</string>
     <string name="activity_save_trail_description">Description (provide an overview of the trail and the experience)</string>
-    <string name="activity_save_trail_difficulty_rating">Difficulty Rating</string>
+    <string name="activity_save_trail_difficulty_rating_high">Highest Difficulty Rating</string>
+    <string name="activity_save_trail_difficulty_rating_low">Lowest Difficulty Rating</string>
     <string name="activity_save_trail_difficulty_description">Difficulty Description (explain why you gave it this difficulty rating)</string>
     <string name="activity_save_trail_tags">Trip Tags (automatically added from waypoints)</string>
     <string name="activity_save_trail_highlights">Highlights</string>

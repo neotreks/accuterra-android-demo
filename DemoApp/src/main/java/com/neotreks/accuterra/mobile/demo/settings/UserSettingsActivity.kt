@@ -9,7 +9,7 @@ import android.view.MenuItem
 import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityUserSettingsBinding
-import com.neotreks.accuterra.mobile.demo.security.DemoAccessManager
+import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -61,7 +61,7 @@ class UserSettingsActivity : AppCompatActivity() {
             if (key == KEY_USER_SETTINGS) {
                 GlobalScope.launch {
                     try {
-                        DemoAccessManager().resetToken(this@UserSettingsActivity)
+                        DemoCredentialsAccessManager().resetToken(this@UserSettingsActivity)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error while resetting access token.", e)
                         CrashSupport.reportError(e, "Error while resetting access token")

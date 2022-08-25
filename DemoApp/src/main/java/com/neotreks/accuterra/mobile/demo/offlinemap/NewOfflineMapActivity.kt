@@ -81,8 +81,6 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
     private val currentLocationEngineListener = CurrentLocationEngineListener(this)
 
-    private val mapViewLoadingFailListener = MapLoadingFailListener(this)
-
     private val networkStateReceiverListener = CurrentNetworkStateListener(this)
 
     // Current style id
@@ -192,7 +190,6 @@ class NewOfflineMapActivity : AppCompatActivity() {
         super.onDestroy()
         destroyLocationEngine()
         accuTerraMapView.removeListener(accuTerraMapViewListener)
-        accuTerraMapView.removeOnDidFailLoadingMapListener(mapViewLoadingFailListener)
         accuTerraMapView.onDestroy()
     }
 
@@ -240,7 +237,6 @@ class NewOfflineMapActivity : AppCompatActivity() {
         accuTerraMapView = binding.acitivityNewOfflineMapAccuterraMapView
         accuTerraMapView.onCreate(savedInstanceState)
         accuTerraMapView.addListener(accuTerraMapViewListener)
-        accuTerraMapView.addOnDidFailLoadingMapListener(mapViewLoadingFailListener)
 
         // Get previous map setup if available
         var mapSetup = getSavedMapSetup()
@@ -641,38 +637,39 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
         private val weakActivity= WeakReference(activity)
 
-        override fun onInitialized(mapboxMap: MapboxMap) {
+        override fun onInitialized(map: AccuTerraMapView) {
             val activity = weakActivity.get()
                 ?: return
 
-            activity.mapboxMap = mapboxMap
+            activity.mapboxMap = map.getMapboxMap()
             activity.onAccuTerraMapViewReady()
         }
 
-        override fun onStyleChanged(mapboxMap: MapboxMap) {
+        override fun onInitializationFailed(map: AccuTerraMapView, errorMessage: String?) {
+            weakActivity.get()?.let { context ->
+                DialogUtil.buildOkDialog(context,"Error",
+                    errorMessage?:"Unknown Error While Loading Map")
+                    .show()
+            }
+        }
+
+        override fun onStyleChanged(map: AccuTerraMapView) {
             val activity = weakActivity.get()
                 ?: return
             activity.binding.activityNewOfflineMapLayerButton.isEnabled = true
             activity.binding.activityNewOfflineMapMyLocationButton.isEnabled = true
         }
 
+        override fun onStyleChangeFailed(map: AccuTerraMapView, errorMessage: String?) {
+        }
+
+        override fun onStyleChangeStart(map: AccuTerraMapView) {
+        }
+
         override fun onSignificantMapBoundsChange() {
         }
 
         override fun onTrackingModeChanged(mode: TrackingOption) {
-        }
-    }
-
-    private class MapLoadingFailListener(activity: NewOfflineMapActivity) :
-        MapView.OnDidFailLoadingMapListener {
-
-        private val weakActivity= WeakReference(activity)
-
-        override fun onDidFailLoadingMap(errorMessage: String?) {
-            weakActivity.get()?.let { context ->
-                DialogUtil.buildOkDialog(context,"Error",
-                    errorMessage?:"Unknown Error While Loading Map")
-            }
         }
     }
 }

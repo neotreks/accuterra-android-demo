@@ -22,10 +22,12 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activity_trail_save_toolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintVertical_bias="0.0">
 
         <!-- LIST OF ATTRIBUTES -->
         <LinearLayout
@@ -39,11 +41,11 @@
                 android:id="@+id/activity_trail_save_image_carousel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_internal"
                 android:minHeight="30dp"
                 android:orientation="horizontal"
-                android:layout_marginTop="@dimen/default_margin_internal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/image_carousel_item"/>
+                tools:listitem="@layout/image_carousel_item" />
 
             <!-- PHOTOS -->
 
@@ -60,8 +62,8 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_margin="@dimen/default_margin_internal"
-                    android:src="@drawable/ic_add_photo_from_gallery_24px"
-                    android:contentDescription="@string/activity_trip_add_poi_add_photos"/>
+                    android:contentDescription="@string/activity_trip_add_poi_add_photos"
+                    android:src="@drawable/ic_add_photo_from_gallery_24px" />
 
                 <!-- Photo List -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -69,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/default_margin_internal"
-                    android:layout_marginStart="@dimen/default_margin"/>
+                    android:layout_marginStart="@dimen/default_margin" />
 
             </LinearLayout>
 
@@ -78,8 +80,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin_internal"
                 android:layout_marginHorizontal="@dimen/default_margin"
+                android:layout_marginTop="@dimen/default_margin_internal"
                 android:labelFor="@id/activity_trail_save_trail_name"
                 android:text="@string/activity_save_trail_name" />
 
@@ -97,8 +99,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin_internal"
                 android:layout_marginHorizontal="@dimen/default_margin"
+                android:layout_marginTop="@dimen/default_margin_internal"
                 android:labelFor="@id/activity_trail_save_trail_description"
                 android:text="@string/activity_save_trail_description" />
 
@@ -112,20 +114,18 @@
                 android:maxLines="4"
                 tools:text="Very long description that is possible not that long as it could be..." />
 
-            <!-- Difficulty Rating -->
+            <!-- Difficulty Rating High-->
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin_internal"
                 android:layout_marginHorizontal="@dimen/default_margin"
-                android:labelFor="@id/activity_trail_save_tech_rating"
-                android:text="@string/activity_save_trail_difficulty_rating" />
-
-            <!-- For Trail collection we gather just one value and not low/high values -->
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:labelFor="@id/activity_trail_save_tech_rating_high"
+                android:text="@string/activity_save_trail_difficulty_rating_high" />
 
             <TextView
-                android:id="@+id/activity_trail_save_tech_rating_text"
+                android:id="@+id/activity_trail_save_tech_rating_high_text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -133,22 +133,53 @@
                 tools:text="R1" />
 
             <com.google.android.material.slider.Slider
-                android:id="@+id/activity_trail_save_tech_rating"
+                android:id="@+id/activity_trail_save_tech_rating_high"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:stepSize="1.0"
                 android:valueFrom="1.0"
                 android:valueTo="5.0"
-                android:stepSize="1.0"
                 app:values="@array/initial_tech_range_slider_values"
-                android:layout_marginHorizontal="@dimen/default_margin" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="473dp" />
 
+            <!-- Difficulty Rating Low-->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:layout_marginTop="@dimen/default_margin_internal"
+                android:labelFor="@id/activity_trail_save_tech_rating_low"
+                android:text="@string/activity_save_trail_difficulty_rating_low" />
+
+            <TextView
+                android:id="@+id/activity_trail_save_tech_rating_low_text"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                tools:text="R2" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/activity_trail_save_tech_rating_low"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:stepSize="1.0"
+                android:valueFrom="1.0"
+                android:valueTo="5.0"
+                app:values="@array/initial_tech_range_slider_values"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="473dp" />
             <!-- Difficulty Description -->
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin_internal"
                 android:layout_marginHorizontal="@dimen/default_margin"
+                android:layout_marginTop="@dimen/default_margin_internal"
                 android:labelFor="@id/activity_trail_save_trail_difficulty_description"
                 android:text="@string/activity_save_trail_difficulty_description" />
 
@@ -164,11 +195,31 @@
 
             <!-- TAGS -->
 
+            <EditText
+                android:id="@+id/activity_trail_save_trail_difficulty_description2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="4"
+                tools:text="Difficulty text..." />
+
+            <EditText
+                android:id="@+id/activity_trail_save_trail_difficulty_description3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="4"
+                tools:text="Difficulty text..." />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin_internal"
                 android:layout_marginHorizontal="@dimen/default_margin"
+                android:layout_marginTop="@dimen/default_margin_internal"
                 android:labelFor="@id/activity_trail_save_tags"
                 android:text="@string/activity_save_trail_tags" />
 
@@ -184,12 +235,12 @@
                 android:id="@+id/activity_trail_save_show_more_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_margin"
                 android:layout_marginHorizontal="@dimen/default_margin"
-                android:padding="@dimen/default_margin_internal"
+                android:layout_marginTop="@dimen/default_margin"
                 android:gravity="center"
-                android:textColor="@color/trailCollectionPrimaryBackground"
-                android:text="@string/general_show_more" />
+                android:padding="@dimen/default_margin_internal"
+                android:text="@string/general_show_more"
+                android:textColor="@color/trailCollectionPrimaryBackground" />
 
             <LinearLayout
                 android:id="@+id/activity_trail_save_optional_fields_container"
@@ -202,8 +253,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_highlights"
                     android:text="@string/activity_save_trail_highlights" />
 
@@ -222,8 +273,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_history"
                     android:text="@string/activity_save_trail_history" />
 
@@ -242,8 +293,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_camping_options"
                     android:text="@string/activity_save_trail_camping_options" />
 
@@ -263,9 +314,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/default_margin"
+                    android:text="@string/activity_save_trail_permit_header"
                     android:textAlignment="center"
-                    android:textColor="@color/trailCollectionPrimaryBackground"
-                    android:text="@string/activity_save_trail_permit_header" />
+                    android:textColor="@color/trailCollectionPrimaryBackground" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -275,11 +326,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/default_margin_internal"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginHorizontal="@dimen/default_margin"
+                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:labelFor="@id/activity_trail_save_permit_required"
-                        android:text="@string/activity_save_trail_permit_required"
-                        android:layout_gravity="center_vertical"/>
+                        android:text="@string/activity_save_trail_permit_required" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/activity_trail_save_permit_required"
@@ -299,12 +350,12 @@
 
                     <!-- PERMIT INFORMATION -->
                     <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
-                    android:layout_marginHorizontal="@dimen/default_margin"
-                    android:labelFor="@id/activity_trail_save_permit_info"
-                    android:text="@string/activity_save_trail_permit_info" />
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/default_margin"
+                        android:layout_marginTop="@dimen/default_margin_internal"
+                        android:labelFor="@id/activity_trail_save_permit_info"
+                        android:text="@string/activity_save_trail_permit_info" />
 
                     <EditText
                         android:id="@+id/activity_trail_save_permit_info"
@@ -320,8 +371,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:layout_marginHorizontal="@dimen/default_margin"
+                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:labelFor="@id/activity_trail_save_permit_info_link"
                         android:text="@string/activity_save_trail_permit_info_link" />
 
@@ -339,8 +390,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:layout_marginHorizontal="@dimen/default_margin"
+                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:labelFor="@id/activity_trail_save_access_issue"
                         android:text="@string/activity_save_trail_access_issue" />
 
@@ -358,8 +409,8 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:layout_marginHorizontal="@dimen/default_margin"
+                        android:layout_marginTop="@dimen/default_margin_internal"
                         android:labelFor="@id/activity_trail_save_access_issue_link"
                         android:text="@string/activity_save_trail_access_issue_link" />
 
@@ -381,16 +432,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/default_margin"
+                    android:text="@string/activity_save_trail_season_header"
                     android:textAlignment="center"
-                    android:textColor="@color/trailCollectionPrimaryBackground"
-                    android:text="@string/activity_save_trail_season_header" />
+                    android:textColor="@color/trailCollectionPrimaryBackground" />
 
                 <!-- Season Recommendation -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_season_recommendation"
                     android:text="@string/activity_save_trail_season_recommendation" />
 
@@ -408,8 +459,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_season_recommendation_reason"
                     android:text="@string/activity_save_trail_season_recommendation_reason" />
 
@@ -427,8 +478,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_season_spring"
                     android:text="@string/activity_save_trail_season_spring" />
 
@@ -446,8 +497,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_season_summer"
                     android:text="@string/activity_save_trail_season_summer" />
 
@@ -465,8 +516,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_season_fall"
                     android:text="@string/activity_save_trail_season_fall" />
 
@@ -484,8 +535,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_season_winter"
                     android:text="@string/activity_save_trail_season_winter" />
 
@@ -505,16 +556,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/default_margin"
+                    android:text="@string/activity_save_trail_permit_header"
                     android:textAlignment="center"
-                    android:textColor="@color/trailCollectionPrimaryBackground"
-                    android:text="@string/activity_save_trail_permit_header" />
+                    android:textColor="@color/trailCollectionPrimaryBackground" />
 
                 <!-- ACCESS CONCERN -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_trail_access_concerns"
                     android:text="@string/activity_save_trail_access_concern" />
 
@@ -522,14 +573,14 @@
                     android:id="@+id/activity_trail_save_trail_access_concerns"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/default_margin"/>
+                    android:layout_marginHorizontal="@dimen/default_margin" />
 
                 <!-- RECOMMENDED CLEARANCE -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_trail_recommended_clearance"
                     android:text="@string/activity_save_trail_recommended_clearance" />
 
@@ -546,8 +597,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:layout_marginHorizontal="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin_internal"
                     android:labelFor="@id/activity_trail_save_trail_best_direction"
                     android:text="@string/activity_save_trail_best_direction" />
 

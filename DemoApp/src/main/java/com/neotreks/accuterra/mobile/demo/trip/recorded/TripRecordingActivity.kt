@@ -29,6 +29,7 @@ import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryModel
 import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryModelBuilder
 import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryRecordType
 import com.neotreks.accuterra.mobile.sdk.telemetry.model.TelemetryValuesBuilder
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingStatus
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripStatistics
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +48,6 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     private lateinit var viewModel: TripRecordingViewModel
 
     private val accuTerraMapViewListener = AccuTerraMapViewListener(this)
-    private val mapViewLoadingFailListener = MapLoadingFailListener(this)
 
     private lateinit var binding: ActivityTripRecordingBinding
 
@@ -156,12 +156,24 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
     }
 
     override fun onBackPressed() {
-        val hasActiveTrip = viewModel.getTripRecorder(this).hasActiveTripRecording()
-        if (hasActiveTrip) {
-            toast(getString(R.string.general_recording_cannot_exit_while_recording))
-            return
+        lifecycleScope.launchWhenCreated {
+            val activeTrip = viewModel.getTripRecorder(this@TripRecordingActivity).getActiveTripRecording()
+            if (activeTrip != null && activeTrip.recordingInfo.status == TripRecordingStatus.RECORDING) {
+                toast(getString(R.string.general_recording_cannot_exit_while_recording))
+                return@launchWhenCreated
+            } else {
+                DialogUtil.buildYesNoDialog(this@TripRecordingActivity,
+                    title = getString(R.string.activity_trip_recording_cancel_dialog_title),
+                    message = getString(R.string.activity_trip_recording_cancel_dialog_message),
+                    positiveCode = {
+                        lifecycleScope.launchWhenCreated {
+                            onRecordingCancelConfirmed()
+                            super.onBackPressed()
+                        }
+                    }
+                ).show()
+            }
         }
-        super.onBackPressed()
     }
 
     /* IMPLEMENTATION OF ABSTRACT METHODS */
@@ -172,10 +184,6 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
 
     override fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener {
         return accuTerraMapViewListener
-    }
-
-    override fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener {
-        return mapViewLoadingFailListener
     }
 
     override fun getDrivingModeButton(): FloatingActionButton {
@@ -390,7 +398,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
 
         private val weakActivity = WeakReference(activity)
 
-        override fun onInitialized(mapboxMap: MapboxMap) {
+        override fun onInitialized(map: AccuTerraMapView) {
             Log.i(TAG, "AccuTerraMapViewListener.onInitialized()")
 
             val activity = weakActivity.get()
@@ -399,7 +407,16 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
             activity.onAccuTerraMapViewReady()
         }
 
-        override fun onStyleChanged(mapboxMap: MapboxMap) {
+        override fun onInitializationFailed(map: AccuTerraMapView, errorMessage: String?) {
+            weakActivity.get()?.let { context ->
+                DialogUtil.buildOkDialog(
+                    context, "Error",
+                    errorMessage ?: "Unknown Error While Loading Map"
+                ).show()
+            }
+        }
+
+        override fun onStyleChanged(map: AccuTerraMapView) {
             weakActivity.get()?.let { activity ->
                 activity.getMapLayerButton().isEnabled = true
                 activity.getDrivingModeButton().isEnabled = true
@@ -410,27 +427,18 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
             }
         }
 
+        override fun onStyleChangeFailed(map: AccuTerraMapView, errorMessage: String?) {
+        }
+
+        override fun onStyleChangeStart(map: AccuTerraMapView) {
+        }
+
         override fun onSignificantMapBoundsChange() {
             // nothing to do. only the GPS data matters - not the map bounds
         }
 
         override fun onTrackingModeChanged(mode: TrackingOption) {
             // TODO #16292 - anything we want to do here?
-        }
-    }
-
-    private class MapLoadingFailListener(activity: TripRecordingActivity) :
-        MapView.OnDidFailLoadingMapListener {
-
-        private val weakActivity = WeakReference(activity)
-
-        override fun onDidFailLoadingMap(errorMessage: String?) {
-            weakActivity.get()?.let { context ->
-                DialogUtil.buildOkDialog(
-                    context, "Error",
-                    errorMessage ?: "Unknown Error While Loading Map"
-                )
-            }
         }
     }
 

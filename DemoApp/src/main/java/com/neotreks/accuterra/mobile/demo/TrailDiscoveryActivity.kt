@@ -96,8 +96,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private val currentLocationEngineListener = CurrentLocationEngineListener(this)
 
-    private val mapViewLoadingFailListener = MapLoadingFailListener(this)
-
     private val networkStateReceiverListener = CurrentNetworkStateListener(this)
 
     private val cacheProgressListener = CacheProgressListener(this)
@@ -235,7 +233,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         super.onDestroy()
         destroyLocationEngine()
         accuTerraMapView.removeListener(accuTerraMapViewListener)
-        accuTerraMapView.removeOnDidFailLoadingMapListener(mapViewLoadingFailListener)
         accuTerraMapView.onDestroy()
     }
 
@@ -316,7 +313,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         accuTerraMapView = binding.accuterraMapView
         accuTerraMapView.onCreate(savedInstanceState)
         accuTerraMapView.addListener(accuTerraMapViewListener)
-        accuTerraMapView.addOnDidFailLoadingMapListener(mapViewLoadingFailListener)
 
         // Get previous map setup if available
         var mapSetup = getSavedMapSetup()
@@ -430,7 +426,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             when(overlayOfflineMapStatus) {
                 OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED ->
                 {
-                    val estimateBytes = offlineCacheManager.estimateOverlayCacheSize().totalSize
+                    val estimateBytes = offlineCacheManager.estimateOverlayCacheSize(true).totalSize
                     val estimateText = Formatter.formatShortFileSize(
                         this@TrailDiscoveryActivity, estimateBytes)
 
@@ -441,7 +437,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                         message = getString(R.string.download_overlay_prompt, estimateText),
                         code = {
                             lifecycleScope.launchWhenResumed {
-                                offlineCacheManager.downloadOverlayOfflineMap()
+                                offlineCacheManager.downloadOverlayOfflineMap(true)
                             }
                         }
                     ).show()
@@ -1288,19 +1284,42 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         private val weakActivity= WeakReference(activity)
 
-        override fun onInitialized(mapboxMap: MapboxMap) {
+        override fun onInitialized(map: AccuTerraMapView) {
             val activity = weakActivity.get()
                 ?: return
 
-            activity.mapboxMap = mapboxMap
+            activity.mapboxMap = map.getMapboxMap()
             activity.onAccuTerraMapViewReady()
         }
 
-        override fun onStyleChanged(mapboxMap: MapboxMap) {
+        override fun onStyleChanged(map: AccuTerraMapView) {
             val activity = weakActivity.get()
                 ?: return
             activity.binding.activityTrailDiscoveryLayerButton.isEnabled = true
             activity.binding.activityTrailDiscoveryMyLocationButton.isEnabled = true
+        }
+
+        override fun onStyleChangeFailed(map: AccuTerraMapView, errorMessage: String?) {
+            weakActivity.get()?.let { context ->
+                DialogUtil.buildOkDialog(context, "Failed to change style", errorMessage?:"Map failed to change style").show()
+            }
+        }
+
+        override fun onInitializationFailed(map: AccuTerraMapView, errorMessage: String?) {
+            weakActivity.get()?.let { context ->
+                DialogUtil.buildYesNoDialog(
+                    context = context,
+                    title = "Map failed to load",
+                    message = errorMessage?:"Unknown Error While Loading Map",
+                    yesButtonResourceId = R.string.repeat,
+                    noButtonResourceId = R.string.cancel,
+                code = {
+                    context.setupMap(null)
+                }).show()
+            }
+        }
+
+        override fun onStyleChangeStart(map: AccuTerraMapView) {
         }
 
         override fun onSignificantMapBoundsChange() {
@@ -1309,18 +1328,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         override fun onTrackingModeChanged(mode: TrackingOption) {
             // TODO #16292 - anything we want to do here?
-        }
-    }
-
-    private class MapLoadingFailListener(activity: TrailDiscoveryActivity) :
-        MapView.OnDidFailLoadingMapListener {
-
-        private val weakActivity= WeakReference(activity)
-
-        override fun onDidFailLoadingMap(errorMessage: String?) {
-            weakActivity.get()?.let { context ->
-                DialogUtil.buildOkDialog(context,"Error", errorMessage?:"Unknown Error While Loading Map")
-            }
         }
     }
 

@@ -98,8 +98,6 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
     abstract fun getAccuTerraMapView(): AccuTerraMapView
 
-    abstract fun getMapViewLoadingFailListener(): MapView.OnDidFailLoadingMapListener
-
     abstract fun getAccuTerraMapViewListener(): AccuTerraMapView.IAccuTerraMapViewListener
 
     protected abstract fun getDrivingModeButton(): FloatingActionButton
@@ -156,7 +154,6 @@ abstract class BaseDrivingActivity : LocationActivity() {
         super.onDestroy()
 
         accuTerraMapView.removeListener(getAccuTerraMapViewListener())
-        accuTerraMapView.removeOnDidFailLoadingMapListener(getMapViewLoadingFailListener())
         accuTerraMapView.onDestroy()
 
         getLocationService()?.removeLocationUpdates()
@@ -182,7 +179,6 @@ abstract class BaseDrivingActivity : LocationActivity() {
         accuTerraMapView = getAccuTerraMapView()
         accuTerraMapView.onCreate(savedInstanceState)
         accuTerraMapView.addListener(getAccuTerraMapViewListener())
-        accuTerraMapView.addOnDidFailLoadingMapListener(getMapViewLoadingFailListener())
 
         accuTerraMapView.initialize(lifecycleScope, currentStyle)
     }

@@ -36,6 +36,7 @@ import com.neotreks.accuterra.mobile.sdk.trail.model.MapLocation
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingBasicInfo
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingSearchCriteria
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripRecordingStatus
+import com.neotreks.accuterra.mobile.sdk.trip.model.TripWorkflowStatus
 import com.neotreks.accuterra.mobile.sdk.ugc.model.ActivityFeedEntry
 import com.neotreks.accuterra.mobile.sdk.ugc.model.GetMyActivityFeedCriteria
 import com.neotreks.accuterra.mobile.sdk.ugc.model.SetTripLikedResult
@@ -184,7 +185,7 @@ class MyTripsActivity : AppCompatActivity() {
                 return
             }
             // Online
-            val criteria = GetMyActivityFeedCriteria(includeExtProperties = true)
+            val criteria = GetMyActivityFeedCriteria(includeExtProperties = true, workflowStatus = listOf(TripWorkflowStatus.PUBLISHED))
             viewModel.loadOnlineTrips(this, criteria)
         } else {
             // Local
