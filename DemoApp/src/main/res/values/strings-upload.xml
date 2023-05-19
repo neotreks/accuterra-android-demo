@@ -9,6 +9,7 @@
     <string name="upload_share_location_db">Share Location DB</string>
     <string name="upload_reset_access_token">Reset Access Token</string>
     <string name="upload_reset_access_token_done">Access token reset finished</string>
+    <string name="upload_export_trip">Export Trip</string>
     <string name="upload_reset_access_token_failed">Access token reset failed because of: %1$s</string>
 
     <!-- Sharing -->

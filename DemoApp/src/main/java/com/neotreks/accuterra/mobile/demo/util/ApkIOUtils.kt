@@ -3,8 +3,11 @@ package com.neotreks.accuterra.mobile.demo.util
 import android.content.Context
 import android.os.Trace
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.*
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 /**
@@ -77,6 +80,74 @@ object ApkIOUtils {
     }
 
     /**
+     * @param zipFilePath
+     * @param destDirectory
+     * @throws IOException
+     */
+    @Throws(IOException::class)
+    fun unzip(zipFilePath: File, destDirectory: String) {
+
+        File(destDirectory).run {
+            if (!exists()) {
+                mkdirs()
+            }
+        }
+
+        ZipFile(zipFilePath).use { zip ->
+
+            zip.entries().asSequence().forEach { entry ->
+
+                zip.getInputStream(entry).use { input ->
+
+
+                    val filePath = destDirectory + File.separator + entry.name
+
+                    if (!entry.isDirectory) {
+                        // if the entry is a file, extracts it
+                        extractFile(input, filePath)
+                    } else {
+                        // if the entry is a directory, make the directory
+                        val dir = File(filePath)
+                        dir.mkdir()
+                    }
+
+                }
+
+            }
+        }
+    }
+
+    fun zipDirectory(inputDirectory: File, outputZipFile: File) {
+        ZipOutputStream(BufferedOutputStream(FileOutputStream(outputZipFile))).use { zos ->
+            inputDirectory.walkTopDown().forEach { file ->
+                val zipFileName = file.absolutePath.removePrefix(inputDirectory.absolutePath).removePrefix("/")
+                val entry = ZipEntry( "$zipFileName${(if (file.isDirectory) "/" else "" )}")
+                zos.putNextEntry(entry)
+                if (file.isFile) {
+                    file.inputStream().copyTo(zos)
+                }
+            }
+        }
+    }
+
+    /**
+     * Extracts a zip entry (file entry)
+     * @param inputStream
+     * @param destFilePath
+     * @throws IOException
+     */
+    @Throws(IOException::class)
+    private fun extractFile(inputStream: InputStream, destFilePath: String) {
+        val bos = BufferedOutputStream(FileOutputStream(destFilePath))
+        val bytesIn = ByteArray(4096)
+        var read: Int
+        while (inputStream.read(bytesIn).also { read = it } != -1) {
+            bos.write(bytesIn, 0, read)
+        }
+        bos.close()
+    }
+
+    /**
      * Copies given [source] file into [target] location
      */
     @Suppress("unused")
@@ -137,6 +208,42 @@ object ApkIOUtils {
         }
 
         return files
+    }
+
+    /**
+     * Read bytes from given [inputStream] using [startIndex] to [endIndex]
+     */
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun readBytes(inputStream: InputStream, startIndex: Long, endIndex: Long): ByteArray {
+
+        return withContext(Dispatchers.IO) {
+            return@withContext inputStream.use { input ->
+
+                var offset = 0
+                var remaining = ((endIndex - startIndex) + 1).also { length ->
+                    if (length > Int.MAX_VALUE) throw OutOfMemoryError("File $this is too big ($length bytes) to fit in memory.")
+                }.toInt()
+                val result = ByteArray(remaining)
+
+                // We need to move to the `start index`
+                input.skip(startIndex)
+
+                // Now we read the file part
+                while (remaining > 0) {
+                    val read = input.read(result, offset, remaining)
+                    if (read < 0) {
+                        break
+                    }
+                    remaining -= read
+                    offset += read
+                }
+                if (remaining > 0) {
+                    return@use result.copyOf(offset)
+                }
+
+                return@use result
+            }
+        }
     }
 
 }

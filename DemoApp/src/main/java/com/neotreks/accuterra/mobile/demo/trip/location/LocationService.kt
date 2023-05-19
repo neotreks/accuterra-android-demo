@@ -5,17 +5,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.location.Location
-import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.Keep
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.trip.recorded.TripRecordingActivity
 import com.neotreks.accuterra.mobile.demo.util.toJson
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.cache.BinderServiceProvider
 import com.neotreks.accuterra.mobile.sdk.location.LocationUpdatesService
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorder
 import kotlinx.coroutines.launch
@@ -29,6 +31,8 @@ import kotlinx.coroutines.runBlocking
 class LocationService: LocationUpdatesService() {
 
     companion object {
+
+        private const val TAG = "LocationService"
 
         fun requestingLocationUpdates(context: Context): Boolean {
             return LocationUpdatesService.requestingLocationUpdates(context)
@@ -52,7 +56,7 @@ class LocationService: LocationUpdatesService() {
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
 
-    private val binder: IBinder = LSLocalBinder()
+    private var binder: BinderServiceProvider<LocationService?>?
 
     private var isRecordLocations = false
 
@@ -61,14 +65,22 @@ class LocationService: LocationUpdatesService() {
     private lateinit var recorder: ITripRecorder
 
     /* * * * * * * * * * * * */
+    /*      CONSTRUCTOR      */
+    /* * * * * * * * * * * * */
+
+    init {
+        binder = BinderServiceProvider(this)
+    }
+
+    /* * * * * * * * * * * * */
     /*       OVERRIDE        */
     /* * * * * * * * * * * * */
 
     override fun onCreate() {
         super.onCreate()
-        serviceScope.launch {
+        lifecycleScope.launch {
             recorder = ServiceFactory.getTripRecorder(applicationContext)
-            isRecordLocations = requestingLocationRecording(this@LocationService)
+            isRecordLocations = requestingLocationRecording()
         }
     }
 
@@ -84,11 +96,15 @@ class LocationService: LocationUpdatesService() {
 
         // Record locations if requested
         if (isRecordLocations) {
-            serviceScope.launch {
-                recorder.logTrackPoint(
-                    location = location,
-                    debugString = LocationDebugInfo.build(this@LocationService, location).toJson() // optional debug string
-                )
+            lifecycleScope.launch {
+                try {
+                    recorder.logTrackPoint(
+                        location = location,
+                        debugString = LocationDebugInfo.build(this@LocationService, location).toJson() // optional debug string
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error while recording location: $location")
+                }
             }
         }
 
@@ -139,8 +155,14 @@ class LocationService: LocationUpdatesService() {
         return builder.build()
     }
 
-    override fun getBinder(): IBinder {
+    override fun getBinder(): IBinder? {
         return binder
+    }
+
+    override fun onDestroy() {
+        binder?.destroy()
+        binder = null
+        super.onDestroy()
     }
 
     /* * * * * * * * * * * * */
@@ -169,7 +191,7 @@ class LocationService: LocationUpdatesService() {
 
     private fun getNotificationTitle(): String {
         return when {
-            requestingLocationRecording(this) -> {
+            requestingLocationRecording() -> {
                 getString(R.string.location_update_service_notification_title_trip_recording)
             }
             requestingLocationUpdates(this) -> {
@@ -183,10 +205,9 @@ class LocationService: LocationUpdatesService() {
 
     private fun getNotificationText(): String {
         return when {
-            requestingLocationRecording(this) -> {
-                var tripName: String? = null
-                runBlocking {
-                    tripName = recorder.getActiveTripRecording()?.tripInfo?.name
+            requestingLocationRecording() -> {
+                val tripName = runBlocking {
+                    return@runBlocking recorder.getActiveTripRecording()?.tripInfo?.name
                 }
                 getString(R.string.location_update_service_notification_message_trip_recording, tripName)
             }
@@ -201,11 +222,9 @@ class LocationService: LocationUpdatesService() {
 
     /**
      * Returns true if requesting location recording, otherwise returns false.
-     *
-     * @param context The [Context].
      */
-    private fun requestingLocationRecording(context: Context): Boolean {
-        return PreferenceManager.getDefaultSharedPreferences(context)
+    private fun requestingLocationRecording(): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean(KEY_REQUESTING_LOCATION_RECORDING, false)
     }
 
@@ -219,19 +238,6 @@ class LocationService: LocationUpdatesService() {
             .edit()
             .putBoolean(KEY_REQUESTING_LOCATION_RECORDING, requestingLocationRecording)
             .apply()
-    }
-
-    /* * * * * * * * * * * * */
-    /*     INNER CLASS       */
-    /* * * * * * * * * * * * */
-
-    /**
-     * Class used for the client Binder.  Since this service runs in the same process as its
-     * clients, we don't need to deal with IPC.
-     */
-    inner class LSLocalBinder : Binder() {
-        val service: LocationService
-            get() = this@LocationService
     }
 
 }

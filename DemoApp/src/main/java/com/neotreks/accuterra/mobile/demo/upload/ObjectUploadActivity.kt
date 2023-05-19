@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.common.util.IOUtils
 import com.neotreks.accuterra.mobile.demo.BuildConfig
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityObjectUploadBinding
@@ -30,11 +31,15 @@ import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import com.neotreks.accuterra.mobile.demo.util.MimeUtil
 import com.neotreks.accuterra.mobile.sdk.SdkInfo
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.sync.model.UploadDataType
 import com.neotreks.accuterra.mobile.sdk.sync.model.UploadRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.*
+import java.util.zip.GZIPInputStream
 
 /**
  * Activity displaying upload request related to given object
@@ -133,6 +138,12 @@ class ObjectUploadActivity : AppCompatActivity() {
             R.id.upload_object_menu_share_location_db -> {
                 lifecycleScope.launchWhenCreated {
                     onExportDb("accuterra-sdk-location.db")
+                }
+                return true
+            }
+            R.id.upload_export_trip -> {
+                lifecycleScope.launchWhenCreated {
+                    onExportTrip()
                 }
                 return true
             }
@@ -252,6 +263,140 @@ class ObjectUploadActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private suspend fun onExportTrip() {
+        var zipFile: File? = null
+        viewModel.uuid.value?.let { uuid ->
+            displayProgressBar()
+
+            withContext(Dispatchers.IO) {
+                val exportName = "export_${uuid}"
+                val cacheDir = File(this@ObjectUploadActivity.filesDir, "trip_share")
+                val exportFolder = File(cacheDir, exportName)
+                try {
+                    exportFolder.deleteRecursively()
+                } catch(e: Exception) {
+                    Log.e(TAG, "Could not remove directory $e")
+                }
+                if (!exportFolder.exists()) {
+                    exportFolder.mkdir()
+                }
+
+                viewModel.requests.value?.forEach { request ->
+                    val fileUrl = request.dataPath!!
+                    when (request.dataType) {
+                        UploadDataType.TRIP -> {
+                            // fileUrl contains path to zip, we want to extract it into the export folder
+                            ApkIOUtils.unzip(File(fileUrl), exportFolder.absolutePath)
+                        }
+                        else -> {
+                            val attachmentsFolder = File(exportFolder, "attachments")
+                            // fileUrl contains path to attachment, we want to copy it into attachments folder, but we need to watch for multipart attachments
+
+                            val startIndex = request.multipartStartIndex
+                            val endIndex = request.multipartEndIndex
+
+                            if (startIndex != null && endIndex != null) {
+                                val fileExtension = File(fileUrl).extension
+                                val tempFileName = "${request.dataUuid}.$fileExtension"
+                                val tempCopy = File(attachmentsFolder, tempFileName)
+
+                                val multipartData = ApkIOUtils.readBytes(
+                                    FileInputStream(File(fileUrl)),
+                                    startIndex,
+                                    endIndex
+                                )
+                                tempCopy.writeBytes(multipartData)
+                            } else {
+                                val tempCopy = File(attachmentsFolder, File(fileUrl).name)
+                                ApkIOUtils.copyFiles(File(fileUrl), tempCopy)
+                            }
+                        }
+                    }
+                }
+                zipFile = File(cacheDir, "$exportName.zip")
+                val zip = zipFile ?: return@withContext
+
+                if (zip.exists()) {
+                    zip.delete()
+                }
+                ApkIOUtils.zipDirectory(exportFolder, zip)
+
+                try {
+                    exportFolder.deleteRecursively()
+                } catch(e: Exception) {
+                    Log.e(TAG, "Could not remove directory $e")
+                }
+            }
+            hideProgressBar()
+            val uuid = viewModel.uuid.value ?: return
+            val service = ServiceFactory.getTripRecordingService(applicationContext)
+            val tripRecording = service.getTripRecordingByUUID(uuid) ?: return
+
+            zipFile?.let {
+                shareTripZipFile(it, uuid, tripRecording.tripInfo.name)
+            }
+        }
+    }
+
+    private suspend fun shareTripZipFile(file: File, tripUuid: String, tripName: String) {
+        try {
+            Log.d("RecordedTripActivity", "shareTripZipFile started")
+            if (!file.exists()) {
+                toast(getString(R.string.activity_upload_object_error_file_not_exists, file.path))
+                return
+            }
+            val uri = FileProvider.getUriForFile(
+                applicationContext, DemoAppFileProvider.AUTHORITY, file
+            )
+            val mime = MimeUtil.getMimeType(file)
+            if (mime == null) {
+                toast(getString(R.string.activity_upload_object_error_getting_mime, file.path))
+                return
+            }
+            val shareIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(
+                    Intent.EXTRA_SUBJECT,
+                    getString(R.string.activity_upload_object_sharing_trip_file, tripUuid)
+                )
+                putExtra(Intent.EXTRA_TEXT, getShareZipTripFileEmailBody(tripName))
+                type = mime
+            }
+            shareIntent.clipData = ClipData.newUri(contentResolver, file.name, uri)
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(Intent.createChooser(shareIntent, "Send to"))
+        } catch (e: Exception) {
+            Log.e("Recorded Trip Activity", "Error while sharing a file: ${file.path}", e)
+            CrashSupport.reportError(e, "Error while sharing a file: ${file.path}")
+        }
+    }
+
+    private suspend fun getShareZipTripFileEmailBody(tripName: String): String {
+        return """
+            Trip Info
+                Trip Name: $tripName
+                Share Date: ${Date().toIsoDateTimeString()}
+            
+            SDK info: 
+                Version: ${SdkInfo().versionName}
+                DB Model: ${SdkInfo().dbModelVersion}
+                Platform: ${SdkInfo().platform}
+            
+            APK Info:
+                ID: ${BuildConfig.APPLICATION_ID}
+                Build: ${BuildConfig.VERSION_NAME} | ${BuildConfig.VERSION_CODE}
+                IS DEBUG: ${BuildConfig.DEBUG}
+            
+            Device Info:
+                Manufacturer: ${Build.MANUFACTURER}
+                Model: ${Build.MODEL}
+                Android Version: ${Build.VERSION.SDK_INT}
+            
+            USER: ${DemoIdentityManager().getUserId(this)}
+        """.trimIndent()
     }
 
     private suspend fun onExportDb(dbName: String) {

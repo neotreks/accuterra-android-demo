@@ -321,6 +321,10 @@ class OfflineMapsActivity : AppCompatActivity() {
                 }
             }
         }
+
+        override fun onImageryDeleted(offlineMaps: List<IOfflineMap>) {
+            // We do not want to show anything
+        }
     }
 
     class OfflineMapListener(private val activityRef: WeakReference<OfflineMapsActivity>)

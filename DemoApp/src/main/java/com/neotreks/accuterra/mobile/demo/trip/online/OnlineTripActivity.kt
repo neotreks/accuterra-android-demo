@@ -475,7 +475,7 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
                 } else {
                     // We were not able to convert the `Trip` into `TripRecording`
                     val resultValue = result.value
-                    longToast(getString(R.string.activity_online_trip_edit_failed, resultValue?.name ?: "Unknown"))
+                    longToast(getString(R.string.activity_online_trip_edit_failed, resultValue?.type?.name ?: "Unknown"))
                     CrashSupport.reportError(result, "Trip UUID: ${viewModel.trip.value?.info}")
                 }
             }

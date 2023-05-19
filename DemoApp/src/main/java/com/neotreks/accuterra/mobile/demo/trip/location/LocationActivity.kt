@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.extensions.addSettingsAction
+import com.neotreks.accuterra.mobile.sdk.cache.BinderServiceProvider
 import com.neotreks.accuterra.mobile.sdk.location.LocationUpdatesService
 import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 
@@ -62,9 +63,8 @@ abstract class LocationActivity : AppCompatActivity(),
     // Monitors the state of the connection to the service.
     private val mServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val binder =
-                service as LocationService.LSLocalBinder
-            mService = binder.service
+            val binder = service as BinderServiceProvider<LocationService>
+            mService = binder.getService()
             mBound = true
             onLocationServiceBind()
         }

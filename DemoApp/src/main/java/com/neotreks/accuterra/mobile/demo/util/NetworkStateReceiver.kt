@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import java.util.*
 
@@ -33,8 +34,7 @@ class NetworkStateReceiver(context: Context) : BroadcastReceiver() {
 
     init {
         mListeners = ArrayList()
-        mManager =
-            this.context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        mManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         checkStateChanged()
     }
 
@@ -85,9 +85,20 @@ class NetworkStateReceiver(context: Context) : BroadcastReceiver() {
 
     private fun checkStateChanged(): Boolean {
         val prev = mConnected
-        val activeNetwork = mManager.activeNetworkInfo
-        mConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting
+        mConnected = checkIsOnline()
         return prev != mConnected
+    }
+
+    private fun checkIsOnline(): Boolean {
+        val network = mManager.activeNetwork ?: return false
+        val capabilities = mManager.getNetworkCapabilities(network) ?: return false
+        val isOnline = when {
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            else -> false
+        }
+        return  isOnline
     }
 
     private fun notifyStateToAll() {

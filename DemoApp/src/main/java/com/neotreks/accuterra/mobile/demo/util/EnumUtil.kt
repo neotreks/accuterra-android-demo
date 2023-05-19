@@ -28,7 +28,6 @@ object EnumUtil {
         return techRatings.values.toList()
     }
 
-    @Synchronized
     private suspend fun initTechRatings(context: Context) {
         if (techRatings.isEmpty()) {
             val ratings = ServiceFactory.getEnumService(context).getTechRatings()

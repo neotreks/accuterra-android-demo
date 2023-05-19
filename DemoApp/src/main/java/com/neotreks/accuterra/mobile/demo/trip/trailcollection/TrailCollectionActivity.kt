@@ -411,6 +411,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         }
         else {
             val mapCenter = binding.activityTrailCollectionAccuterraMapView.getMapboxMap().cameraPosition.target
+                ?: throw IllegalStateException("Error while saving poi, camera target is null.")
             val mapLocation = MapLocation(mapCenter.latitude, mapCenter.longitude)
 
             val dialog =

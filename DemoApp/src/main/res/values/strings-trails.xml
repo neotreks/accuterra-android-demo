@@ -12,8 +12,10 @@
     <string name="trail_updates_checking_updates_failed">Checking of trail updates has failed because of: %1$s</string>
     <string name="trail_updates_no_updates">No trail updates available</string>
     <string name="trail_updates_updating_trails">Updating Trail DB</string>
+    <string name="trail_updates_trail_db_update_already_in_progress">Trail DB update is already in progress</string>
     <string name="trail_updates_trail_db_updated">Trail DB updated (%1$s).</string>
     <string name="trail_updates_trail_no_updates">There were no updates of the Trail DB.</string>
+    <string name="trail_updates_trail_no_postponed">Trail DB update was postponed.</string>
     <string name="trail_updates_trail_db_update_failed">Trail DB update failed because of: %1$s</string>
 
     <!-- Trail Errors -->

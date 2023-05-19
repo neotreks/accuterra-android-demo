@@ -193,7 +193,7 @@ class RecordedTripActivity : AppCompatActivity() {
                 } else {
                     // We were not able to start trip editing
                     val resultValue = result.value
-                    longToast(getString(R.string.activity_recorded_trip_edit_failed, resultValue?.name ?: "Unknown"))
+                    longToast(getString(R.string.activity_recorded_trip_edit_failed, resultValue?.type?.name ?: "Unknown"))
                     CrashSupport.reportError(result, "Trip UUID: ${viewModel.trip.value?.tripInfo}")
                 }
             }

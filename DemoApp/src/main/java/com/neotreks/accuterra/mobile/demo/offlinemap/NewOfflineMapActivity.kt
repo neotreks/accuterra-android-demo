@@ -293,7 +293,8 @@ class NewOfflineMapActivity : AppCompatActivity() {
         lifecycleScope.launchWhenCreated {
             offlineCacheBgService?.offlineMapManager?.let {
                 val latLngBounds = mapboxMap.projection.visibleRegion.latLngBounds
-                val mapBounds = MapBounds(latLngBounds.latSouth, latLngBounds.lonWest, latLngBounds.latNorth, latLngBounds.lonEast)
+                val mapBounds = MapBounds(latLngBounds.latitudeSouth, latLngBounds.longitudeWest, latLngBounds.latitudeNorth,
+                    latLngBounds.longitudeEast)
                 val includeImagery = binding.activityNewOfflineMapImageryToggle.isChecked
                 val size = it.estimateAreaCacheSize(mapBounds, includeImagery)
                 binding.activityNewOfflineMapEstimateText.text = getString(R.string.estimated_download_size, size.totalSize.bytesToHumanReadable())
@@ -375,8 +376,8 @@ class NewOfflineMapActivity : AppCompatActivity() {
             lifecycleScope.launchWhenCreated {
                 offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                     val latLngBounds = mapboxMap.projection.visibleRegion.latLngBounds
-                    val mapBounds = MapBounds(latLngBounds.latSouth, latLngBounds.lonWest,
-                        latLngBounds.latNorth, latLngBounds.lonEast)
+                    val mapBounds = MapBounds(latLngBounds.latitudeSouth, latLngBounds.longitudeWest,
+                        latLngBounds.latitudeNorth, latLngBounds.longitudeEast)
                     val includeImagery = binding.activityNewOfflineMapImageryToggle.isChecked
                     val size = offlineMapManager.estimateAreaCacheSize(mapBounds, includeImagery)
 
@@ -492,10 +493,10 @@ class NewOfflineMapActivity : AppCompatActivity() {
     private fun getVisibleMapBounds(): MapBounds {
         val mapBounds = mapboxMap.projection.visibleRegion.latLngBounds
 
-        val latSouth = mapBounds.latSouth
-        val latNorth = mapBounds.latNorth
-        val lonWest = mapBounds.lonWest
-        val lonEast = mapBounds.lonEast
+        val latSouth = mapBounds.latitudeSouth
+        val latNorth = mapBounds.latitudeNorth
+        val lonWest = mapBounds.longitudeWest
+        val lonEast = mapBounds.longitudeEast
 
         return MapBounds(latSouth, lonWest, latNorth, lonEast)
     }
@@ -581,6 +582,9 @@ class NewOfflineMapActivity : AppCompatActivity() {
         }
 
         override fun onProgressChanged(offlineMap: IOfflineMap) {
+        }
+
+        override fun onImageryDeleted(offlineMaps: List<IOfflineMap>) {
         }
     }
 

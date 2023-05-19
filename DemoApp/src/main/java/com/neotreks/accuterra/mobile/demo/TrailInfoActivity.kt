@@ -132,16 +132,20 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
         initializeGpsLocationUpdates()
     }
 
-    protected fun initializeGpsLocationUpdates() {
+    private fun initializeGpsLocationUpdates() {
         Log.d(TAG, "initializeGpsLocationUpdates()")
 
         if (hasLocationPermissions()) {
-            val provider = getPreferredLocationProvider()
+            val provider =
+                if (BuildConfig.USE_TRAIL_PATH_EMULATOR) SdkLocationProvider.EMULATED
+                else getPreferredLocationProvider()
+
             getLocationService()?.requestLocationUpdates(provider)
         } else {
             requestPermissions()
         }
     }
+
     override fun getViewForSnackbar(): View {
         return binding.root
     }
@@ -258,18 +262,30 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
 
     private fun setupButtons() {
         binding.activityTrailInfoGetStartIcon.setOnClickListener {
-            if(!hasLocationPermissions()) {
+            if (!hasLocationPermissions()) {
                 requestPermissions()
-            }else if(hasLocationPermissions() && viewModel.drive.value?.let { trailDrive -> viewModel.getLastLocation()
-                    ?.let { location -> TrailNavigator.Direction.isCloseToTrailHeadSegment(trailDrive, location) } } == true){
-                startActivity(DrivingActivity.createNavigateToIntent(this, viewModel.trailId))
-            }else{
-                DialogUtil.buildOkDialog(
-                    context = this@TrailInfoActivity,
-                    title = getString(R.string.start_trail_title),
-                    message = getString(R.string.start_trail_message),
-                    null)
-                    .show()
+            } else {
+                if (BuildConfig.USE_TRAIL_PATH_EMULATOR) {
+                    // Proximity to trailhead is not required for emulated trail paths.
+                    startActivity(DrivingActivity.createNavigateToIntent(this, viewModel.trailId))
+                } else if (viewModel.drive.value?.let { trailDrive ->
+                        viewModel.getLastLocation()
+                            ?.let { location ->
+                                TrailNavigator.Direction.isCloseToTrailHeadSegment(
+                                    trailDrive,
+                                    location
+                                )
+                            }
+                    } == true) {
+                    startActivity(DrivingActivity.createNavigateToIntent(this, viewModel.trailId))
+                } else {
+                    DialogUtil.buildOkDialog(
+                        context = this@TrailInfoActivity,
+                        title = getString(R.string.start_trail_title),
+                        message = getString(R.string.start_trail_message),
+                        null
+                    ).show()
+                }
             }
         }
 
@@ -284,7 +300,8 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
                 offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
                     val trailOfflineMap = offlineMapManager.getTrailOfflineMap(trailId)
                     when (trailOfflineMap?.status ?: OfflineMapStatus.NOT_CACHED) {
-                        OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED, OfflineMapStatus.PAUSED -> {
+                        OfflineMapStatus.NOT_CACHED, OfflineMapStatus.FAILED, OfflineMapStatus.PAUSED,
+                        OfflineMapStatus.CANCELED -> {
                             // Please note the estimate is often very inaccurate!
                             // Let's estimate everything
                             val estimateMedia = true
@@ -493,6 +510,12 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
                 binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
                 binding.activityTrailInfoGetDownloadText.text = getString(R.string.download)
             }
+            OfflineMapStatus.CANCELED ->
+            {
+                binding.activityTrailInfoGetDownloadButton.visibility = View.VISIBLE
+                binding.activityTrailInfoGetDownloadIcon.setImageDrawable(loadDrawable(R.drawable.ic_cloud_download_24px))
+                binding.activityTrailInfoGetDownloadText.text = getString(R.string.cancelled)
+            }
         }
     }
 
@@ -658,6 +681,10 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
                     }
                 }
             }
+        }
+
+        override fun onImageryDeleted(offlineMaps: List<IOfflineMap>) {
+            // We do not want to show anything now
         }
     }
 

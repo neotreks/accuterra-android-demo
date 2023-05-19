@@ -24,7 +24,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.engine.*
-import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
 import com.neotreks.accuterra.mobile.demo.extensions.fromMilesToMeters
@@ -70,7 +69,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     /*      PROPERTIES       */
     /* * * * * * * * * * * * */
 
-    private lateinit var binding: ActivityTrailDiscoveryBinding
+    internal lateinit var binding: ActivityTrailDiscoveryBinding
 
     private var bottomListSize = ListViewSize.MEDIUM
 
@@ -98,7 +97,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private val networkStateReceiverListener = CurrentNetworkStateListener(this)
 
-    private val cacheProgressListener = CacheProgressListener(this)
+    private val cacheProgressListener = TrailDiscoveryCacheServiceConnectionListener(this)
 
     private lateinit var viewModel: TrailDiscoveryViewModel
 
@@ -230,10 +229,12 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        offlineCacheBgService?.offlineMapManager?.removeProgressListener(cacheProgressListener)
+        offlineCacheBgService = null
         destroyLocationEngine()
         accuTerraMapView.removeListener(accuTerraMapViewListener)
         accuTerraMapView.onDestroy()
+        super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -708,18 +709,30 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             // Close the dialog
             lifecycleScope.launchWhenResumed {
                 // Lets refresh the map in case of changes
-                if (result.value?.hasChangeActions() == true) {
+                if ((result.value as? TrailDbUpdateResult.Updated)?.hasChangeActions() == true) {
                     accuTerraMapView.trailLayersManager.reloadLayers()
                     handleMapViewChanged()
                 }
                 if (result.isSuccess) {
-                    if (result.value?.hasChangeActions() == true) {
-                        dialog.dismiss()
-                        longToast(getString(R.string.trail_updates_trail_db_updated,
-                            (result.value?.changedTrailsCount()?.toString() ?: "-")))
-                    } else {
-                        dialog.dismiss()
-                        toast(getString(R.string.trail_updates_trail_no_updates))
+                    dialog.dismiss()
+                    when (result.value) {
+                        TrailDbUpdateResult.Empty,
+                        TrailDbUpdateResult.Fresh -> {
+                            toast(getString(R.string.trail_updates_trail_no_updates))
+                        }
+                        TrailDbUpdateResult.InProgress -> {
+                            longToast(getString(R.string.trail_updates_trail_db_update_already_in_progress))
+                        }
+                        is TrailDbUpdateResult.Updated -> {
+                            longToast(getString(R.string.trail_updates_trail_db_updated,
+                                (result.value as TrailDbUpdateResult.Updated).changedTrailsCount().toString() ?: "-"))
+                        }
+                        is TrailDbUpdateResult.Postponed -> {
+                            longToast(getString(R.string.trail_updates_trail_no_postponed))
+                        }
+                        null -> {
+                            Log.e(TAG, "Empty value returned for successful result: $result")
+                        }
                     }
                 } else {
                     dialog.dismiss()
@@ -835,11 +848,15 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 override fun getCommunityFeedLocation(): MapLocation {
                     // Let's take the position from the middle of the map
                     val position = mapboxMap.cameraPosition.target
-                    return MapLocation(
-                        position.latitude,
-                        position.longitude,
-                        position.altitude
-                    )
+                    return if (position == null) {
+                        MapLocation(.0, .0, .0)
+                    } else {
+                        MapLocation(
+                            position.latitude,
+                            position.longitude,
+                            position.altitude
+                        )
+                    }
                 }
             })
         )
@@ -1074,10 +1091,10 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     private fun getVisibleMapBounds(): MapBounds {
         val mapBounds = mapboxMap.projection.visibleRegion.latLngBounds
 
-        val latSouth = mapBounds.latSouth
-        val latNorth = mapBounds.latNorth
-        val lonWest = mapBounds.lonWest
-        val lonEast = mapBounds.lonEast
+        val latSouth = mapBounds.latitudeSouth
+        val latNorth = mapBounds.latitudeNorth
+        val lonWest = mapBounds.longitudeWest
+        val lonEast = mapBounds.longitudeEast
 
         return MapBounds(latSouth, lonWest, latNorth, lonEast)
     }
@@ -1181,55 +1198,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     /* * * * * * * * * * * * */
     /*     INNER CLASS       */
     /* * * * * * * * * * * * */
-
-    private class CacheProgressListener(activity: TrailDiscoveryActivity): ICacheProgressListener {
-
-        val weakActivity = WeakReference(activity)
-
-        override fun onComplete(offlineMap: IOfflineMap) {
-            weakActivity.get()?.let { activity ->
-                activity.lifecycleScope.launchWhenCreated {
-                    activity.binding.activityTrailOfflinemapProgressLayout.visibility = View.GONE
-                }
-            }
-        }
-
-        override fun onComplete() {
-            // We do not wan to do anything
-        }
-
-        override fun onError(error: HashMap<IOfflineResource, String>, offlineMap: IOfflineMap) {
-            weakActivity.get()?.let { activity ->
-                activity.lifecycleScope.launchWhenCreated {
-                    val errorMessage = error.map { e ->
-                        "${e.key.getResourceTypeName()}: ${e.value}"
-                    }.joinToString("\n")
-                    DialogUtil.buildOkDialog(activity, activity.getString(R.string.download_failed),errorMessage).show()
-                }
-            }
-        }
-
-        override fun onProgressChanged(offlineMap: IOfflineMap) {
-            weakActivity.get()?.let { activity ->
-                activity.lifecycleScope.launchWhenCreated {
-                    // Show what is downloading and progress
-                    val progressPercents = (100.0 * offlineMap.progress).toInt()
-                    activity.binding.activityTrailOfflinemapProgressLayout.visibility = View.VISIBLE
-                    activity.binding.activityTrailOfflinemapProgressBar.progress = progressPercents
-
-                    var cacheName = offlineMap.type.name
-                    when (offlineMap) {
-                        is ITrailOfflineMap ->
-                            cacheName += "(${offlineMap.trailId})"
-                        is IAreaOfflineMap ->
-                            cacheName += "(${offlineMap.areaName})"
-                    }
-
-                    activity.binding.activityTrailOfflinemapProgressLabel.text = activity.getString(R.string.downloading_cache, cacheName, progressPercents)
-                }
-            }
-        }
-    }
 
     private class CurrentLocationEngineListener(activity: TrailDiscoveryActivity) :
         LocationEngineCallback<LocationEngineResult> {

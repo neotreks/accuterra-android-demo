@@ -353,6 +353,9 @@ class MyTripsActivity : AppCompatActivity() {
                             val intent = RecordedTripActivity.createNavigateToIntent(activity, trip.uuid)
                             activity.startActivityForResult(intent, REQUEST_RECORDED)
                         }
+                        else -> {
+                            Log.e(TAG, "Unhandled status: ${trip.status}")
+                        }
                     }
                 }
                 else -> {
@@ -412,6 +415,9 @@ class MyTripsActivity : AppCompatActivity() {
                             activity.dialogHolder.hideProgressDialog()
                         }
                     }
+                }
+                else -> {
+                    Log.e(TAG, "Unhandled item type: ${item.type}")
                 }
             }
         }

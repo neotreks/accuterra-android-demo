@@ -27,6 +27,10 @@
         android:title="@string/upload_share_location_db" />
 
     <item
+        android:id="@+id/upload_export_trip"
+        android:title="@string/upload_export_trip" />
+
+    <item
         android:id="@+id/upload_object_menu_item_resume_queue"
         android:title="@string/upload_resume_upload_queue" />
 

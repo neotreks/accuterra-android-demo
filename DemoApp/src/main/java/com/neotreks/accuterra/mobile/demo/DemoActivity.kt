@@ -155,9 +155,11 @@ class DemoActivity : AppCompatActivity() {
                     when (state) {
                         // Show progress bar
                         SdkInitState.IN_PROGRESS,
+                        SdkInitState.PAUSED,
                         SdkInitState.WAITING,
                         SdkInitState.WAITING_FOR_NETWORK -> showProgressBar(detail)
                         // Hide progress bar
+                        SdkInitState.UNKNOWN,
                         SdkInitState.CANCELED,
                         SdkInitState.COMPLETED,
                         SdkInitState.FAILED -> hideProgressBar()
@@ -274,6 +276,9 @@ class DemoActivity : AppCompatActivity() {
             // Init Trail Markers
             SdkInitStateDetail.TRAIL_MARKERS_CACHE_INIT -> {
                 binding.activityDemoProgressBarText.text = getString(R.string.demo_activity_init_trail_markers_cache)
+            }
+            else -> {
+                Log.e(TAG, "Unhandled detail type: $detail")
             }
         }
     }

@@ -67,6 +67,7 @@
     <string name="downloading_percents">Downloading %1$d %%</string>
     <string name="estimated_download_size">Estimated download size %1$s</string>
     <string name="queued">Queued</string>
+    <string name="cancelled">Cancelled</string>
 
     <string name="download_overlay_prompt">Would you like to download Overlay map cache (~%1$s).</string>
     <string name="download_trail_prompt">Would you like to download trail map cache (~%1$s).</string>

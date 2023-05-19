@@ -375,7 +375,11 @@ abstract class BaseDrivingActivity : LocationActivity() {
         }
 
         override fun onProgressChanged(offlineMap: IOfflineMap) {
-            // We do not wan to show anything
+            // We do not want to show anything
+        }
+
+        override fun onImageryDeleted(offlineMaps: List<IOfflineMap>) {
+            // We do not want to show anything
         }
     }
 
