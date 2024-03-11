@@ -24,7 +24,7 @@
     <string name="activity_db_passcode_set_passcode_dialog_title">Set Passcode</string>
     <string name="activity_db_passcode_set_passcode_dialog_message">Set Passcode for Trip Recording Database</string>
     <string name="activity_db_passcode_set_passcode_dialog_yes">Set Passcode</string>
-    <string name="activity_db_passcode_password_set">The DB password has been changed.</string>
+    <string name="activity_db_passcode_password_set">The DB password has been changed. Restart the App.</string>
     <string name="activity_db_passcode_password_not_set">There was an error while changing the password: %1$s</string>
 
     <string name="activity_db_passcode_restart_dialog_title">APK restart</string>

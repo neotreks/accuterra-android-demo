@@ -1,13 +1,18 @@
 package com.neotreks.accuterra.mobile.demo
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
@@ -63,6 +68,14 @@ class DemoActivity : AppCompatActivity() {
         CrashSupport.reportError(throwable)
       }
 
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted: Boolean ->
+            Log.i(TAG, "requestNotificationPermissionLauncher() - granted=$granted")
+            initSdkIfNeeded()
+        }
+
     /* * * * * * * * * * * * */
     /*       OVERRIDE        */
     /* * * * * * * * * * * * */
@@ -76,37 +89,59 @@ class DemoActivity : AppCompatActivity() {
         // Test the reference to the SDK
         Log.i(TAG, "AccuTerra SDK Version: ${SdkInfo().versionName}")
 
+        tryToGetNotificationPermissions()
+
+    }
+
+    private fun tryToGetNotificationPermissions() {
+        Log.d(TAG, "tryToGetNotificationPermissions()")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val grantStatus = ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS)
+            if (grantStatus == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "tryToGetNotificationPermissions() - already granted")
+                initSdkIfNeeded()
+            } else {
+                Log.i(TAG, "tryToGetNotificationPermissions() - requesting")
+                requestNotificationPermissionLauncher.launch(POST_NOTIFICATIONS)
+            }
+        } else {
+            Log.d(TAG, "tryToGetNotificationPermissions() - irrelevant Android API")
+            initSdkIfNeeded()
+        }
+    }
+
+    private fun initSdkIfNeeded() {
         // Checking if DB is initialized is here just for the DEMO purpose.
         // You should not check this in real APK but call the `SdkManager.initSdk()`
         // and monitor the progress and result. The TRAIL DB will be downloaded automatically
         // during the SDK initialization.
         if (!SdkManager.isTrailDbInitialized(this)) {
-            // Display DIALOG
-            DialogUtil.buildOkDialog(
-                context = this,
-                title = "Download",
-                message = "The trail DB is going to be downloaded now.",
-                code = {
-                    // Init the SDK. Since DB was not downloaded yet, it will be downloaded
-                    // during SDK initialization.
-                    initSdk(
-                        // Start Using the SDK
-                        onSdkInitSuccess = { onSdkInitSuccess() },
-                        // DO NOT USE THE SDK just display the error
-                        onSdkInitFailure = { e -> displaySdkInitError(e) }
-                    )
-                }
-            ).show()
+            showDownloadTrailsDbDialog()
         } else {
-            // Init the SDK. Since DB was downloaded already there will be no download now.
-            initSdk(
-                // Start Using the SDK
-                onSdkInitSuccess = { onSdkInitSuccess() },
-                // DO NOT USE THE SDK just display the error
-                onSdkInitFailure = { e -> displaySdkInitError(e) }
-            )
+            initSdk()
         }
+    }
 
+    private fun showDownloadTrailsDbDialog() {
+        // Display DIALOG
+        DialogUtil.buildOkDialog(
+            context = this,
+            title = "Download",
+            message = "The trail DB is going to be downloaded now.",
+            code = {
+                initSdk()
+            }
+        ).show()
+    }
+
+    private fun initSdk() {
+        // Init the SDK. Since DB was downloaded already there will be no download now.
+        initSdk(
+            // Start Using the SDK
+            onSdkInitSuccess = { onSdkInitSuccess() },
+            // DO NOT USE THE SDK just display the error
+            onSdkInitFailure = { e -> displaySdkInitError(e) }
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

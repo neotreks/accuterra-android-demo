@@ -52,28 +52,26 @@ object ApkIOUtils {
             // Make Path
             ensureFilePath(zipFile)
 
-            var origin: BufferedInputStream?
-            val dest = FileOutputStream(zipFile)
-            val out = ZipOutputStream(
-                BufferedOutputStream(
-                    dest
-                )
-            )
-            val data = ByteArray(bufferSize)
-            // copy files
-            for (file in files) {
-                Log.v(TAG, "Adding: $file")
-                val fi = FileInputStream(file)
-                origin = BufferedInputStream(fi, bufferSize)
-                val entry = ZipEntry(file.path.substring(file.path.lastIndexOf("/") + 1))
-                out.putNextEntry(entry)
-                var count: Int
-                while (origin.read(data, 0, bufferSize).also { count = it } != -1) {
-                    out.write(data, 0, count)
+            FileOutputStream(zipFile).use { fileOutputStream ->
+                BufferedOutputStream(fileOutputStream).use { bufferedOutputStream ->
+                    ZipOutputStream(bufferedOutputStream).use { out ->
+                        val data = ByteArray(bufferSize)
+                        for (file in files) {
+                            Log.v(TAG, "Adding: $file")
+                            FileInputStream(file).use { fileInputStream ->
+                                BufferedInputStream(fileInputStream, bufferSize).use { origin ->
+                                    val entry = ZipEntry(file.path.substring(file.path.lastIndexOf("/") + 1))
+                                    out.putNextEntry(entry)
+                                    var count: Int
+                                    while (origin.read(data, 0, bufferSize).also { count = it } != -1) {
+                                        out.write(data, 0, count)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                origin.close()
             }
-            out.close()
         } catch (e: Exception) {
             Log.e(TAG, "Error while creating a $zipFile zip file from: $files")
         }
@@ -138,13 +136,13 @@ object ApkIOUtils {
      */
     @Throws(IOException::class)
     private fun extractFile(inputStream: InputStream, destFilePath: String) {
-        val bos = BufferedOutputStream(FileOutputStream(destFilePath))
-        val bytesIn = ByteArray(4096)
-        var read: Int
-        while (inputStream.read(bytesIn).also { read = it } != -1) {
-            bos.write(bytesIn, 0, read)
+        BufferedOutputStream(FileOutputStream(destFilePath)).use { bos ->
+            val bytesIn = ByteArray(4096)
+            var read: Int
+            while (inputStream.read(bytesIn).also { read = it } != -1) {
+                bos.write(bytesIn, 0, read)
+            }
         }
-        bos.close()
     }
 
     /**

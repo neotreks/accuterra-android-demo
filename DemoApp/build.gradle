@@ -3,15 +3,15 @@ apply plugin: 'kotlin-android'
 apply from: file('../settings/demo-settings.gradle')
 
 android {
-    compileSdkVersion(33)
+    compileSdkVersion(34)
     ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
-        targetSdkVersion 33
-        versionCode 2700
-        versionName "0.27.0"
+        targetSdkVersion 34
+        versionCode 2900
+        versionName "0.29.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -72,10 +72,10 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.27.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.29.0"
     // Download also sources and javadoc for easier orientation - just for the development!
-    // implementation "com.accuterra:accuterra-android-sdk:0.27.0:sources"
-    // implementation "com.accuterra:accuterra-android-sdk:0.27.0:javadoc"
+    // implementation "com.accuterra:accuterra-android-sdk:0.29.0:sources"
+    // implementation "com.accuterra:accuterra-android-sdk:0.29.0:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])

@@ -189,7 +189,7 @@ abstract class LocationActivity : AppCompatActivity(),
 
     override fun onSharedPreferenceChanged(
         sharedPreferences: SharedPreferences,
-        s: String
+        s: String?
     ) {
         // Update the buttons state depending on whether location updates are being requested.
         if (s == LocationUpdatesService.KEY_REQUESTING_LOCATION_UPDATES) {

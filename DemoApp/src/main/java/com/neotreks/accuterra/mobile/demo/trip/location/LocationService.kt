@@ -110,7 +110,8 @@ class LocationService: LocationUpdatesService() {
 
         // Notify anyone listening for broadcasts about the new location.
         val intent = Intent(ACTION_BROADCAST)
-        intent.putExtra(EXTRA_LOCATION, location)
+            .setPackage(packageName)
+            .putExtra(EXTRA_LOCATION, location)
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
 
