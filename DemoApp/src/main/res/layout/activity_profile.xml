@@ -8,71 +8,77 @@
 
     <!-- TOOLBAR -->
 
-     <LinearLayout
-        android:id="@+id/activity_profile_toolbar_envelope"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <include
+        android:id="@+id/new_trip_activity_toolbar"
+        layout="@layout/accuterra_toolbar"
         app:layout_constraintTop_toTopOf="parent"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
-        <include
-            android:id="@+id/new_trip_activity_toolbar"
-            layout="@layout/accuterra_toolbar"
-            app:layout_constraintTop_toTopOf="parent"
+    <!-- SETTINGS -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="56dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/activity_profile_settings_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                style="@style/ActivityProfile_Button"
+                android:text="@string/general_settings" />
+
+            <Button
+                android:id="@+id/activity_profile_reset_token_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/activity_profile_settings_button"
+                style="@style/ActivityProfile_Button"
+                android:text="@string/upload_reset_access_token" />
+
+            <Button
+                android:id="@+id/activity_profile_delete_user_data_button"
+                style="@style/ActivityProfile_Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_profile_delete_user_data"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/activity_profile_reset_token_button" />
+
+            <Button
+                android:id="@+id/activity_profile_db_passcode_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/activity_profile_delete_user_data_button"
+                style="@style/ActivityProfile_Button"
+                android:text="@string/activity_profile_trip_recording_passcode" />
+
+            <Button
+                android:id="@+id/activity_profile_download_offline_maps_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/activity_profile_db_passcode_button"
+                style="@style/ActivityProfile_Button"
+                android:text="@string/download_offline_maps" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <include
             android:id="@+id/activity_profile_tabs"
             layout="@layout/component_basic_tabs" />
-
     </LinearLayout>
 
-    <!-- SETTINGS -->
-
-    <Button
-        android:id="@+id/activity_profile_settings_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_profile_toolbar_envelope"
-        style="@style/ActivityProfile_Button"
-        android:text="@string/general_settings" />
-
-    <Button
-        android:id="@+id/activity_profile_reset_token_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_profile_settings_button"
-        style="@style/ActivityProfile_Button"
-        android:text="@string/upload_reset_access_token" />
-
-    <Button
-        android:id="@+id/activity_profile_delete_user_data_button"
-        style="@style/ActivityProfile_Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_profile_delete_user_data"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_profile_reset_token_button" />
-
-    <Button
-        android:id="@+id/activity_profile_db_passcode_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_profile_delete_user_data_button"
-        style="@style/ActivityProfile_Button"
-        android:text="@string/activity_profile_trip_recording_passcode" />
-
-    <Button
-        android:id="@+id/activity_profile_download_offline_maps_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_profile_db_passcode_button"
-        style="@style/ActivityProfile_Button"
-        android:text="@string/download_offline_maps" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

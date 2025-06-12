@@ -49,8 +49,12 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupListeners()
         setupTabListener()
-        selectCurrentTab()
         UiUtils.setApkVersionText(binding.newTripActivityToolbar.generalToolbarSdkVersion)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.activityProfileTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_PROFILE_INDEX)
     }
 
     /* * * * * * * * * * * * */
@@ -148,12 +152,14 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupTabListener() {
+        binding.activityProfileTabs.componentBasicTabs.setupAppBasicTabs()
+        binding.activityProfileTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_PROFILE_INDEX)
         binding.activityProfileTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object : MainTabListener.MainTabListenerHelper {
                 override val context: Activity
                     get() = this@ProfileActivity
                 override fun getCurrentTabPosition(): Int {
-                    return this@ProfileActivity.getCurrentTabPosition()
+                    return AppBasicTabs.TAB_PROFILE_INDEX
                 }
                 override fun shouldFinish(): Boolean {
                     return true
@@ -163,14 +169,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
             })
         )
-    }
-
-    private fun getCurrentTabPosition(): Int {
-        return AppBasicTabs.TAB_PROFILE_INDEX
-    }
-
-    private fun selectCurrentTab() {
-        binding.activityProfileTabs.componentBasicTabs.getTabAt(getCurrentTabPosition())!!.select()
     }
 
 }

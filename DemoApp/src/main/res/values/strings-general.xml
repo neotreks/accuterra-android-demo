@@ -20,7 +20,7 @@
     <string name="general_map">Map</string>
     <string name="general_photos">Photos</string>
     <string name="general_poi">POI</string>
-    <string name="general_pois">POIs</string>
+    <string name="general_pois">Waypoints</string>
     <string name="general_uuid">UUID</string>
 
     <!-- ACTIONS -->
@@ -78,7 +78,7 @@
     <string name="general_cd_user_avatar">User Avatar</string>
 
     <!-- UGC -->
-    <string name="general_ugc">UGC</string>
+    <string name="general_ugc">Ratings</string>
     <string name="general_likes_number">%1$d Likes</string>
     <string name="general_comments_number">%1$d Comments</string>
     <string name="general_photos_number">%1$d Photos</string>

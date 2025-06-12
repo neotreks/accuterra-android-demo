@@ -1,17 +1,23 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: file('../settings/demo-settings.gradle')
+apply plugin: 'org.jetbrains.kotlin.android'
+
+// Link the files with versions
+apply from: file('../settings/libraries-settings.gradle')
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*      ANDROID CONFIGURATION                                            */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 android {
-    compileSdkVersion(34)
+    compileSdk 34
     ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 2900
-        versionName "0.29.0"
+        versionCode 2940
+        versionName "0.29.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -64,15 +70,19 @@ android {
     // TODO: remove when this issue will be fixed
     // This needed because of this bug: https://issuetracker.google.com/issues/169249668
     // It claims it's fixed in androidx-lifecycle 2.3.1 - but it still blocks release builds
-    lintOptions {
+    lint {
         disable 'NullSafeMutableLiveData'
     }
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*      DEPENDENCIES                                                     */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.29.0"
+    implementation "com.accuterra:accuterra-android-sdk:0.29.4"
     // Download also sources and javadoc for easier orientation - just for the development!
     // implementation "com.accuterra:accuterra-android-sdk:0.29.0:sources"
     // implementation "com.accuterra:accuterra-android-sdk:0.29.0:javadoc"
@@ -81,34 +91,45 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.6.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
-    implementation "androidx.fragment:fragment-ktx:1.5.7"
-    implementation "com.google.android.material:material:1.9.0"
+    implementation "androidx.lifecycle:lifecycle-common-java8:${version_androidx_lifecycle}"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${version_androidx_lifecycle}"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:${version_androidx_lifecycle}"
+    implementation 'androidx.fragment:fragment-ktx:1.5.7'
+    // Do not upgrade to 1.7.0 until the issue `Can't determine type for tag` is fixed in 1.7.0
+    implementation 'com.google.android.material:material:1.9.0'
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.recyclerview:recyclerview:1.3.0"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-    // V 1.1.1 Needed to support usage on Android 30 and older versions
     implementation "androidx.preference:preference-ktx:1.2.0"
 
     // CameraX core library using the camera2 implementation
-    implementation "androidx.camera:camera-core:1.2.2"
-    implementation "androidx.camera:camera-camera2:1.2.2"
-    implementation "androidx.camera:camera-lifecycle:1.2.2"
-    implementation "androidx.camera:camera-view:1.2.2"
-    implementation "androidx.camera:camera-extensions:1.2.2"
+    implementation "androidx.camera:camera-core:${version_androidx_camera}"
+    implementation "androidx.camera:camera-camera2:${version_androidx_camera}"
+    implementation "androidx.camera:camera-lifecycle:${version_androidx_camera}"
+    implementation "androidx.camera:camera-view:${version_androidx_camera}"
+    implementation "androidx.camera:camera-extensions:${version_androidx_camera}"
 
     // Retrofit - HTTP Client
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "com.squareup.retrofit2:retrofit:${version_retrofit}"
+    implementation "com.squareup.retrofit2:converter-gson:${version_retrofit}"
 
     // Glide
     implementation "com.github.bumptech.glide:glide:4.15.1"
     annotationProcessor "com.github.bumptech.glide:compiler:4.15.1"
 
-    // Turf - MapBox library for geometry operations
-    implementation 'org.maplibre.gl:android-sdk-turf:5.9.0'
+    // Testing
+    testImplementation "junit:junit:${version_junit}"
+    androidTestImplementation "androidx.test:runner:${version_androidx_test_runner}"
+    androidTestImplementation "androidx.test:rules:${version_androidx_test_rules}"
+    androidTestImplementation "androidx.test.ext:junit:${version_androidx_test_ext}"
+    androidTestImplementation "androidx.test.espresso:espresso-core:${version_androidx_test_expresson}"
+
+    // Turf - Mapbox library for geometry operations
+    implementation "org.maplibre.gl:android-sdk-turf:${version_turf}"
+
+    // LeakCanary - library for detecting memory leaks
+    // debugImplementation because LeakCanary should only run in debug builds.
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
 }

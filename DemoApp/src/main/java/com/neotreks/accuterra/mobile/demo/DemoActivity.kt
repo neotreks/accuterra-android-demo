@@ -260,8 +260,7 @@ class DemoActivity : AppCompatActivity() {
             // (after APK installation) to be able to use the SDK.
             val result = SdkManager.initSdk(applicationContext, config, DemoCredentialsAccessManager(), DemoIdentityManager(),
                 listener = listener,
-                dbEncryptConfigProvider = dbEncryptProvider,
-                mapRequestInterceptor = ApkHereMapsInterceptor(),
+                dbEncryptConfigProvider = dbEncryptProvider
             )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
