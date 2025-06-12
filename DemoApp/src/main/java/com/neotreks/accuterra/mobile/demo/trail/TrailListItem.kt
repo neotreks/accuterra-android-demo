@@ -11,7 +11,10 @@ class TrailListItem(
     val length: Float,
     val rating: UserRating?,
     val isBookmarked: Boolean,
-    val difficulty: TechnicalRating
+    val difficulty: TechnicalRating,
+    val highestElevation: Float?,
+    val estimatedDriveTimeMin: Int?,
+    val estimatedDriveTimeAvg: Int
 ) {
 
     companion object {
@@ -19,13 +22,16 @@ class TrailListItem(
             val difficulty = trailBasicInfo.techRatingHigh
 
             return TrailListItem(
-                trailBasicInfo.id,
-                trailBasicInfo.name,
-                trailBasicInfo.highlights,
-                trailBasicInfo.statistics.length,
-                trailBasicInfo.userRating,
-                false,
-                difficulty
+                id = trailBasicInfo.id,
+                title = trailBasicInfo.name,
+                shortDescription = trailBasicInfo.locationInfo.nearestTownName ?: trailBasicInfo.highlights,
+                length = trailBasicInfo.statistics.length,
+                rating = trailBasicInfo.userRating,
+                isBookmarked = false,
+                difficulty = difficulty,
+                highestElevation = trailBasicInfo.statistics.highestElevation,
+                estimatedDriveTimeMin = trailBasicInfo.statistics.estimatedDriveTimeMin,
+                estimatedDriveTimeAvg = trailBasicInfo.statistics.estimatedDriveTimeAvg
             )
         }
     }

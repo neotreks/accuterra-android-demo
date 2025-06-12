@@ -18,8 +18,12 @@ import android.widget.Button
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -27,10 +31,11 @@ import com.mapbox.mapboxsdk.location.engine.*
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
 import com.neotreks.accuterra.mobile.demo.extensions.fromMilesToMeters
-import com.neotreks.accuterra.mobile.demo.extensions.setOnSingleClickListener
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
+import com.neotreks.accuterra.mobile.demo.trail.TechRatingColorMapper
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
-import com.neotreks.accuterra.mobile.demo.trail.TrailListItemAdapter
+import com.neotreks.accuterra.mobile.demo.trail.TrailRecyclerItemAdapter
+import com.neotreks.accuterra.mobile.demo.trail.TrailRecyclerItemOnClickListener
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.*
 import com.neotreks.accuterra.mobile.demo.view.TrailFilterControl
@@ -48,6 +53,7 @@ import com.neotreks.accuterra.mobile.sdk.util.DelayedLastCallExecutor
 import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
+
 
 class TrailDiscoveryActivity : AppCompatActivity() {
 
@@ -73,7 +79,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private var bottomListSize = ListViewSize.MEDIUM
 
-    private lateinit var trailsListAdapter: TrailListItemAdapter
+    private lateinit var trailsRecyclerAdapter: TrailRecyclerItemAdapter
 
     private lateinit var accuTerraMapView: AccuTerraMapView
     private lateinit var mapboxMap: MapboxMap
@@ -184,8 +190,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         networkStateReceiver.addListener(networkStateReceiverListener)
         networkStateReceiver.onResume()
 
-        // Select the discovery tab if needed
-        binding.activityTrailDiscoveryTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_DISCOVER_INDEX)?.select()
+        binding.activityTrailDiscoveryTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_DISCOVER_INDEX)
     }
 
     override fun onPause() {
@@ -519,12 +524,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private fun handleTrailMapClick(trailId: Long) {
         selectTrail(trailId)
-
-        if (bottomListSize.showListViewIcons) {
-            scrollListToTrail(trailId)
-        } else {
-            navigateToTrailInfoScreen(trailId)
-        }
+        scrollListToTrail(trailId)
     }
 
     private fun showNewSnackBar(snackBar: Snackbar?) {
@@ -604,7 +604,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         if (listItem != null) {
             val listIndex = trailsListItems.indexOf(listItem)
 
-            binding.activityTrailDiscoveryList.setSelection(listIndex)
+            binding.activityTrailDiscoveryRecycler.scrollToPosition(listIndex)
         } else {
             toast("Trail #$trailId is not on the current list.")
         }
@@ -627,38 +627,47 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun setupList() {
-
-        trailsListAdapter = TrailListItemAdapter(this,
-            listOf(),
-            bottomListSize.showListViewIcons)
-
-        trailsListAdapter.setOnTrailListItemIconClickedListener(object : TrailListItemAdapter.OnTrailListItemIconClickedListener {
-            override fun onZoomToTrailIconClicked(trailListItem: TrailListItem) {
-                selectTrail(trailListItem.id)
-                zoomMapToTrail(trailListItem.id)
-            }
-
-            override fun onShowTrailInfoIconClicked(trailListItem: TrailListItem) {
+        trailsRecyclerAdapter = TrailRecyclerItemAdapter(trails = emptyList(), object : TrailRecyclerItemOnClickListener {
+            override fun onTrailRecyclerItemClick(trailListItem: TrailListItem) {
                 navigateToTrailInfoScreen(trailListItem.id)
             }
         })
 
-        binding.activityTrailDiscoveryList.emptyView = binding.activityTrailDiscoveryEmptyListLabel
-        binding.activityTrailDiscoveryList.adapter = trailsListAdapter
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.activityTrailDiscoveryRecycler.layoutManager = layoutManager
+        binding.activityTrailDiscoveryRecycler.adapter = trailsRecyclerAdapter
+        binding.activityTrailDiscoveryRecycler.setHasFixedSize(true)
 
-        binding.activityTrailDiscoveryList.setOnItemClickListener { _, _, position, _ ->
-            val trailListItem = trailsListAdapter.getItem(position)
-                ?: return@setOnItemClickListener
-            handleTrailsListItemClick(trailListItem)
-        }
+        val snapHelper = LinearSnapHelper()
+        snapHelper.attachToRecyclerView(binding.activityTrailDiscoveryRecycler)
 
-        binding.activityTrailDiscoveryDownloadUpdatesButton.setOnSingleClickListener(
+        binding.activityTrailDiscoveryRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val snappedView = snapHelper.findSnapView(recyclerView.layoutManager)
+                    val snappedPosition = recyclerView.getChildAdapterPosition(snappedView ?: return)
+                    onTrailCarouselSnappedToPosition(snappedPosition)
+                }
+            }
+        })
+
+        // TODO: Download updates button
+        /*binding.activityTrailDiscoveryDownloadUpdatesButton.setOnSingleClickListener(
             onClicked = { onDownloadUpdates() }
-        )
+        )*/
 
+        // TODO: Loading indication
         // hide the list at startup. make it look like it is loading
         // the actual load will start once the map becomes available
-        displayProgressBar()
+        //displayProgressBar()
+    }
+
+    private fun onTrailCarouselSnappedToPosition(position: Int) {
+        val trail = viewModel.trailsListItems.value?.getOrNull(position) ?: return
+        selectTrail(trailId = trail.id)
+        Log.d("Carousel", "Snapped to item at position $position")
     }
 
     private fun onDownloadUpdates() {
@@ -744,16 +753,13 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun updateItemList(items: List<TrailListItem>) {
-        // Update items
-        trailsListAdapter.setItems(items)
-        // Display the list and hide the progress.
-        hideProgressBar()
+        trailsRecyclerAdapter.setItems(items)
     }
 
     @SuppressLint("MissingPermission")
     private fun selectTrail(trailId: Long?) {
         viewModel.selectedTrailId = trailId
-        trailsListAdapter.selectTrail(trailId)
+        trailsRecyclerAdapter.selectTrail(trailId)
 
         trailLayersManager.highlightTrail(trailId)
 
@@ -835,6 +841,8 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun setupTabs() {
+        binding.activityTrailDiscoveryTabs.componentBasicTabs.setupAppBasicTabs()
+        binding.activityTrailDiscoveryTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_DISCOVER_INDEX)
         binding.activityTrailDiscoveryTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object : MainTabListener.MainTabListenerHelper {
                 override val context: Activity
@@ -860,17 +868,9 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 }
             })
         )
-
-        selectDefaultTabHack()
     }
 
     private fun setupButtons() {
-        binding.activityTrailDiscoveryShowListButton.drawUpArrowOnLeftSide()
-        binding.activityTrailDiscoveryShowListButton.setOnClickListener {
-            toggleListView()
-            trailsListAdapter.showActionIcons = bottomListSize.showListViewIcons
-        }
-
         binding.activityTrailDiscoveryMyLocationButton.setOnClickListener {
             cycleTrackingOption()
         }
@@ -956,50 +956,9 @@ class TrailDiscoveryActivity : AppCompatActivity() {
         binding.activityTrailDiscoveryMyLocationButton.setImageDrawable(icon)
     }
 
-    private fun toggleListView() {
-        bottomListSize = bottomListSize.toggleListView()
-
-        moveListViewGuideLine()
-    }
-
-    private fun moveListViewGuideLine() {
-        when(bottomListSize) {
-            ListViewSize.MINIMUM -> {
-                binding.activityTrailDiscoveryListTopGuideline.setGuidelinePercent(
-                    //make only the activity_trail_discovery_main_view visible
-                    1.0f - binding.activityTrailDiscoveryShowListButton.height.toFloat() / binding.activityTrailDiscoveryMainView.height.toFloat()
-                )
-                binding.activityTrailDiscoveryShowListButton.drawUpArrowOnLeftSide()
-            }
-            ListViewSize.MEDIUM -> {
-                binding.activityTrailDiscoveryListTopGuideline.setGuidelinePercent(0.5f)
-                binding.activityTrailDiscoveryShowListButton.drawUpArrowOnLeftSide()
-            }
-            ListViewSize.MAXIMUM -> {
-                binding.activityTrailDiscoveryListTopGuideline.setGuidelinePercent(0.0f)
-                binding.activityTrailDiscoveryShowListButton.drawDownArrowOnLeftSide()
-            }
-        }
-    }
-
-    private fun selectDefaultTabHack() {
-        //TODO Honza: Replace this awful async call with something nice
-        lifecycleScope.launchWhenCreated {
-            delay(100)
-            selectCurrentTab()
-        }
-    }
-
-    private fun selectCurrentTab() {
-        binding.activityTrailDiscoveryTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_DISCOVER_INDEX)!!.select()
-    }
-
     @UiThread
     private suspend fun refreshTrailsList(zoomToResult: Boolean, applyMapBoundsFilter: Boolean) {
         withContext(Dispatchers.Main) {
-            // Display progress bar
-            displayProgressBar()
-
             val zoomCamera = { trails: Iterable<TrailBasicInfo> ->
                 if (zoomToResult) {
                     val trailIds = trails.map { trailInfo -> trailInfo.id }
@@ -1073,18 +1032,6 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
             }
         }
-    }
-
-    @UiThread
-    private fun displayProgressBar() {
-        binding.activityTrailDiscoveryListWrapper.visibility = View.GONE
-        binding.activityTrailDiscoveryListLoadingProgress.visibility = View.VISIBLE
-    }
-
-    @UiThread
-    private fun hideProgressBar() {
-        binding.activityTrailDiscoveryListWrapper.visibility = View.VISIBLE
-        binding.activityTrailDiscoveryListLoadingProgress.visibility = View.GONE
     }
 
     @UiThread

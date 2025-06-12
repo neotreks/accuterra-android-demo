@@ -20,5 +20,16 @@ class TechRatingColorMapper {
                 else -> R.color.difficulty_unknown
             }
         }
+
+        fun getTechRatingColorHex(techRatingCode: String): String {
+            return when (techRatingCode.toUpperCase(Locale.getDefault())) {
+                SdkTechRating.R1.code -> "#008000"
+                SdkTechRating.R2.code -> "#FFF000"
+                SdkTechRating.R3.code -> "#FF8E15"
+                SdkTechRating.R4.code -> "#C80000"
+                SdkTechRating.R5.code -> "#000000"
+                else -> "#000000"
+            }
+        }
     }
 }

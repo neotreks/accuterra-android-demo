@@ -9,30 +9,12 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        app:tabMode="scrollable"
+        android:background="@android:color/white"
+        app:tabMode="fixed"
         app:tabTextColor="@color/toolbarTextGrayed"
-        app:tabSelectedTextColor="@color/toolbarText">
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/community" />
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/my_trips" />
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/discover" />
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/profile" />
+        app:tabSelectedTextColor="@color/colorPrimary"
+        app:tabIconTint="@color/colorPrimary"
+        app:tabIndicatorColor="@color/colorPrimary">
 
     </com.google.android.material.tabs.TabLayout>
 

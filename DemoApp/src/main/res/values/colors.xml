@@ -13,10 +13,10 @@
     <!-- Rating -->
     <color name="colorUserRatingStarForeground">#FF9800</color>
     <!-- Difficulty -->
-    <color name="difficulty_piece_of_cake">#61D836</color>
-    <color name="difficulty_easy">#00A2FF</color>
-    <color name="difficulty_medium">#F8BA00</color>
-    <color name="difficulty_advanced">#EE220C</color>
+    <color name="difficulty_piece_of_cake">#008000</color>
+    <color name="difficulty_easy">#FFF000</color>
+    <color name="difficulty_medium">#FF8E15</color>
+    <color name="difficulty_advanced">#C80000</color>
     <color name="difficulty_hard">#000000</color>
     <color name="difficulty_unknown">#929292</color>
     <!-- Text -->

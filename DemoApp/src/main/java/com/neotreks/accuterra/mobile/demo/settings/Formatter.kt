@@ -71,6 +71,19 @@ object Formatter {
             override fun formatDrivingTime(context: Context, timeInSeconds: Int): String {
                 return DateUtils.formatElapsedTime(timeInSeconds.toLong())
             }
+
+            override fun formatEstimatedDrivingTimeRange(
+                minTimeInSeconds: Int,
+                avgTimeInSeconds: Int
+            ): String {
+                val minHours = minTimeInSeconds / 60 / 60
+                val avgHours = avgTimeInSeconds / 60 / 60
+                return if (minHours == avgHours) {
+                    "$minHours hrs."
+                } else {
+                    "$minHours to $avgHours hrs."
+                }
+            }
         }
     }
 }

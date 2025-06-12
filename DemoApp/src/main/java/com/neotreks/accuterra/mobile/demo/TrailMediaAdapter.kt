@@ -65,7 +65,7 @@ class TrailMediaAdapter(private val mediaList: List<TrailMedia>,
             holder.imageView.setImageResource(options.placeholderId)
             val media = mediaList[position]
             // We need to get url for the thumbnail variant
-            val url = ApkMediaVariantUtil.getUrlForVariant(media.url, media.mediaCategoryNumber, ApkMediaVariant.THUMBNAIL)
+            val url = ApkMediaVariantUtil.getUrlForVariant(media.url, media.mediaCategoryNumber, ApkMediaVariant.DEFAULT)
             // Get the Uri from the media service
             val uri = mediaService.getMediaFile(url)
             // Click listener

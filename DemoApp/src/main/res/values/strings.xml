@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AccuTerra SDK</string>
+    <string name="app_name">AccuTerra Trails</string>
     <string name="app_sdk_version">unknown version</string>
     <string name="close">Close</string>
     <string name="loading">Loading…</string>
@@ -8,9 +8,9 @@
     <string name="na">n/a</string>
     <string name="general_error">Error</string>
 
-    <string name="community">Community</string>
-    <string name="my_trips">My Trips</string>
     <string name="discover">Discover</string>
+    <string name="community">Feed</string>
+    <string name="my_trips">Trips</string>
     <string name="profile">Profile</string>
     <string name="list">List</string>
 
@@ -41,7 +41,7 @@
     <string name="description">Description</string>
     <string name="developer">Developer</string>
     <string name="details">Details</string>
-    <string name="forecast">Forecast</string>
+    <string name="forecast">Map</string>
     <string name="reviews">Reviews</string>
     <string name="discussion">Discussion</string>
 
