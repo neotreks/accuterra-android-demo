@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailInfoBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.getFavoriteIconResource
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.settings.Formatter
@@ -165,6 +166,7 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
         super.onCreate(savedInstanceState)
         binding = ActivityTrailInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsets(binding.root)
         //setSupportActionBar(activity_trail_info_toolbar)
 
         viewModel = ViewModelProvider(this).get(TrailInfoViewModel::class.java)

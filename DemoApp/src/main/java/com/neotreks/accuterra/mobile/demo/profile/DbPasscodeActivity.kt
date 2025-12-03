@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDbPasscodeBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
@@ -52,6 +54,8 @@ class DbPasscodeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDbPasscodeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityDbPasscodeToolbar.root)
         setupToolbar()
         setupButton()
         setupObservers()
