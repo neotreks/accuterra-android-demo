@@ -26,6 +26,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailCollectionBinding
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.trip.recorded.BaseTripRecordingActivity
@@ -115,6 +117,8 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         super.onCreate(savedInstanceState)
         binding = ActivityTrailCollectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityTrailCollectionToolbar.root)
 
         viewModel = ViewModelProvider(this).get(TrailCollectionViewModel::class.java)
         lifecycleScope.launchWhenCreated {

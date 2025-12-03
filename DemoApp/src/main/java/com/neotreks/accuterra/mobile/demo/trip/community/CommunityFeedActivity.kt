@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.*
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityCommunityFeedBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.feed.*
 import com.neotreks.accuterra.mobile.demo.trip.community.CommunityFeedViewModel.Companion.DEFAULT_LOCATION
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity
@@ -78,10 +80,13 @@ class CommunityFeedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCommunityFeedBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityCommunityFeedToolbar.root)
 
         networkStateReceiver = NetworkStateReceiver(this)
 
         setupToolbar()
+        selectCurrentTab()
         setupTabListener()
         UiUtils.setApkVersionText(binding.activityCommunityFeedToolbar.generalToolbarSdkVersion)
 
@@ -95,8 +100,6 @@ class CommunityFeedActivity : AppCompatActivity() {
         super.onResume()
         loadTrips(forceReload = false)
         networkStateReceiver.onResume()
-
-        binding.activityCommunityFeedTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_COMMUNITY_INDEX)
     }
 
     override fun onPause() {
@@ -197,9 +200,11 @@ class CommunityFeedActivity : AppCompatActivity() {
         }
     }
 
+    private fun selectCurrentTab() {
+        binding.activityCommunityFeedTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_COMMUNITY_INDEX)!!.select()
+    }
+
     private fun setupTabListener() {
-        binding.activityCommunityFeedTabs.componentBasicTabs.setupAppBasicTabs()
-        binding.activityCommunityFeedTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_COMMUNITY_INDEX)
         binding.activityCommunityFeedTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object: MainTabListener.MainTabListenerHelper {
                 override val context: Activity

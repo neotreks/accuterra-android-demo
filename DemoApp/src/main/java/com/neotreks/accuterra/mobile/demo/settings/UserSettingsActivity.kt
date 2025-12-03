@@ -9,6 +9,8 @@ import android.view.MenuItem
 import androidx.preference.PreferenceManager
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityUserSettingsBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.util.CrashSupport
 import kotlinx.coroutines.GlobalScope
@@ -48,6 +50,8 @@ class UserSettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityUserSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityUserSettingsToolbar.root)
 
         // Set the default fragment
         supportFragmentManager

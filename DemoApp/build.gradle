@@ -9,25 +9,27 @@ apply from: file('../settings/libraries-settings.gradle')
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 android {
-    compileSdk 34
     ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
-        targetSdkVersion 34
-        versionCode 2940
-        versionName "0.29.4"
+        compileSdkVersion 35
+        targetSdkVersion 35
+        versionCode 3010
+        versionName "0.30.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -73,6 +75,7 @@ android {
     lint {
         disable 'NullSafeMutableLiveData'
     }
+    namespace 'com.neotreks.accuterra.mobile.demo'
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -82,10 +85,10 @@ android {
 dependencies {
 
     // Reference the AccuTerra SDK library
-    implementation "com.accuterra:accuterra-android-sdk:0.29.4"
+    implementation "com.accuterra:accuterra-android-sdk:0.30.1"
     // Download also sources and javadoc for easier orientation - just for the development!
-    // implementation "com.accuterra:accuterra-android-sdk:0.29.0:sources"
-    // implementation "com.accuterra:accuterra-android-sdk:0.29.0:javadoc"
+    // implementation "com.accuterra:accuterra-android-sdk:0.30.1:sources"
+    // implementation "com.accuterra:accuterra-android-sdk:0.30.1:javadoc"
 
     // Android X + libraries
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -132,4 +135,5 @@ dependencies {
     // debugImplementation because LeakCanary should only run in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 }
