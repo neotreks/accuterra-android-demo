@@ -7,8 +7,6 @@ import android.os.Bundle
 import android.text.Html
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailCollectionGuideBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 
 class TrailCollectionGuideActivity : AppCompatActivity() {
 
@@ -37,8 +35,6 @@ class TrailCollectionGuideActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTrailCollectionGuideBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityTrailCollectionGuideToolbar.root)
 
         setupToolbar()
 

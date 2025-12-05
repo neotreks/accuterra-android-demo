@@ -12,8 +12,6 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import com.neotreks.accuterra.mobile.demo.DemoApplication
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityOnlineTripMediaBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaVariant
 import com.neotreks.accuterra.mobile.demo.ui.RecycleViewBottomDotDecorator
@@ -65,8 +63,6 @@ class OnlineTripMediaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityOnlineTripMediaBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityOnlineTripMediaToolbar.root)
 
         initViewModel()
         setupToolbar()

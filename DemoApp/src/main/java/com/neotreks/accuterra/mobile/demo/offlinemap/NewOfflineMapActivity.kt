@@ -20,8 +20,6 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.neotreks.accuterra.mobile.demo.DemoAppPreferences
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityNewOfflineMapBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.bytesToHumanReadable
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
@@ -138,8 +136,6 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
         binding = ActivityNewOfflineMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityNewOfflineMapToolbar.root)
         setupToolbar()
 
         setupButtons()

@@ -13,8 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.*
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityMyTripsBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.feed.*
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripTabDefinition
@@ -83,13 +81,10 @@ class MyTripsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMyTripsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityMyTripsToolbar.root)
 
         networkStateReceiver = NetworkStateReceiver(this)
 
         setupToolbar()
-        selectCurrentTab()
         setupTabListener()
         setupButtons()
         UiUtils.setApkVersionText(binding.activityMyTripsToolbar.generalToolbarSdkVersion)
@@ -253,11 +248,9 @@ class MyTripsActivity : AppCompatActivity() {
         loadTrips(forceReload = true)
     }
 
-    private fun selectCurrentTab() {
-        binding.activityMyTripsTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_MY_TRIPS_INDEX)!!.select()
-    }
-
     private fun setupTabListener() {
+        binding.activityMyTripsTabs.componentBasicTabs.setupAppBasicTabs()
+        binding.activityMyTripsTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_MY_TRIPS_INDEX)
         binding.activityMyTripsTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object: MainTabListener.MainTabListenerHelper {
                 override val context: Activity

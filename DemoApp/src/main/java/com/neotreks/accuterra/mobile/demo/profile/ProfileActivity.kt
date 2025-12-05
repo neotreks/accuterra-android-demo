@@ -9,8 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.*
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityProfileBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.offlinemap.OfflineMapsActivity
 import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
@@ -49,12 +47,14 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.newTripActivityToolbar.root)
         setupListeners()
         setupTabListener()
-        selectCurrentTab()
         UiUtils.setApkVersionText(binding.newTripActivityToolbar.generalToolbarSdkVersion)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.activityProfileTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_PROFILE_INDEX)
     }
 
     /* * * * * * * * * * * * */
@@ -152,12 +152,14 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupTabListener() {
+        binding.activityProfileTabs.componentBasicTabs.setupAppBasicTabs()
+        binding.activityProfileTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_PROFILE_INDEX)
         binding.activityProfileTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object : MainTabListener.MainTabListenerHelper {
                 override val context: Activity
                     get() = this@ProfileActivity
                 override fun getCurrentTabPosition(): Int {
-                    return this@ProfileActivity.getCurrentTabPosition()
+                    return AppBasicTabs.TAB_PROFILE_INDEX
                 }
                 override fun shouldFinish(): Boolean {
                     return true
@@ -167,14 +169,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
             })
         )
-    }
-
-    private fun getCurrentTabPosition(): Int {
-        return AppBasicTabs.TAB_PROFILE_INDEX
-    }
-
-    private fun selectCurrentTab() {
-        binding.activityProfileTabs.componentBasicTabs.getTabAt(getCurrentTabPosition())!!.select()
     }
 
 }

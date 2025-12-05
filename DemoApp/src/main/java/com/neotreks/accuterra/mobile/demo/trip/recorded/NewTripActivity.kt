@@ -8,8 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.TrailDiscoveryActivity
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityNewTripBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.trip.trailcollection.TrailCollectionActivity
 
 class NewTripActivity : AppCompatActivity() {
@@ -34,8 +32,6 @@ class NewTripActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityNewTripBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.newTripActivityToolbar.root)
 
         setupToolbar()
         setupButtons()

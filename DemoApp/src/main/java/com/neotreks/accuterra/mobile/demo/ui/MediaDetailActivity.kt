@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityMediaDetailBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.util.visibility
 
@@ -62,8 +60,6 @@ class MediaDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMediaDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityMediaDetailToolbar.root)
         // Init view model
         viewModel = ViewModelProvider(this).get(MediaDetailViewModel::class.java)
 

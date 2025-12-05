@@ -16,8 +16,6 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.slider.Slider
 import com.neotreks.accuterra.mobile.demo.*
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailSaveBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.fromInchesToMeters
 import com.neotreks.accuterra.mobile.demo.extensions.fromMetersToInches
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
@@ -85,8 +83,6 @@ class TrailSaveActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTrailSaveBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityTrailSaveToolbar.root)
 
         viewModel = ViewModelProvider(this).get(TrailSaveViewModel::class.java)
         mediaService = ServiceFactory.getTrailMediaService(this)

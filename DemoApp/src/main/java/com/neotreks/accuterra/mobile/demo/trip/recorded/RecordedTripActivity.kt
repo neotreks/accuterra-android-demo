@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityRecordedTripBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateString
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.toast
@@ -61,8 +59,6 @@ class RecordedTripActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRecordedTripBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityRecordedTripToolbar.root)
         // Init view model
         viewModel = ViewModelProvider(this).get(RecordedTripViewModel::class.java)
         setupToolbar()

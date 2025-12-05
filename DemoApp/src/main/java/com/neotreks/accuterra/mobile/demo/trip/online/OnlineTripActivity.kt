@@ -16,8 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.DemoApplication
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityOnlineTripBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.getLikeIconResource
 import com.neotreks.accuterra.mobile.demo.extensions.getLocationLabelString
 import com.neotreks.accuterra.mobile.demo.extensions.toLocalDateTimeString
@@ -81,8 +79,6 @@ class OnlineTripActivity : AppCompatActivity(), ViewModelStoreOwner {
         super.onCreate(savedInstanceState)
         binding = ActivityOnlineTripBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityOnlineTripToolbar.root)
 
         initViewModel()
         setupToolbar()

@@ -13,8 +13,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.neotreks.accuterra.mobile.demo.DemoApplication
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityOnlineTripPoiBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripMedia
 import com.neotreks.accuterra.mobile.sdk.trip.model.TripPoint
@@ -58,8 +56,6 @@ class OnlineTripPoiActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityOnlineTripPoiBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityOnlineTripPoiToolbar.root)
 
         setupToolbar()
         setupMediaList()

@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
@@ -85,7 +84,6 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDemoBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
         setSupportActionBar(binding.toolbar)
 
         // Test the reference to the SDK
@@ -249,7 +247,7 @@ class DemoActivity : AppCompatActivity() {
                     // Using Here Maps
                     // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
                     imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE),
-                    // Custom Map Configuration - mostly for the development purpose. If empty the SDK will download configuration from the backend.
+                    // Custom Map Configuration - mostly for the development purpose
                     //accuTerraMapConfig = AccuTerraMapConfig(
                     //    mapUrl = "",
                     //    mapApiKey = "",
@@ -262,8 +260,7 @@ class DemoActivity : AppCompatActivity() {
             // (after APK installation) to be able to use the SDK.
             val result = SdkManager.initSdk(applicationContext, config, DemoCredentialsAccessManager(), DemoIdentityManager(),
                 listener = listener,
-                dbEncryptConfigProvider = dbEncryptProvider,
-                mapRequestInterceptor = ApkHereMapsInterceptor()
+                dbEncryptConfigProvider = dbEncryptProvider
             )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {

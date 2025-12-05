@@ -12,8 +12,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripEditPoiBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
@@ -73,8 +71,6 @@ class TripEditPoiActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTripEditPoiBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityTripEditPoiToolbar.root)
         viewModel = ViewModelProvider(this@TripEditPoiActivity).get(TripEditPoiViewModel::class.java)
         mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,
             binding.activityTripEditPoiPhotos,

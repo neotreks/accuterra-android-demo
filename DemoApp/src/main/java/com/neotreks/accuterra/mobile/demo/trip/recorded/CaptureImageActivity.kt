@@ -18,7 +18,6 @@ import com.bumptech.glide.load.ImageHeaderParser.UNKNOWN_ORIENTATION
 import com.google.common.util.concurrent.ListenableFuture
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityCaptureImageBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsets
 import com.neotreks.accuterra.mobile.demo.loadDrawable
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
@@ -99,7 +98,6 @@ class CaptureImageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCaptureImageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsets(binding.root)
         previewView = binding.activityCaptureImagePreviewView
 
         imageCapture = ImageCapture.Builder().apply {

@@ -18,8 +18,6 @@ import com.google.android.gms.common.util.IOUtils
 import com.neotreks.accuterra.mobile.demo.BuildConfig
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityObjectUploadBinding
-import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.extensions.toIsoDateTimeString
 import com.neotreks.accuterra.mobile.demo.longToast
@@ -87,8 +85,6 @@ class ObjectUploadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityObjectUploadBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        applyAllWindowInsetsButStatusBar(binding.root)
-        applyStatusBarWindowInsets(binding.activityObjectUploadToolbar.root)
 
         setupToolbar()
         registerObservers()
