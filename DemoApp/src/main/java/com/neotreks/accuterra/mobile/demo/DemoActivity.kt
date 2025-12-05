@@ -249,7 +249,7 @@ class DemoActivity : AppCompatActivity() {
                     // Using Here Maps
                     // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
                     imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE),
-                    // Custom Map Configuration - mostly for the development purpose
+                    // Custom Map Configuration - mostly for the development purpose. If empty the SDK will download configuration from the backend.
                     //accuTerraMapConfig = AccuTerraMapConfig(
                     //    mapUrl = "",
                     //    mapApiKey = "",
@@ -262,7 +262,8 @@ class DemoActivity : AppCompatActivity() {
             // (after APK installation) to be able to use the SDK.
             val result = SdkManager.initSdk(applicationContext, config, DemoCredentialsAccessManager(), DemoIdentityManager(),
                 listener = listener,
-                dbEncryptConfigProvider = dbEncryptProvider
+                dbEncryptConfigProvider = dbEncryptProvider,
+                mapRequestInterceptor = ApkHereMapsInterceptor()
             )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {
