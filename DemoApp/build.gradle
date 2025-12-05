@@ -73,6 +73,7 @@ android {
     lint {
         disable 'NullSafeMutableLiveData'
     }
+    namespace 'com.neotreks.accuterra.mobile.demo'
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
