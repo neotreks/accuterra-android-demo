@@ -6,7 +6,7 @@ ext {
 
     // AndroidX
     version_androidx_lifecycle = "2.6.1"
-    version_androidx_camera = "1.2.2"
+    version_androidx_camera = "1.4.2"
 
     // Retrofit
     version_retrofit = "2.9.0"
