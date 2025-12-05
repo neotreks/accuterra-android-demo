@@ -89,7 +89,6 @@ class MyTripsActivity : AppCompatActivity() {
         networkStateReceiver = NetworkStateReceiver(this)
 
         setupToolbar()
-        selectCurrentTab()
         setupTabListener()
         setupButtons()
         UiUtils.setApkVersionText(binding.activityMyTripsToolbar.generalToolbarSdkVersion)
@@ -253,11 +252,9 @@ class MyTripsActivity : AppCompatActivity() {
         loadTrips(forceReload = true)
     }
 
-    private fun selectCurrentTab() {
-        binding.activityMyTripsTabs.componentBasicTabs.getTabAt(AppBasicTabs.TAB_MY_TRIPS_INDEX)!!.select()
-    }
-
     private fun setupTabListener() {
+        binding.activityMyTripsTabs.componentBasicTabs.setupAppBasicTabs()
+        binding.activityMyTripsTabs.componentBasicTabs.selectTab(AppBasicTabs.TAB_MY_TRIPS_INDEX)
         binding.activityMyTripsTabs.componentBasicTabs.addOnTabSelectedListener(
             MainTabListener(object: MainTabListener.MainTabListenerHelper {
                 override val context: Activity

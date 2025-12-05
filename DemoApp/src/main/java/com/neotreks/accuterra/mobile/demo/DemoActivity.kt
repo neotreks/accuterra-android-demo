@@ -15,8 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
-import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
 import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
