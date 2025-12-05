@@ -14,8 +14,8 @@ android {
     defaultConfig {
         applicationId = "com.neotreks.accuterra.mobile.demo"
         minSdkVersion 23
-        compileSdkVersion 34
-        targetSdkVersion 34
+        compileSdkVersion 35
+        targetSdkVersion 35
         versionCode 2940
         versionName "0.29.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
