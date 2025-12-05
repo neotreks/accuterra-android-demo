@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripSaveBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.extensions.isNotNullNorBlank
 import com.neotreks.accuterra.mobile.demo.longToast
 import com.neotreks.accuterra.mobile.demo.media.ApkMediaUtil
@@ -78,6 +80,8 @@ class TripSaveActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTripSaveBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityTripSaveToolbar.root)
 
         viewModel = ViewModelProvider(this).get(TripSaveViewModel::class.java)
         mediaListManager = TripRecordingMediaListManager(this, lifecycleScope,

@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailPoiDetailBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.ui.MediaDetailActivity
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailMedia
 
@@ -49,6 +51,8 @@ class TrailPoiDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTrailPoiDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityTrailPoiDetailToolbar.root)
 
         // Setup toolbar
         setupToolbar()

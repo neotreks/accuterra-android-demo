@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
 import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
@@ -84,6 +85,7 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDemoBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
         setSupportActionBar(binding.toolbar)
 
         // Test the reference to the SDK

@@ -17,6 +17,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripRecordingBinding
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.toast
 import com.neotreks.accuterra.mobile.demo.trip.TestTelemetryRecording
 import com.neotreks.accuterra.mobile.demo.util.ActivityResult
@@ -76,6 +78,8 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTripRecordingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityTripRecordingToolbar.root)
 
         viewModel = ViewModelProvider(this).get(TripRecordingViewModel::class.java)
 

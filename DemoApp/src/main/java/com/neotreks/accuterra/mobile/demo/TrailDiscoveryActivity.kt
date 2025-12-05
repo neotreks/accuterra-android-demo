@@ -30,6 +30,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.engine.*
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
 import com.neotreks.accuterra.mobile.demo.extensions.fromMilesToMeters
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.trail.TechRatingColorMapper
@@ -168,6 +169,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
         binding = ActivityTrailDiscoveryBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
         setupToolbar()
 
         binding.activityTrailDiscoveryMainView.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)

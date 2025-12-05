@@ -13,6 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neotreks.accuterra.mobile.demo.*
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityMyTripsBinding
+import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
+import com.neotreks.accuterra.mobile.demo.extensions.applyStatusBarWindowInsets
 import com.neotreks.accuterra.mobile.demo.feed.*
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripActivity
 import com.neotreks.accuterra.mobile.demo.trip.online.OnlineTripTabDefinition
@@ -81,6 +83,8 @@ class MyTripsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMyTripsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyAllWindowInsetsButStatusBar(binding.root)
+        applyStatusBarWindowInsets(binding.activityMyTripsToolbar.root)
 
         networkStateReceiver = NetworkStateReceiver(this)
 
