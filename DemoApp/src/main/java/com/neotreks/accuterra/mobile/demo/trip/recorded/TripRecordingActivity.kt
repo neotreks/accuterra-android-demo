@@ -11,9 +11,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.MapLibreMap
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTripRecordingBinding
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
@@ -343,7 +343,7 @@ class TripRecordingActivity : BaseTripRecordingActivity() {
             switchToLocationMode()
             getDrivingModeButton().show()
             // Add map move listener to update the icon
-            getAccuTerraMapView().getMapboxMap().addOnMoveListener(object : MapboxMap.OnMoveListener {
+            getAccuTerraMapView().getMapLibreMap().addOnMoveListener(object : MapLibreMap.OnMoveListener {
                 override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {}
                 override fun onMoveEnd(moveGestureDetector: MoveGestureDetector) {}
 

@@ -7,7 +7,7 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.mapboxsdk.geometry.LatLng
+import org.maplibre.android.geometry.LatLng
 import com.neotreks.accuterra.mobile.demo.BaseDrivingActivity
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
@@ -369,7 +369,7 @@ abstract class BaseTripRecordingActivity : BaseDrivingActivity() {
     /* * * * * * * * * * * * */
 
     protected fun registerMapClickHandler() {
-        getAccuTerraMapView().getMapboxMap().addOnMapClickListener { latLng ->
+        getAccuTerraMapView().getMapLibreMap().addOnMapClickListener { latLng ->
             handleMapViewClick(latLng)
             return@addOnMapClickListener true
         }

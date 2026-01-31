@@ -2,13 +2,10 @@ package com.neotreks.accuterra.mobile.demo.util
 
 import android.location.Location
 import android.os.Handler
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.LineString
-import com.mapbox.geojson.Point
-import com.mapbox.turf.TurfMeasurement
+import org.maplibre.geojson.Point
+import org.maplibre.turf.TurfMeasurement
 import com.neotreks.accuterra.mobile.demo.trip.location.ILocationUpdateListener
 import com.neotreks.accuterra.mobile.sdk.trail.model.TrailDrive
-import com.neotreks.accuterra.mobile.sdk.trail.model.TrailPath
 
 class TrailPathLocationSimulator(trailDrive: TrailDrive,
                                  callback: ILocationUpdateListener) {
