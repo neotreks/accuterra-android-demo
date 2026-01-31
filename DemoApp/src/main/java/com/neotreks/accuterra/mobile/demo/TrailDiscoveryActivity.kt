@@ -18,22 +18,20 @@ import android.widget.Button
 import android.widget.ProgressBar
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.engine.*
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.engine.*
+import org.maplibre.android.maps.MapLibreMap
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailDiscoveryBinding
 import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
 import com.neotreks.accuterra.mobile.demo.extensions.fromMilesToMeters
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
-import com.neotreks.accuterra.mobile.demo.trail.TechRatingColorMapper
 import com.neotreks.accuterra.mobile.demo.trail.TrailListItem
 import com.neotreks.accuterra.mobile.demo.trail.TrailRecyclerItemAdapter
 import com.neotreks.accuterra.mobile.demo.trail.TrailRecyclerItemOnClickListener
@@ -83,7 +81,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     private lateinit var trailsRecyclerAdapter: TrailRecyclerItemAdapter
 
     private lateinit var accuTerraMapView: AccuTerraMapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var mapLibreMap: MapLibreMap
     private lateinit var trailLayersManager: TrailLayersManager
     private var isTrailsLayerManagersLoaded = false
 
@@ -398,7 +396,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     private fun onAccuTerraMapViewReady() {
 
-        mapboxMap.addOnMoveListener(object : MapboxMap.OnMoveListener {
+        mapLibreMap.addOnMoveListener(object : MapLibreMap.OnMoveListener {
             override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {}
             override fun onMove(moveGestureDetector: MoveGestureDetector) {
                 setLocationTracking(determineNextTrackingOption())
@@ -622,7 +620,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
     }
 
     private fun registerMapClickHandler() {
-        mapboxMap.addOnMapClickListener { latLng ->
+        mapLibreMap.addOnMapClickListener { latLng ->
             handleMapViewClick(latLng)
             return@addOnMapClickListener true
         }
@@ -857,7 +855,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 }
                 override fun getCommunityFeedLocation(): MapLocation {
                     // Let's take the position from the middle of the map
-                    val position = mapboxMap.cameraPosition.target
+                    val position = mapLibreMap.cameraPosition.target
                     return if (position == null) {
                         MapLocation(.0, .0, .0)
                     } else {
@@ -1038,7 +1036,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     @UiThread
     private fun getVisibleMapBounds(): MapBounds {
-        val mapBounds = mapboxMap.projection.visibleRegion.latLngBounds
+        val mapBounds = mapLibreMap.projection.visibleRegion.latLngBounds
 
         val latSouth = mapBounds.latitudeSouth
         val latNorth = mapBounds.latitudeNorth
@@ -1050,7 +1048,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
 
     @UiThread
     private fun getVisibleMapCenter(): MapLocation {
-        val mapCenter = mapboxMap.projection.visibleRegion.latLngBounds.center
+        val mapCenter = mapLibreMap.projection.visibleRegion.latLngBounds.center
 
         return MapLocation(mapCenter.latitude, mapCenter.longitude)
     }
@@ -1127,7 +1125,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             .setDisplacement(1.0F)
             .build()
 
-        val locationEngine = LocationEngineProvider.getBestLocationEngine(this)
+        val locationEngine = LocationEngineDefault.getDefaultLocationEngine(this)
         locationEngine.requestLocationUpdates(locationEngineRequest,
             currentLocationEngineListener, Looper.getMainLooper())
 
@@ -1205,7 +1203,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
             val activity = weakActivity.get()
                 ?: return
 
-            activity.mapboxMap = map.getMapboxMap()
+            activity.mapLibreMap = map.getMapLibreMap()
             activity.onAccuTerraMapViewReady()
         }
 

@@ -8,17 +8,14 @@ import androidx.annotation.UiThread
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
-import com.mapbox.mapboxsdk.maps.MapView
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.settings.UserSettingsActivity
 import com.neotreks.accuterra.mobile.demo.trip.location.LocationActivity
 import com.neotreks.accuterra.mobile.demo.ui.UiUtils
 import com.neotreks.accuterra.mobile.demo.util.ApkMapActivityUtil
+import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.NetworkStateReceiver
-import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.location.SdkLocationProvider
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraStyle
@@ -26,6 +23,8 @@ import com.neotreks.accuterra.mobile.sdk.map.HereMapsStyle
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
 import com.neotreks.accuterra.mobile.sdk.trail.model.MapPoint
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.location.OnLocationCameraTransitionListener
 import java.lang.ref.WeakReference
 
 /**
@@ -198,13 +197,13 @@ abstract class BaseDrivingActivity : LocationActivity() {
 
         // Set padding for current camera position
         val mapView = getAccuTerraMapView()
-        val mapboxMap = mapView.getMapboxMap()
+        val mapLibreMap = mapView.getMapLibreMap()
         val topPadding: Double = if (trackingOption == TrackingOption.DRIVING) {
             mapView.measuredHeight * 0.3
         } else {
             0.0
         }
-        val currentCamera = mapboxMap.cameraPosition
+        val currentCamera = mapLibreMap.cameraPosition
         val cameraPosition = CameraPosition.Builder()
             .target(currentCamera.target)
             .bearing(currentCamera.bearing)
@@ -212,7 +211,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
             .zoom(currentCamera.zoom)
             .padding(0.0, topPadding, 0.0, 0.0)
             .build()
-        mapboxMap.cameraPosition = cameraPosition
+        mapLibreMap.cameraPosition = cameraPosition
 
         currentTracking = trackingOption
         if (trackingOption.isTrackingOption()) {
@@ -284,7 +283,7 @@ abstract class BaseDrivingActivity : LocationActivity() {
     }
 
     protected open fun onToggleLocationTrackingMode() {
-        val currentCameraMode = getAccuTerraMapView().getMapboxMap().locationComponent.cameraMode
+        val currentCameraMode = getAccuTerraMapView().getMapLibreMap().locationComponent.cameraMode
         val isMapTracking = getAccuTerraMapView().isTrackingCameraMode(currentCameraMode)
         val lastGpsTracking = lastGpsTracking
         if (isMapTracking || lastGpsTracking == null) {

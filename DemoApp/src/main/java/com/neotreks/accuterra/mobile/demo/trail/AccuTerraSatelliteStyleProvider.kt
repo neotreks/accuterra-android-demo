@@ -2,11 +2,11 @@ package com.neotreks.accuterra.mobile.demo.trail
 
 import android.content.Context
 import android.util.Log
-import com.mapbox.geojson.Feature
-import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.Property
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
-import com.mapbox.mapboxsdk.style.layers.PropertyValue
+import org.maplibre.geojson.Feature
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.layers.PropertyValue
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
 import com.neotreks.accuterra.mobile.sdk.map.style.AccuterraStyleProvider
 import com.neotreks.accuterra.mobile.sdk.map.style.TrailLayerStyleType

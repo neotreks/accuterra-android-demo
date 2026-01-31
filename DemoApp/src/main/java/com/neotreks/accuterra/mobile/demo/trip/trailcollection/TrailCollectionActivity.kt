@@ -19,10 +19,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.camera.CameraUpdateFactory
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityTrailCollectionBinding
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
@@ -39,6 +37,7 @@ import com.neotreks.accuterra.mobile.demo.util.hideSoftKeyboard
 import com.neotreks.accuterra.mobile.demo.util.visibility
 import com.neotreks.accuterra.mobile.sdk.SdkManager
 import com.neotreks.accuterra.mobile.sdk.ServiceFactory
+import com.neotreks.accuterra.mobile.sdk.extension.toLatLng
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
 import com.neotreks.accuterra.mobile.sdk.map.TrackingOption
 import com.neotreks.accuterra.mobile.sdk.model.ExtProperties
@@ -58,6 +57,7 @@ import com.neotreks.accuterra.mobile.sdk.trip.recorder.ITripRecorderListener
 import com.neotreks.accuterra.mobile.sdk.trip.recorder.TripRecorderStatus
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.maplibre.android.maps.MapLibreMap
 import java.lang.ref.WeakReference
 
 class TrailCollectionActivity : BaseTripRecordingActivity(),
@@ -414,7 +414,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             }
         }
         else {
-            val mapCenter = binding.activityTrailCollectionAccuterraMapView.getMapboxMap().cameraPosition.target
+            val mapCenter = binding.activityTrailCollectionAccuterraMapView.getMapLibreMap().cameraPosition.target
                 ?: throw IllegalStateException("Error while saving poi, camera target is null.")
             val mapLocation = MapLocation(mapCenter.latitude, mapCenter.longitude)
 
@@ -611,7 +611,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
             switchToLocationMode()
             getDrivingModeButton().show()
             // Add map move listener to update the icon
-            getAccuTerraMapView().getMapboxMap().addOnMoveListener(object : MapboxMap.OnMoveListener {
+            getAccuTerraMapView().getMapLibreMap().addOnMoveListener(object : MapLibreMap.OnMoveListener {
                 override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {}
                 override fun onMoveEnd(moveGestureDetector: MoveGestureDetector) {}
 
@@ -683,7 +683,7 @@ class TrailCollectionActivity : BaseTripRecordingActivity(),
         mapFrame.requestLayout()
         if (location != null) {
             val update = CameraUpdateFactory.newLatLng(location.toLatLng())
-            getAccuTerraMapView().getMapboxMap().animateCamera(update, 2_000)
+            getAccuTerraMapView().getMapLibreMap().animateCamera(update, 2_000)
         }
 
         // Displays cross hairs when map center is used instead of user location to add POI

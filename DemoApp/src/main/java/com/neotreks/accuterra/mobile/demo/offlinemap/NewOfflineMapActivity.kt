@@ -11,12 +11,10 @@ import android.view.MenuItem
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.location.engine.*
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.Style
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.location.engine.*
+import org.maplibre.android.maps.MapLibreMap
 import com.neotreks.accuterra.mobile.demo.DemoAppPreferences
 import com.neotreks.accuterra.mobile.demo.R
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityNewOfflineMapBinding
@@ -29,7 +27,7 @@ import com.neotreks.accuterra.mobile.demo.util.*
 import com.neotreks.accuterra.mobile.sdk.cache.OfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.sdk.map.*
 import com.neotreks.accuterra.mobile.sdk.map.cache.*
-import com.neotreks.accuterra.mobile.sdk.trail.extension.toLatLngBounds
+import com.neotreks.accuterra.mobile.sdk.extension.toLatLngBounds
 import com.neotreks.accuterra.mobile.sdk.trail.model.*
 import com.neotreks.accuterra.mobile.sdk.util.LocationPermissionUtil
 import java.lang.ref.WeakReference
@@ -66,7 +64,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNewOfflineMapBinding
 
     private lateinit var accuTerraMapView: AccuTerraMapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var mapLibreMap: MapLibreMap
 
     private var editOfflineMapId: String? = null
 
@@ -296,7 +294,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
     private fun refreshEstimate() {
         lifecycleScope.launchWhenCreated {
             offlineCacheBgService?.offlineMapManager?.let {
-                val latLngBounds = mapboxMap.projection.visibleRegion.latLngBounds
+                val latLngBounds = mapLibreMap.projection.visibleRegion.latLngBounds
                 val mapBounds = MapBounds(latLngBounds.latitudeSouth, latLngBounds.longitudeWest, latLngBounds.latitudeNorth,
                     latLngBounds.longitudeEast)
                 val includeImagery = binding.activityNewOfflineMapImageryToggle.isChecked
@@ -310,7 +308,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
         setButtonsEnable(true)
 
-        mapboxMap.addOnCameraIdleListener {
+        mapLibreMap.addOnCameraIdleListener {
             refreshEstimate()
         }
 
@@ -322,7 +320,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
                         binding.activityNewOfflineMapNameEditText.setText(it.areaName)
 
                         binding.activityNewOfflineMapImageryToggle.isChecked = it.containsImagery
-                        mapboxMap.animateCamera(
+                        mapLibreMap.animateCamera(
                             CameraUpdateFactory.newLatLngBounds(it.bounds.toLatLngBounds(),
                                 0.0,0.0,0)
                         )
@@ -331,7 +329,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
             }
         }
 
-        mapboxMap.addOnMoveListener(object : MapboxMap.OnMoveListener {
+        mapLibreMap.addOnMoveListener(object : MapLibreMap.OnMoveListener {
             override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {}
             override fun onMove(moveGestureDetector: MoveGestureDetector) {
                 setLocationTracking(determineNextTrackingOption())
@@ -379,7 +377,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
             setButtonsEnable(false)
             lifecycleScope.launchWhenCreated {
                 offlineCacheBgService?.offlineMapManager?.let { offlineMapManager ->
-                    val latLngBounds = mapboxMap.projection.visibleRegion.latLngBounds
+                    val latLngBounds = mapLibreMap.projection.visibleRegion.latLngBounds
                     val mapBounds = MapBounds(latLngBounds.latitudeSouth, latLngBounds.longitudeWest,
                         latLngBounds.latitudeNorth, latLngBounds.longitudeEast)
                     val includeImagery = binding.activityNewOfflineMapImageryToggle.isChecked
@@ -495,7 +493,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
     @UiThread
     private fun getVisibleMapBounds(): MapBounds {
-        val mapBounds = mapboxMap.projection.visibleRegion.latLngBounds
+        val mapBounds = mapLibreMap.projection.visibleRegion.latLngBounds
 
         val latSouth = mapBounds.latitudeSouth
         val latNorth = mapBounds.latitudeNorth
@@ -507,7 +505,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
 
     @UiThread
     private fun getVisibleMapCenter(): MapLocation {
-        val mapCenter = mapboxMap.projection.visibleRegion.latLngBounds.center
+        val mapCenter = mapLibreMap.projection.visibleRegion.latLngBounds.center
 
         return MapLocation(mapCenter.latitude, mapCenter.longitude)
     }
@@ -542,7 +540,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
             .setDisplacement(1.0F)
             .build()
 
-        val locationEngine = LocationEngineProvider.getBestLocationEngine(this)
+        val locationEngine = LocationEngineDefault.getDefaultLocationEngine(this)
         locationEngine.requestLocationUpdates(locationEngineRequest,
             currentLocationEngineListener, Looper.getMainLooper())
 
@@ -649,7 +647,7 @@ class NewOfflineMapActivity : AppCompatActivity() {
             val activity = weakActivity.get()
                 ?: return
 
-            activity.mapboxMap = map.getMapboxMap()
+            activity.mapLibreMap = map.getMapLibreMap()
             activity.onAccuTerraMapViewReady()
         }
 

@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.MapLibreMap
 import com.neotreks.accuterra.mobile.demo.databinding.FragmentRecordedTripMapBinding
 import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.sdk.map.AccuTerraMapView
@@ -128,8 +128,8 @@ class RecordedTripMapFragment : RecordedTripFragment() {
     private fun onAccuTerraMapViewReady() {
         Log.i(TAG, "onAccuTerraMapViewReady()")
         // Avoid map rotation by user
-        getAccuTerraMapView().getMapboxMap().uiSettings.isRotateGesturesEnabled = false
-        getAccuTerraMapView().getMapboxMap().uiSettings.isCompassEnabled = false
+        getAccuTerraMapView().getMapLibreMap().uiSettings.isRotateGesturesEnabled = false
+        getAccuTerraMapView().getMapLibreMap().uiSettings.isCompassEnabled = false
         // Try to register location observers to obtain device location
 
         lifecycleScope.launchWhenResumed {

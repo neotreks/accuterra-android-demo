@@ -17,11 +17,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.OnLocationCameraTransitionListener
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.MapLibreMap
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDrivingBinding
 import com.neotreks.accuterra.mobile.demo.databinding.ComponentTripRecordingButtonsBinding
 import com.neotreks.accuterra.mobile.demo.databinding.DrivingActivityToolbarBinding
@@ -697,7 +697,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
                         (binding.activityDrivingRecordingPanel.height.toFloat() / binding.activityDrivingMainView.height)
 
                 binding.activityDrivingListBottomGuideline.setGuidelinePercent(guidelinePercent)
-                // keep map visible to avoid mapbox crashes caused by its height being 0
+                // keep map visible to avoid maplibre crashes caused by its height being 0
                 // the list will overflow the map so it will look like it's hidden
                 binding.activityDrivingPoiListExpander.drawUpArrowOnLeftSide()
             }
@@ -732,7 +732,7 @@ class DrivingActivity : BaseTripRecordingActivity() {
             setupRecordingAfterOnAccuTerraMapViewReady()
             getDrivingModeButton().show()
             // Add map move listener to update the icon
-            getAccuTerraMapView().getMapboxMap().addOnMoveListener(object : MapboxMap.OnMoveListener {
+            getAccuTerraMapView().getMapLibreMap().addOnMoveListener(object : MapLibreMap.OnMoveListener {
                 override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {}
                 override fun onMoveEnd(moveGestureDetector: MoveGestureDetector) {}
                 // Remove the [TrackOption.LOCATION] tracking

@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.neotreks.accuterra.mobile.demo.databinding.ActivityDemoBinding
 import com.neotreks.accuterra.mobile.demo.extensions.applyAllWindowInsetsButStatusBar
-import com.neotreks.accuterra.mobile.demo.heremaps.ApkHereMapsInterceptor
 import com.neotreks.accuterra.mobile.demo.offline.ApkOfflineCacheBackgroundService
 import com.neotreks.accuterra.mobile.demo.security.DemoCredentialsAccessManager
 import com.neotreks.accuterra.mobile.demo.security.DemoDbEncryptProvider
@@ -26,14 +25,10 @@ import com.neotreks.accuterra.mobile.demo.util.DialogUtil
 import com.neotreks.accuterra.mobile.demo.util.EnumUtil
 import com.neotreks.accuterra.mobile.sdk.*
 import com.neotreks.accuterra.mobile.sdk.cache.model.OfflineCacheConfig
-import com.neotreks.accuterra.mobile.sdk.map.HereMapsStyle
-import com.neotreks.accuterra.mobile.sdk.map.ImageryMapConfig
-import com.neotreks.accuterra.mobile.sdk.map.MapConfig
+import com.neotreks.accuterra.mobile.sdk.maplibre.ImageryTileServer
+import com.neotreks.accuterra.mobile.sdk.maplibre.MapLibreMapProvider
+import com.neotreks.accuterra.mobile.sdk.maplibre.WellKnownImageryTileServer
 import com.neotreks.accuterra.mobile.sdk.security.model.SdkEndpointConfig
-import com.neotreks.accuterra.mobile.sdk.trail.model.NetworkTypeConstraint
-import com.neotreks.accuterra.mobile.sdk.trail.model.TrailConfiguration
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripAttachmentSplitConfig
-import com.neotreks.accuterra.mobile.sdk.trip.model.TripConfiguration
 import kotlinx.coroutines.*
 
 class DemoActivity : AppCompatActivity() {
@@ -226,36 +221,17 @@ class DemoActivity : AppCompatActivity() {
                 ),
                 // Request to initialize the overlay map download during SDK initialization
                 offlineCacheConfig = OfflineCacheConfig(
-                    downloadOverlayMap = true,
                     offlineCacheBackgroundServiceClass = ApkOfflineCacheBackgroundService::class.qualifiedName,
-                ),
-                tripConfiguration = TripConfiguration(
-                    // Just to demonstrate the upload network type constraint
-                    uploadNetworkType = NetworkTypeConstraint.CONNECTED,
-                    // Let's keep the trip recording on the device for development reasons,
-                    // otherwise it should be deleted
-                    deleteRecordingAfterUpload = false,
-                    attachmentSplitConfig = TripAttachmentSplitConfig(attachmentSplitSizeLimit = 2.0f, attachmentSplitChunkSize = 1.0f)
-                ),
-                trailConfiguration = TrailConfiguration(
-                    // Update trail DB during SDK initialization
-                    updateTrailDbDuringSdkInit = true,
-                    // Update trail User Data during SDK initialization (user rating, user like)
-                    updateTrailUserDataDuringSdkInit = true,
-                    // Update trail Dynamic Data during SDK initialization (ratings, reported closed dates, etc.)
-                    updateTrailDynamicDataDuringSdkInit = true,
-                ),
-                mapConfig = MapConfig (
-                    // Using Here Maps
-                    // Please note we have to provide also a custom `ApkHereMapsInterceptor` below
-                    imageryMapConfig = ImageryMapConfig(HereMapsStyle.SATELLITE),
-                    // Custom Map Configuration - mostly for the development purpose. If empty the SDK will download configuration from the backend.
-                    //accuTerraMapConfig = AccuTerraMapConfig(
-                    //    mapUrl = "",
-                    //    mapApiKey = "",
-                    //)
                 )
             )
+            // Initialize MapLibre with HERE MAPS API KEY.
+            // Note: similar way initialize map provider with MAPBOX
+            val mapLibreMapProvider = MapLibreMapProvider(
+                imageryTileServer = ImageryTileServer(
+                    type = WellKnownImageryTileServer.HereMaps,
+                    apiKey = BuildConfig.HERE_MAPS_API_KEY)
+            )
+
             // This is the main initialization of the AccuTerra SDK.
             // The listener is notified about progress of the initialization.
             // This initialization must be called and successfully finish at least once
@@ -263,7 +239,7 @@ class DemoActivity : AppCompatActivity() {
             val result = SdkManager.initSdk(applicationContext, config, DemoCredentialsAccessManager(), DemoIdentityManager(),
                 listener = listener,
                 dbEncryptConfigProvider = dbEncryptProvider,
-                mapRequestInterceptor = ApkHereMapsInterceptor()
+                mapProvider = mapLibreMapProvider
             )
             withContext(Dispatchers.Main) {
                 if (result.isSuccess) {

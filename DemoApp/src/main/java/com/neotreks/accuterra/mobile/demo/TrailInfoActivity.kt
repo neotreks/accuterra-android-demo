@@ -331,7 +331,7 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
                                         lifecycleScope.launchWhenCreated {
                                             configureDownloadButton(OfflineMapStatus.WAITING)
                                             val downloadTrailMedia = true
-                                            offlineMapManager.downloadTrailOfflineMap(trailId, includeImagery, downloadTrailMedia)
+                                            offlineMapManager.downloadTrailOfflineMap(trailId, true, includeImagery, downloadTrailMedia)
                                         }
                                     },
                                     negativeCodeLabel = "Yes, without media",
@@ -339,7 +339,7 @@ class TrailInfoActivity : LocationActivity(), TrailMediaClickListener {
                                         lifecycleScope.launchWhenCreated {
                                             configureDownloadButton(OfflineMapStatus.WAITING)
                                             val downloadTrailMedia = false
-                                            offlineMapManager.downloadTrailOfflineMap(viewModel.trailId, includeImagery, downloadTrailMedia)
+                                            offlineMapManager.downloadTrailOfflineMap(viewModel.trailId, true, includeImagery, downloadTrailMedia)
                                         }
                                     },
                                     neutralCodeLabel = "No",
