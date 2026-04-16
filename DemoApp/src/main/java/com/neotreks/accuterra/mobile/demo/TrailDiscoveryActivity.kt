@@ -1204,6 +1204,7 @@ class TrailDiscoveryActivity : AppCompatActivity() {
                 ?: return
 
             activity.mapLibreMap = map.getMapLibreMap()
+            activity.mapLibreMap.uiSettings.attributionGravity = Gravity.BOTTOM or Gravity.RIGHT
             activity.onAccuTerraMapViewReady()
         }
 
